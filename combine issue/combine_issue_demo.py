@@ -1,53 +1,55 @@
 from ursina import *
 from combine_350 import combine_350
 from combine_360 import combine_360
+from math import floor
+from random import random
 
 app = Ursina()
 
-ghost=Entity(texture='33HU.gif',eternal=True,position=(0,0,0))
-amlands=[]
-
-def setup():
-    global amlands
-    amlands=[]  # Clear out our list.
-    for i in range(12):
-        petter=Entity(  model='cube',
-                        color=color.rgb(0,i*7,i*7),
-                        scale_x=0.9,
-                        x=i-5.5)
-        amlands.append(petter)
-        amlands[-1].parent=scene
+subsets=[]
+subset=Entity(texture='block_texture')
+subsets.append(subset)
+cubes=[]
+currentSubset=0
+for i in range(36):
+    petter=Entity(  model='block',
+                    color=color.rgb(0,i*7,i*7),
+                    scale_x=0.9,
+                    scale_z=0.9,
+                    y=random()-2.5,
+                    x=floor(i/6-3),
+                    z=floor(i%6-3),
+                    parent=subsets[currentSubset])
+    cubes.append(petter)
 
 def moveup():
-    global amlands
-    for a in amlands:
-        a.parent=scene
+    for a in cubes:
         a.y+=1
 
-def reset():
-    global ghost
-    scene.clear()
-    ghost.model=None
-    setup()
-
 def input(key):
+    global currentSubset
     if key=='5':
-        for a in amlands:
-            a.parent=ghost
-        combine_350(ghost,auto_destroy=False)
-        # moveup()
+        for a in cubes:
+            a.parent=subsets[currentSubset]
+        combine_350(subsets[currentSubset],auto_destroy=False)
+        e=Entity(texture='block_texture')
+        subsets.append(e)
+        currentSubset+=1
+        moveup()
     elif key=='6':
-        for a in amlands:
-            a.parent=ghost
-        combine_360(ghost,auto_destroy=False)
-        # moveup()
-    elif key=='r' or key=='space':
-        reset()
+        for a in cubes:
+            a.parent=subsets[currentSubset]
+        combine_360(subsets[currentSubset],auto_destroy=False)
+        e=Entity(texture='block_texture')
+        subsets.append(e)
+        currentSubset+=1
+        moveup()
     elif key=='w': moveup()
-    elif key=='s': ghost.y -= 1
+    elif key=='d': subsets[-2].x += 1
+    elif key=='a': subsets[-2].x -= 1
     elif key=='escape':
         exit()
 
-setup()
+EditorCamera()
 
 app.run()
