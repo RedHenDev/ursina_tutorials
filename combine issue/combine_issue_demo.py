@@ -9,9 +9,17 @@ app = Ursina()
 subsets=[]
 subset=Entity(texture='block_texture')
 subsets.append(subset)
-cubes=[]
 currentSubset=0
+
+cubes=[]
+blockModel=load_model('block')
+
 for i in range(36):
+    # *****************************************
+    # Change MODEL='BLOCK' to MODEL=blockModel
+    # to see affected behaviour.
+    # I thought these would be equivalent?
+    # *****************************************
     petter=Entity(  model='block',
                     color=color.rgb(0,i*7,i*7),
                     scale_x=0.9,
