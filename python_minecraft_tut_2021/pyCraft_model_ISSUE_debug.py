@@ -133,11 +133,11 @@ subCubes = []
 generating = 1 # -1 if off.
 canGenerate = 1 # -1 if off.
 genSpeed = 0
-perCycle = 16
+perCycle = 32
 currentCube = 0
 currentSubset = 0
-numSubCubes = 16
-numSubsets = 42 # I.e. how many combined into a megaset?
+numSubCubes = 32
+numSubsets = 420 # I.e. how many combined into a megaset?
 theta = 0
 rad = 0
 # Dictionary for recording whether terrain blocks exist
@@ -205,8 +205,8 @@ def genTerrain():
                 for s in subsets:
                     s.parent=megasets[-1]
                 megasets[-1].combine(auto_destroy=False)
-                for s in subsets:
-                    s.parent=scene
+                # for s in subsets:
+                #     s.parent=scene
                 currentSubset=0
                 print('Megaset #' + str(len(megasets))+'!')
             
