@@ -44,12 +44,15 @@ def input(key):
         subsets.append(e)
         currentSubset+=1
         moveup()
-    elif key=='w': moveup()
     elif key=='d': subsets[-2].x += 1
     elif key=='a': subsets[-2].x -= 1
     elif key=='escape':
         exit()
 
 EditorCamera()
+
+vincent=Tooltip('<pink>Press 5 to combine(entity) & move layer position up'+
+                '<orange>OR Press 6 to combine(entity.model) etc.')
+vincent.enabled=True
 
 app.run()
