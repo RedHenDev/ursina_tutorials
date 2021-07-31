@@ -132,12 +132,12 @@ subCubes = []
 # New variables :)
 generating = 1 # -1 if off.
 canGenerate = 1 # -1 if off.
-genSpeed = 0
-perCycle = 32
+genSpeed = 0.04
+perCycle = 64
 currentCube = 0
 currentSubset = 0
-numSubCubes = 32
-numSubsets = 32 # I.e. how many combined into a megaset?
+numSubCubes = 64
+numSubsets = 128 # I.e. how many combined into a megaset?
 theta = 0
 rad = 0
 # Dictionary for recording whether terrain blocks exist
