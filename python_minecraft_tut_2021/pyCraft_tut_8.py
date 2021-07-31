@@ -1,18 +1,20 @@
 """
 Minecraft in Python, with Ursina, tut 8
+Petter Amland :)
 
-0) Colour correction
-1) 3.6.0 terrain issues - model and texture loading
-2) More efficient terrain generation
-3) New gravity system - better performance, no glitching, 
+DONE 0) Colour correction
+DONE 1) 3.6.0 terrain issues - model and texture loading
+DONE 2) More efficient terrain generation
+DONE 3) New gravity system - better performance, no glitching, 
     and ability to step up blocks easily (+height bounds; jump?)
+3.1) check build tool position
 4) Caves
 5) Layers of terrain
 6) Axe model
 7) Fog darkens/changes colour as we descend height
 8) Trees
-9) Tidy numpy imports
-10) Something else that I've forgotten...
+DONE 9) Tidy numpy imports
+DONE 10) The new repo - home of tutorial code
 ...
 future) Mining? 
 """
@@ -20,11 +22,7 @@ future) Mining?
 from random import randrange
 from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
-from numpy import floor
-from numpy import abs
-from numpy import sin
-from numpy import cos
-from numpy import radians
+from numpy import floor,abs,sin,cos,radians
 import time
 from perlin_noise import PerlinNoise  
 from nMap import nMap
@@ -45,18 +43,18 @@ prevTime = time.time()
 scene.fog_color = color.rgb(0,222,0)
 scene.fog_density = 0.02
 
-grassStrokeTex = load_texture('grass_14.png')
-monoTex = load_texture('stroke_mono.png')
-wireTex = load_texture('wireframe.png')
-stoneTex = load_texture('grass_mono.png')
+grassStrokeTex = 'grass_14.png'
+monoTex = 'stroke_mono.png'
+wireTex = 'wireframe.png'
+stoneTex = 'grass_mono.png'
 
-cubeTex = load_texture('block_texture.png')
+cubeTex = 'block_texture.png'
 
-cubeModel = load_model('moonCube')
+cubeModel = 'moonCube'
 
 
-axoTex = load_texture('axolotl.png')
-axoModel = load_model('axolotl.obj')
+axoTex = 'axolotl.png'
+axoModel = 'axolotl.obj'
 
 bte = Entity(model='cube',texture=wireTex)
 class BTYPE:
@@ -143,27 +141,33 @@ subCubes = []
 generating = 1 # -1 if off.
 canGenerate = 1 # -1 if off.
 genSpeed = 0
-perCycle = 16
+perCycle = 64
 currentCube = 0
 currentSubset = 0
-numSubCubes = 16
-numSubsets = 42 # I.e. how many combined into a megaset?
+numSubCubes = 64
+numSubsets = 420 # I.e. how many combined into a megaset?
 theta = 0
 rad = 0
 # Dictionary for recording whether terrain blocks exist
 # at location specified in key.
 subDic = {}
 
+caveDic = { 'x9z9':'cave',
+            'x10z9':'cave',
+            'x11z9':'cave',
+            'x9z10':'cave',
+            'x9z11':'cave'}
+
 # Instantiate our 'ghost' subset cubes.
 for i in range(numSubCubes):
-    bud = Entity(model=cubeModel)
+    bud = Entity(model=cubeModel,texture=cubeTex)
     bud.rotation_y = random.randint(1,4)*90
     bud.disable()
     subCubes.append(bud)
 
 # Instantiate our empty subsets.
 for i in range(numSubsets):
-    bud = Entity(model=None)
+    bud = Entity(model=cubeModel)
     bud.texture = cubeTex
     bud.disable()
     subsets.append(bud)
@@ -176,6 +180,12 @@ def genPerlin(_x, _z):
     freq = 32
     amp = 21
     y += ((noise([_x/freq,_z/freq]))*amp)
+
+    # Is there are cave-gap here?
+    # If so, lower the cube by 32...or something ;)
+    if caveDic.get('x'+str(int(_x))+'z'+str(int(_z)))=='cave':
+        y-=9
+
     return floor(y)
 
 def genTerrain():
@@ -195,30 +205,30 @@ def genTerrain():
         subDic['x'+str(x)+'z'+str(z)] = 'i'
         subCubes[currentCube].parent = subsets[currentSubset]
         y = subCubes[currentCube].y = genPerlin(x,z)
-        g = nMap(y,-8,21,12,243)
-        g += random.randint(-12,12)
-        subCubes[currentCube].color = color.rgb(0,g,0)
+        # OK -- time to decide colours :D
+        c = nMap(y,-8,21,132,212)
+        c += random.randint(-32,32)
+        subCubes[currentCube].color = color.rgb(c,c,c)
         subCubes[currentCube].disable()
         currentCube+=1
 
         # Ready to build a subset?
         if currentCube==numSubCubes:
-            safe_combine(subsets[currentSubset],
-                        auto_destroy=False)
-            # subsets[currentSubset].combine(auto_destroy=False)
+            subsets[currentSubset].combine(auto_destroy=False)
             subsets[currentSubset].enable()
             currentSubset+=1
             currentCube=0
             
             # And ready to build a megaset?
             if currentSubset==numSubsets:
-                megasets.append(Entity(texture=cubeTex))
+                megasets.append(Entity( model=cubeModel,
+                                        texture=cubeTex))
                 # Parent all subsets to our new megaset.
                 for s in subsets:
                     s.parent=megasets[-1]
                 # In case user has Ursina version 3.6.0.
-                safe_combine(megasets[-1],auto_destroy=False)
-                # megasets[-1].combine(auto_destroy=False)
+                # safe_combine(megasets[-1],auto_destroy=False)
+                megasets[-1].combine(auto_destroy=False)
                 for s in subsets:
                     s.parent=scene
                 currentSubset=0
@@ -244,18 +254,24 @@ for i in range(shellWidth*shellWidth):
     bud.visible=False
     shellies.append(bud)
 
+# Our new gravity system for moving the subject :)
 def generateShell():
-    global shellWidth
-    for i in range(len(shellies)):
-        x = shellies[i].x = floor((i/shellWidth) + 
-                            subject.x - 0.5*shellWidth)
-        z = shellies[i].z = floor((i%shellWidth) + 
-                            subject.z - 0.5*shellWidth)
-        shellies[i].y = genPerlin(x,z)
+    global subject
+
+    target_y = genPerlin(subject.x,subject.z) + 2
+    subject.y = lerp(subject.y, target_y, 9.807*time.dt)
+
+    # global shellWidth
+    # for i in range(len(shellies)):
+    #     x = shellies[i].x = floor((i/shellWidth) + 
+    #                         subject.x - 0.5*shellWidth)
+    #     z = shellies[i].z = floor((i%shellWidth) + 
+    #                         subject.z - 0.5*shellWidth)
+    #     shellies[i].y = genPerlin(x,z)
 
 subject = FirstPersonController()
 subject.cursor.visible = False
-subject.gravity = 0.5
+subject.gravity = 0
 subject.x = subject.z = 5
 subject.y = 32
 prevZ = subject.z
