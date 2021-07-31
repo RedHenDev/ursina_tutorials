@@ -238,7 +238,7 @@ def generateShell():
 
     # New gravity system -- making the shell system unnecessary :')
     subject.y = lerp(   subject.y,
-                        genPerlin(subject.x,subject.z)+3,
+                        genPerlin(subject.x,subject.z)+2,
                         9.81*time.dt)
 
     # for i in range(len(shellies)):
