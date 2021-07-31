@@ -236,8 +236,9 @@ for i in range(shellWidth*shellWidth):
 def generateShell():
     global shellWidth, subject
 
+    # New gravity system -- making the shell system unnecessary :')
     subject.y = lerp(   subject.y,
-                        genPerlin(subject.x,subject.z)+2,
+                        genPerlin(subject.x,subject.z)+3,
                         9.81*time.dt)
 
     # for i in range(len(shellies)):
