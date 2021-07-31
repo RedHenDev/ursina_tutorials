@@ -137,7 +137,7 @@ perCycle = 32
 currentCube = 0
 currentSubset = 0
 numSubCubes = 32
-numSubsets = 420 # I.e. how many combined into a megaset?
+numSubsets = 32 # I.e. how many combined into a megaset?
 theta = 0
 rad = 0
 # Dictionary for recording whether terrain blocks exist
@@ -199,6 +199,8 @@ def genTerrain():
             
             # And ready to build a megaset?
             if currentSubset==numSubsets:
+                subject.y+=0.2
+                subject.gravity=0
                 megasets.append(Entity( model='block',
                                         texture='block_texture'))
                 # Parent all subsets to our new megaset.
@@ -209,6 +211,7 @@ def genTerrain():
                 #     s.parent=scene
                 currentSubset=0
                 print('Megaset #' + str(len(megasets))+'!')
+                
             
     else:
         pass
@@ -231,17 +234,22 @@ for i in range(shellWidth*shellWidth):
     shellies.append(bud)
 
 def generateShell():
-    global shellWidth
-    for i in range(len(shellies)):
-        x = shellies[i].x = floor((i/shellWidth) + 
-                            subject.x - 0.5*shellWidth)
-        z = shellies[i].z = floor((i%shellWidth) + 
-                            subject.z - 0.5*shellWidth)
-        shellies[i].y = genPerlin(x,z)
+    global shellWidth, subject
+
+    subject.y = lerp(   subject.y,
+                        genPerlin(subject.x,subject.z)+2,
+                        9.81*time.dt)
+
+    # for i in range(len(shellies)):
+    #     x = shellies[i].x = floor((i/shellWidth) + 
+    #                         subject.x - 0.5*shellWidth)
+    #     z = shellies[i].z = floor((i%shellWidth) + 
+    #                         subject.z - 0.5*shellWidth)
+    #     shellies[i].y = genPerlin(x,z)
 
 subject = FirstPersonController()
 subject.cursor.visible = False
-subject.gravity = 0.5
+subject.gravity = 0
 subject.x = subject.z = 5
 subject.y = 32
 prevZ = subject.z
