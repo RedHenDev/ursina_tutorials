@@ -1,20 +1,13 @@
 """
-Minecraft in Python, with Ursina, tut 8
+Minecraft in Python, with Ursina, tut 10
 Petter Amland :)
-
-DONE 0) Colour correction
-DONE 1) 3.6.0 terrain issues - model and texture loading
-DONE 2) More efficient terrain generation
-DONE 3) New gravity system - better performance, no glitching, 
-    and ability to step up blocks easily (+height bounds; jump?)
-3.1) check build tool position
+3.2) Dictionary for stepping onto built blocks
 4) Caves
 5) Layers of terrain
-6) Axe model
+DONE 6) Axe model
 7) Fog darkens/changes colour as we descend height
-8) Trees
-DONE 9) Tidy numpy imports
-DONE 10) The new repo - home of tutorial code
+DONE 8) Trees
+
 ...
 future) Mining? 
 """
@@ -26,14 +19,15 @@ from numpy import floor,abs,sin,cos,radians
 import time
 from perlin_noise import PerlinNoise  
 from nMap import nMap
-# NB this import is different from youtube tutorial video.
-# In the 3.6.0 update for ursina, a minor change in the
-# combine() function may cause the terrain to generate
-# in pieces instead of as expected. This safe_combine()
-# function simply uses the legacy code from 3.5.0.
-from safe_combine import safe_combine
+from cave_system import Caves 
+from tree_system import Trees
 
 app = Ursina()
+
+# Create a cave system object. It's called anush.
+anush = Caves()
+# Same again, but for trees :)
+sol4r = Trees()
 
 window.color = color.rgb(0,200,211)
 window.exit_button.visible = False
@@ -43,6 +37,7 @@ prevTime = time.time()
 scene.fog_color = color.rgb(0,222,0)
 scene.fog_density = 0.02
 
+# Load in textures and models.
 grassStrokeTex = 'grass_14.png'
 monoTex = 'stroke_mono.png'
 wireTex = 'wireframe.png'
@@ -52,11 +47,17 @@ cubeTex = 'block_texture.png'
 
 cubeModel = 'moonCube'
 
-
 axoTex = 'axolotl.png'
 axoModel = 'axolotl.obj'
 
+axeModel = 'Diamond-Pickaxe'
+axeTex = 'diamond_axe_tex'
+
+# Building code...
 bte = Entity(model='cube',texture=wireTex)
+# distance of build (Thanks, Ethan!)
+build_distance = 3
+
 class BTYPE:
     STONE= color.rgb(255,255,255) 
     GRASS= color.rgb(0,255,0)
@@ -65,7 +66,6 @@ class BTYPE:
 
 blockType = BTYPE.SOIL
 buildMode = -1  # -1 is OFF, 1 is ON.
-build_distance = 3
 
 def buildTool():
     global build_distance
@@ -73,9 +73,8 @@ def buildTool():
         bte.visible = False
         return
     else: bte.visible = True
-    bte.position = round(   subject.position +
-                            camera.forward *
-                            build_distance )
+    bte.position = round(subject.position +
+                    camera.forward * build_distance)
     bte.y += 2
     bte.y = round(bte.y)
     bte.x = round(bte.x)
@@ -90,18 +89,23 @@ def build():
 
 def input(key):
     global blockType, buildMode, generating
-    global canGenerate, build_distance
+    global canGenerate
+    global build_distance
+
+    # scroll down to build closer or 
+    # scroll up to build further
+    # Thanks again, Ethanalos! :)
+    if key == 'scroll up':
+        build_distance += 1
+    if key == 'scroll down':
+        build_distance -= 1
+
+
     if key == 'q' or key == 'escape':
         quit()
     if key == 'g': 
         generating *= -1
         canGenerate *= -1
-    
-    # E.R. scroll down to build closer or scroll up to build further
-    if key == 'scroll up':
-        build_distance += 1
-    if key == 'scroll down':
-        build_distance -= 1
 
     if buildMode == 1 and key == 'left mouse up':
         build()
@@ -161,12 +165,6 @@ rad = 0
 # at location specified in key.
 subDic = {}
 
-caveDic = { 'x9z9':'cave',
-            'x10z9':'cave',
-            'x11z9':'cave',
-            'x9z10':'cave',
-            'x9z11':'cave'}
-
 # Instantiate our 'ghost' subset cubes.
 for i in range(numSubCubes):
     bud = Entity(model=cubeModel,texture=cubeTex)
@@ -181,7 +179,7 @@ for i in range(numSubsets):
     bud.disable()
     subsets.append(bud)
 
-def genPerlin(_x, _z):
+def genPerlin(_x, _z, plantTree=False):
     y = 0
     freq = 64
     amp = 42      
@@ -192,8 +190,10 @@ def genPerlin(_x, _z):
 
     # Is there are cave-gap here?
     # If so, lower the cube by 32...or something ;)
-    if caveDic.get('x'+str(int(_x))+'z'+str(int(_z)))=='cave':
+    if anush.checkCave(_x, _z) == True:
         y-=9
+    elif plantTree==True:
+        sol4r.checkTree(_x,y,_z)
 
     return floor(y)
 
@@ -213,7 +213,7 @@ def genTerrain():
         subCubes[currentCube].z = z
         subDic['x'+str(x)+'z'+str(z)] = 'i'
         subCubes[currentCube].parent = subsets[currentSubset]
-        y = subCubes[currentCube].y = genPerlin(x,z)
+        y = subCubes[currentCube].y = genPerlin(x,z,True)
         # OK -- time to decide colours :D
         c = nMap(y,-8,21,132,212)
         c += random.randint(-32,32)
@@ -265,10 +265,23 @@ for i in range(shellWidth*shellWidth):
 
 # Our new gravity system for moving the subject :)
 def generateShell():
-    global subject
+    global subject, grav_speed, grav_acc
 
+    # How high or low can we step/drop?
+    step_height = 5
+
+    # What y is the terrain at this position?
     target_y = genPerlin(subject.x,subject.z) + 2
-    subject.y = lerp(subject.y, target_y, 9.807*time.dt)
+
+    # How far are we from the target y?
+    target_dist = target_y - subject.y
+    # Can we step up or down?
+    if target_dist < step_height and target_dist > -step_height:
+        subject.y = lerp(subject.y, target_y, 9.807*time.dt)
+    elif target_dist < -step_height:
+        # This means we're falling!
+        grav_speed += (grav_acc * time.dt)
+        subject.y -= grav_speed
 
     # global shellWidth
     # for i in range(len(shellies)):
@@ -281,11 +294,25 @@ def generateShell():
 subject = FirstPersonController()
 subject.cursor.visible = False
 subject.gravity = 0
+grav_speed = 0
+grav_acc = 0.1
 subject.x = subject.z = 5
 subject.y = 32
 prevZ = subject.z
 prevX = subject.x
 origin = subject.position # Vec3 object? .x .y .z
+# Our axe :D
+axe = Entity(   model=axeModel,
+                texture=axeTex,
+                scale=0.07,
+                position = subject.position,
+                always_on_top=True)
+axe.x -= 3
+axe.z -= 2.2
+axe.y -= subject.y
+axe.rotation_z = 90
+axe.rotation_y = 180
+axe.parent=camera
 
 chickenModel = load_model('chicken.obj')
 vincent = Entity(model=chickenModel,scale=1,
