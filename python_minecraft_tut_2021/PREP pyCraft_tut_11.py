@@ -120,7 +120,8 @@ def input(key):
                 if (v[0] >= bte.x - 0.5 and v[0] <= bte.x + 0.5 and
                     v[1] >= bte.y - 0.5 and v[1] <= bte.y + 0.5 and
                     v[2] >= bte.z - 0.5 and v[2] <= bte.z + 0.5):
-                    v[1]-=1
+                    # v[1] -= 1
+                    v[1] = -999 # 'disappear'
                     print('mined!')
                     vertCount += 1
                     if vertCount == 8: break
@@ -130,6 +131,10 @@ def input(key):
                     # we come to this subcube, lower?
                     # OR -- subcubes need to be smaller and
                     # not overlap? That would be genius...
+                    # Actually works!
+                    # Now need to test for terrain surrounding
+                    # and generate cubes as needed...
+                    # Definitely need a paint diagram :)
 
     
     if key == 'f': buildMode *= -1
