@@ -11,17 +11,20 @@ class Caves:
     def buildCaves(this):
         # Dictionary of cave 'gaps'
         this.caveDic = { 
-            'x9z9':'cave',
-            'x10z9':'cave',
-            'x11z9':'cave',
-            'x9z10':'cave',
-            'x9z11':'cave'}
+            'x9z9': -9,
+            'x10z9': -9,
+            'x11z9': -9,
+            'x9z10': -9,
+            'x9z11': -9}
 
     def checkCave(this, _x, _z):
         tempStr = this.caveDic.get( 'x'+str(int(_x))+
                                     'z'+str(int(_z)))
-        if tempStr=='cave':
-            return True
-        else: return False 
+        return tempStr 
+
+    def makeCave(this, _x, _z, _height):
+        tempStr = ( 'x'+str(int(_x))+
+                    'z'+str(int(_z)))
+        this.caveDic[tempStr] = _height
     
 

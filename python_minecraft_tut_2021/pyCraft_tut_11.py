@@ -8,10 +8,9 @@ DONE 6) Axe model
 7) Fog darkens/changes colour as we descend height
 DONE 8) Trees
 
-1) Correct built blocks rendering over axe - don't duplicate
-
 ...
-future) Mining? 
+DONE near future) axe draw bug
+DONE future) (very basic) Mining! 
 """
 
 from random import randrange
@@ -56,7 +55,7 @@ axeModel = 'Diamond-Pickaxe'
 axeTex = 'diamond_axe_tex'
 
 # Building code...
-bte = Entity(model='cube',texture=wireTex)
+bte = Entity(model='cube',texture=wireTex,scale=1.01)
 # distance of build (Thanks, Ethan!)
 build_distance = 3
 
@@ -83,11 +82,42 @@ def buildTool():
     bte.z = round(bte.z)
     bte.color = blockType
 def build():
+    # e = duplicate(bte)
     e = Entity(model='cube',position=bte.position)
     e.collider = 'box'
     e.texture = stoneTex
     e.color = blockType
     e.shake(duration=0.5,speed=0.01)
+def mine():
+    e = mouse.hovered_entity
+    destroy(e)
+    # Our real mining of the terrain :)
+    # Iterate over all the subsets that we have...
+    for s in range(len(subsets)):
+        vChange = False
+        totalY = 0
+        for v in subsets[s].model.vertices:
+            # Is the vertex close enough to
+            # where we want to mine (bte position)?
+            if (v[0] >= bte.x - 0.5 and
+                v[0] <= bte.x + 0.5 and
+                v[1] >= bte.y - 0.5 and
+                v[1] <= bte.y + 0.5 and
+                v[2] >= bte.z - 0.5 and
+                v[2] <= bte.z + 0.5):
+                # Yes!
+                v[1] -= 1
+                # Note that we have made change.
+                # Gather average height for cave dic.
+                totalY += v[1]
+                vChange = True
+        subsets[s].model.generate()
+        # Record change of height in cave dictionary :)
+        if vChange == True:
+            totalY = floor(totalY / 8)
+            anush.makeCave(bte.x,bte.z,bte.y-1)    
+
+
 
 def input(key):
     global blockType, buildMode, generating
@@ -112,30 +142,7 @@ def input(key):
     if buildMode == 1 and key == 'left mouse up':
         build()
     elif buildMode == 1 and key == 'right mouse up':
-        e = mouse.hovered_entity
-        destroy(e)
-        for s in range(len(subsets)):
-            for v in subsets[s].model.vertices:
-                vertCount = 0
-                if (v[0] >= bte.x - 0.5 and v[0] <= bte.x + 0.5 and
-                    v[1] >= bte.y - 0.5 and v[1] <= bte.y + 0.5 and
-                    v[2] >= bte.z - 0.5 and v[2] <= bte.z + 0.5):
-                    # v[1] -= 1
-                    v[1] = -999 # 'disappear'
-                    print('mined!')
-                    vertCount += 1
-                    if vertCount == 8: break
-                    subsets[s].model.generate()
-                    # OK -- we could delete and then
-                    # regenerate this subset and when
-                    # we come to this subcube, lower?
-                    # OR -- subcubes need to be smaller and
-                    # not overlap? That would be genius...
-                    # Actually works!
-                    # Now need to test for terrain surrounding
-                    # and generate cubes as needed...
-                    # Definitely need a paint diagram :)
-
+        mine()
     
     if key == 'f': buildMode *= -1
     
@@ -192,7 +199,7 @@ subDic = {}
 # Instantiate our 'ghost' subset cubes.
 for i in range(numSubCubes):
     bud = Entity(model=cubeModel,texture=cubeTex)
-    bud.scale*=0.9999
+    bud.scale *= 0.99999
     bud.rotation_y = random.randint(1,4)*90
     bud.disable()
     subCubes.append(bud)
@@ -215,8 +222,9 @@ def genPerlin(_x, _z, plantTree=False):
 
     # Is there are cave-gap here?
     # If so, lower the cube by 32...or something ;)
-    if anush.checkCave(_x, _z) == True:
-        y-=9
+    whatCaveHeight = anush.checkCave(_x, _z)
+    if whatCaveHeight != None:
+        y = whatCaveHeight
     elif plantTree==True:
         sol4r.checkTree(_x,y,_z)
 
