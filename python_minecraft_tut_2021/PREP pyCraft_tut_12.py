@@ -8,6 +8,12 @@ DONE 6) Axe model
 7) Fog darkens/changes colour as we descend height
 DONE 8) Trees
 
+9.0) Break out of subsets loop after mining.
+9.1) 3D Cave_Dictionary - for recording y pos too.
+9.2) Spawn and combine(?) 5 new blocks when mining.
+9.3) Figure out where to spawn if mining sideways.
+9.4) Improve controls (better replicate Minecraft's).
+
 ...
 DONE near future) axe draw bug
 DONE future) (very basic) Mining! 
