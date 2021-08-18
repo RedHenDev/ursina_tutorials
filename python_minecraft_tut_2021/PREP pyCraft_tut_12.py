@@ -8,6 +8,8 @@ DONE 6) Axe model
 7) Fog darkens/changes colour as we descend height
 DONE 8) Trees
 
+9.-1) use round instead of floor for subject position.
+
 9.0) Break out of subsets loop after mining.
 9.1) 3D Cave_Dictionary - for recording y pos too.
 9.2) Spawn and combine(?) 5 new blocks when mining.
@@ -19,10 +21,10 @@ DONE near future) axe draw bug
 DONE future) (very basic) Mining! 
 """
 
-from random import randrange
+
 from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
-from numpy import floor,abs,sin,cos,radians
+from numpy import floor,abs,sin,cos,radians, round
 import time
 from perlin_noise import PerlinNoise  
 from nMap import nMap
@@ -101,7 +103,6 @@ def mine():
     # Iterate over all the subsets that we have...
     for s in range(len(subsets)):
         vChange = False
-        totalY = 0
         for v in subsets[s].model.vertices:
             # Is the vertex close enough to
             # where we want to mine (bte position)?
@@ -113,15 +114,43 @@ def mine():
                 v[2] <= bte.z + 0.5):
                 # Yes!
                 v[1] -= 1
+                # v[1] = 999 # 'Delete' block.
                 # Note that we have made change.
-                # Gather average height for cave dic.
-                totalY += v[1]
                 vChange = True
-        subsets[s].model.generate()
-        # Record change of height in cave dictionary :)
+        # Record change of height in TERRAIN dictionary :)
+        # Which now records y as value. 
         if vChange == True:
-            totalY = floor(totalY / 8)
-            anush.makeCave(bte.x,bte.z,bte.y-1)    
+            subsets[s].model.generate()
+            x = floor(bte.x)
+            z = floor(bte.z)
+            y = floor(bte.y) - 1
+            # Track new position of terrain.
+            subDic['x'+str(x)+'z'+str(z)] = y
+            # Now we need to spawn surrounding cubes.
+            pos1 = (x+1,y+1,z)
+            pos2 = (x-1,y+1,z)
+            pos3 = (x,y+1,z+1)
+            pos4 = (x,y+1,z-1)
+            spawnPos = []
+            spawnPos.append(pos1)
+            spawnPos.append(pos2)
+            spawnPos.append(pos3)
+            spawnPos.append(pos4)
+            for i in range(4):
+                x = spawnPos[i][0]
+                z = spawnPos[i][2]
+                y = spawnPos[i][1]
+                # Only spawn if no block already there, or
+                # if block already on top of this position.
+                # We also don't want to fill in mined gaps...
+                if subDic.get('x'+str(x)+'z'+str(z))!= y and \
+                    subDic.get('x'+str(x)+'z'+str(z))!=y-1:
+                    e = Entity(model=cubeModel)
+                    e.position = spawnPos[i]
+                    subDic['x'+str(x)+'z'+str(z)] = y
+                    print('spawned mine wall ' + str(i))
+            # anush.makeCave(bte.x,bte.z,bte.y-1)
+            break    
 
 
 
@@ -134,9 +163,9 @@ def input(key):
     # scroll up to build further
     # Thanks again, Ethanalos! :)
     if key == 'scroll up':
-        build_distance += 1
-    if key == 'scroll down':
         build_distance -= 1
+    if key == 'scroll down':
+        build_distance += 1
 
 
     if key == 'q' or key == 'escape':
@@ -159,7 +188,7 @@ def input(key):
 
 def update():
     global prevZ, prevX, prevTime, genSpeed, perCycle
-    global rad, origin, generating, canGenerate
+    global rad, origin, generating, canGenerate, theta
     if  abs(subject.z - prevZ) > 1 or \
         abs(subject.x - prevX) > 1:
             origin=subject.position
@@ -246,13 +275,15 @@ def genTerrain():
     x = floor(origin.x + sin(radians(theta)) * rad)
     z = floor(origin.z + cos(radians(theta)) * rad)
     # Check whether there is terrain here already...
-    if subDic.get('x'+str(x)+'z'+str(z))!='i':
+    if subDic.get('x'+str(x)+'z'+str(z))==None:
         subCubes[currentCube].enable()
         subCubes[currentCube].x = x
         subCubes[currentCube].z = z
-        subDic['x'+str(x)+'z'+str(z)] = 'i'
+        
         subCubes[currentCube].parent = subsets[currentSubset]
+        # Pass in true to allow tree generation here.
         y = subCubes[currentCube].y = genPerlin(x,z,True)
+        subDic['x'+str(x)+'z'+str(z)] = y
         # OK -- time to decide colours :D
         c = nMap(y,-8,21,132,212)
         c += random.randint(-32,32)
@@ -304,13 +335,19 @@ for i in range(shellWidth*shellWidth):
 
 # Our new gravity system for moving the subject :)
 def generateShell():
-    global subject, grav_speed, grav_acc
+    global subject, grav_speed, grav_acc, subDic
 
     # How high or low can we step/drop?
     step_height = 5
 
     # What y is the terrain at this position?
-    target_y = genPerlin(subject.x,subject.z) + 2
+    # target_y = genPerlin(subject.x,subject.z) + 2
+    terra = subDic.get( 'x'+str((round(subject.x)))+
+                        'z'+str((round(subject.z))))
+    target_y = subject.y
+    if terra != None:
+        target_y = terra + 2
+    else: print('No terra firma yet, captain.')
 
     # How far are we from the target y?
     target_dist = target_y - subject.y
