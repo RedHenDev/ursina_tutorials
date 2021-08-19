@@ -56,8 +56,9 @@ cubeTex = 'block_texture.png'
 
 cubeModel = 'moonCube'
 
-axoTex = 'axolotl.png'
-axoModel = 'axolotl.obj'
+# ***
+axoTex = 'b_axolotl.png'
+axoModel = 'b_axolotl.obj'
 
 axeModel = 'Diamond-Pickaxe'
 axeTex = 'diamond_axe_tex'
@@ -72,6 +73,7 @@ class BTYPE:
     GRASS= color.rgb(0,255,0)
     SOIL= color.rgb(255,80,100)
     RUBY= color.rgb(255,0,0) 
+    NETHERITE= color.rgb(0,0,0)
 
 blockType = BTYPE.SOIL
 buildMode = -1  # -1 is OFF, 1 is ON.
@@ -142,12 +144,16 @@ def mine():
                 y = spawnPos[i][1]
                 # Only spawn if no block already there, or
                 # if block already on top of this position.
+                # Oh, also if block already underneath this pos.
                 # We also don't want to fill in mined gaps...
-                if subDic.get('x'+str(x)+'z'+str(z))!= y and \
+                if  subDic.get('x'+str(x)+'z'+str(z))!= y and \
                     subDic.get('x'+str(x)+'z'+str(z))!=y-1:
-                    e = Entity(model=cubeModel)
+                    e = Entity( model='cube',
+                                texture=stoneTex,
+                                color=BTYPE.SOIL)
                     e.position = spawnPos[i]
-                    subDic['x'+str(x)+'z'+str(z)] = y
+                    e.collider='box'
+                    subDic['x'+str(e.x)+'z'+str(e.z)] = e.y
                     print('spawned mine wall ' + str(i))
             # anush.makeCave(bte.x,bte.z,bte.y-1)
             break    
@@ -168,7 +174,7 @@ def input(key):
         build_distance += 1
 
 
-    if key == 'q' or key == 'escape':
+    if key == 'b' or key == 'escape':
         quit()
     if key == 'g': 
         generating *= -1
@@ -185,6 +191,7 @@ def input(key):
     if key == '2': blockType=BTYPE.GRASS
     if key == '3': blockType=BTYPE.STONE
     if key == '4': blockType=BTYPE.RUBY
+    if key == '5': blockType=BTYPE.NETHERITE
 
 def update():
     global prevZ, prevX, prevTime, genSpeed, perCycle
@@ -211,7 +218,7 @@ def update():
 
     buildTool()
 
-noise = PerlinNoise(octaves=1,seed=99)
+noise = PerlinNoise(octaves=1,seed=1220115)
 
 megasets = []
 subsets = []
@@ -396,7 +403,7 @@ vincent = Entity(model=chickenModel,scale=1,
                 texture='chicken.png',
                 double_sided=True)
 
-baby = Entity(model=axoModel,scale=10,
+luke = Entity(model=axoModel,scale=10,
                 x=-22,z=16,y=4,
                 texture=axoTex,
                 double_sided=True)
