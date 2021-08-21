@@ -16,6 +16,13 @@ DONE 8) Trees
 9.3) Figure out where to spawn if mining sideways.
 9.4) Improve controls (better replicate Minecraft's).
 
+9.2) ELABORATION: adjust genTerrain for new 3D dictionary
+        have to use Perlin twice. Also, need to correct
+        our walking system. We now record built blocks as
+        the object itself, and terrain cubes as 'terrain',
+        and gaps that have been mined as 'gap'.
+        So, how to use these to determine whether subject
+        is stepping up or down etc.?          
 ...
 DONE near future) axe draw bug
 DONE future) (very basic) Mining! 
@@ -67,6 +74,9 @@ axeTex = 'diamond_axe_tex'
 bte = Entity(model='cube',texture=wireTex,scale=1.01)
 # distance of build (Thanks, Ethan!)
 build_distance = 3
+# Builds...
+builds = {} # Stores entity block itself at location (key).
+
 
 class BTYPE:
     STONE= color.rgb(255,255,255) 
@@ -104,7 +114,20 @@ def mine():
     # Our real mining of the terrain :)
     # Iterate over all the subsets that we have...
     for s in range(len(subsets)):
+        # First, check to see if built block here.
+        # If so, we can destroy it, and break.
+        # Oh, but how do we get hold of it?
+        # Perhaps save it in a new dictionary?
         vChange = False
+        suspect = builds.get(  'x'+str(bte.x)+'y'+str(bte.y)+
+                        'z'+str(bte.z))
+        if suspect==type(Entity):
+            print('destroying built block...')
+            destroy(suspect)
+            # clear built block on builds dictionary.
+            builds['x'+str(bte.x)+'y'+str(bte.y)+'z'+str(bte.z)] = None
+            vChange = True
+            
         for v in subsets[s].model.vertices:
             # Is the vertex close enough to
             # where we want to mine (bte position)?
@@ -115,19 +138,33 @@ def mine():
                 v[2] >= bte.z - 0.5 and
                 v[2] <= bte.z + 0.5):
                 # Yes!
-                v[1] -= 1
-                # v[1] = 999 # 'Delete' block.
+                # v[1] -= 1
+                v[1] = 999 # 'Delete' block.
+                if subDic.get('x'+str(bte.x)+'y'+str(bte.y-1)+'z'+str(bte.z))!= 'terrain' and \
+                   subDic.get('x'+str(bte.x)+'y'+str(bte.y-1)+'z'+str(bte.z))!= 'gap':
+                    e = Entity( model='cube',
+                                texture=stoneTex,
+                                color=BTYPE.SOIL)
+                    e.position = bte.position
+                    e.scale *= 0.9
+                    e.y -= 1
+                    # We are also going to have to combine this
+                    # new block into the current subset.
+                    e.parent = subsets[s]
+                    # Track new position of terrain.
+                    subDic['x'+str(e.x)+'y'+str(e.y)+'z'+str(e.z)] = e.y
                 # Note that we have made change.
                 vChange = True
         # Record change of height in TERRAIN dictionary :)
         # Which now records y as value. 
         if vChange == True:
-            subsets[s].model.generate()
+            # subsets[s].model.generate() # We have to do this later.
             x = floor(bte.x)
             z = floor(bte.z)
             y = floor(bte.y) - 1
-            # Track new position of terrain.
-            subDic['x'+str(x)+'z'+str(z)] = y
+            
+            # Track position of mined gap.
+            subDic['x'+str(x)+'y'+str(y+1)+'z'+str(z)] = 'gap'
             # Now we need to spawn surrounding cubes.
             pos1 = (x+1,y+1,z)
             pos2 = (x-1,y+1,z)
@@ -143,19 +180,33 @@ def mine():
                 z = spawnPos[i][2]
                 y = spawnPos[i][1]
                 # Only spawn if no block already there, or
-                # if block already on top of this position.
-                # Oh, also if block already underneath this pos.
-                # We also don't want to fill in mined gaps...
-                if  subDic.get('x'+str(x)+'z'+str(z))!= y and \
-                    subDic.get('x'+str(x)+'z'+str(z))!=y-1:
-                    e = Entity( model='cube',
-                                texture=stoneTex,
+                # if block already underneath this pos.
+                # We also don't want to fill in mine shaft...
+                # which includes all the way below and above gap.
+                # OK -- this does not suffice. Sometimes,
+                # for instance, we do need a cave wall to spawn
+                # even when a gap exists higher up at this location,
+                # since there is intervening terrain. So, we need
+                # dictionaries that record x,z, and y to be recorded.
+                # So, we could just use one dictionary where the 
+                # values are 'gap', or 'terrain', or 'cave_wall', etc.
+                if  subDic.get('x'+str(x)+'y'+str(y)+'z'+str(z)) == None and \
+                    subDic.get('x'+str(x)+'y'+str(y-1)+'z'+str(z))== None and \
+                    subDic.get('x'+str(x)+'y'+str(y-1)+'z'+str(z))!='gap' and \
+                    subDic.get('x'+str(x)+'y'+str(y)+'z'+str(z))!='gap':
+                    e = Entity( model=cubeModel,
+                                texture=cubeTex,
                                 color=BTYPE.SOIL)
                     e.position = spawnPos[i]
-                    e.collider='box'
-                    subDic['x'+str(e.x)+'z'+str(e.z)] = e.y
+                    e.scale *= 0.99
+                    e.parent = subsets[s]
+                    # Store position of block on main dictionary.
+                    subDic['x'+str(e.x)+'y'+str(e.y)+'z'+str(e.z)] = e.y
+                    # This is so that we can mine it (destroy it).
                     print('spawned mine wall ' + str(i))
             # anush.makeCave(bte.x,bte.z,bte.y-1)
+                subsets[s].combine()
+                subsets[s].model.generate()
             break    
 
 
@@ -282,7 +333,7 @@ def genTerrain():
     x = floor(origin.x + sin(radians(theta)) * rad)
     z = floor(origin.z + cos(radians(theta)) * rad)
     # Check whether there is terrain here already...
-    if subDic.get('x'+str(x)+'z'+str(z))==None:
+    if subDic.get('x'+str(x)+'y'+str(genPerlin(x,z))+'z'+str(z))==None:
         subCubes[currentCube].enable()
         subCubes[currentCube].x = x
         subCubes[currentCube].z = z
@@ -290,7 +341,7 @@ def genTerrain():
         subCubes[currentCube].parent = subsets[currentSubset]
         # Pass in true to allow tree generation here.
         y = subCubes[currentCube].y = genPerlin(x,z,True)
-        subDic['x'+str(x)+'z'+str(z)] = y
+        subDic['x'+str(x)+'y'+str(y)+'z'+str(z)] = y
         # OK -- time to decide colours :D
         c = nMap(y,-8,21,132,212)
         c += random.randint(-32,32)
@@ -322,6 +373,7 @@ def genTerrain():
             
     else:
         pass
+        # print('TC at ' + 'x'+str(x)+'y'+str(genPerlin(x,z))+'z'+str(z))
         # There was terrain already there, so
         # continue rotation to find new terrain spot.
     
@@ -344,27 +396,63 @@ for i in range(shellWidth*shellWidth):
 def generateShell():
     global subject, grav_speed, grav_acc, subDic
 
+    """
+    OK -
+    first bias stepping up. So, FIRST check whether there
+    are any blocks above us and <= step_height.
+    If yes, lerp to there as target_y.
+    If no, then SECOND check whether there are any blocks
+    below us and >= step_height. If yes, lerp to there.
+    If neither, then use gravity.
+    NB that we have to iterate * step_height during our
+    check of terrain cubes above or below subject's
+    current pos.
+    """
+
     # How high or low can we step/drop?
     step_height = 5
-
-    # What y is the terrain at this position?
-    # target_y = genPerlin(subject.x,subject.z) + 2
-    terra = subDic.get( 'x'+str((round(subject.x)))+
-                        'z'+str((round(subject.z))))
+    gravityON = True
+    
     target_y = subject.y
-    if terra != None:
-        target_y = terra + 2
-    else: print('No terra firma yet, captain.')
 
+    for i in range(step_height,-step_height,-1):
+        # What y is the terrain at this position?
+        # terra = genPerlin(subject.x,subject.z)
+        terra = subDic.get( 'x'+str((round(subject.x)))+
+                            'y'+str((floor(subject.y+i)))+
+                            'z'+str((round(subject.z))))
+        if terra != None and terra != 'gap':
+            # print('TERRAIN FOUND! ' + str(terra + 2))
+            target_y = terra + 2
+            # subject.y = terra + 2
+            grav_speed = 0
+            gravityON = False
+            break
+
+    if gravityON==True:
+        # This means we're falling!
+        grav_speed += (grav_acc * time.dt)
+        subject.y -= grav_speed
+    else:
+        subject.y = lerp(subject.y, target_y, 9.807*time.dt)
+        grav_speed = 0 # Reset gravity speed: grounded.
+
+    """
     # How far are we from the target y?
-    target_dist = target_y - subject.y
+    # But first, see if gravity override, in which
+    # case we pretend that there is a drop, not step.
+    if gravityON==True:
+        target_dist = -step_height-1 # Pretend drop.
+    else: target_dist = target_y - subject.y
     # Can we step up or down?
     if target_dist < step_height and target_dist > -step_height:
         subject.y = lerp(subject.y, target_y, 9.807*time.dt)
+        grav_speed = 0 # Reset gravity speed: grounded.
     elif target_dist < -step_height:
         # This means we're falling!
         grav_speed += (grav_acc * time.dt)
         subject.y -= grav_speed
+    """
 
     # global shellWidth
     # for i in range(len(shellies)):
