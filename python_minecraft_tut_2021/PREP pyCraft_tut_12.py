@@ -22,7 +22,10 @@ DONE 8) Trees
         the object itself, and terrain cubes as 'terrain',
         and gaps that have been mined as 'gap'.
         So, how to use these to determine whether subject
-        is stepping up or down etc.?          
+        is stepping up or down etc.?   
+        Need could use a new subset-like model into which
+        spawned blocks during mining and building are
+        combined.       
 ...
 DONE near future) axe draw bug
 DONE future) (very basic) Mining! 
@@ -75,7 +78,7 @@ bte = Entity(model='cube',texture=wireTex,scale=1.01)
 # distance of build (Thanks, Ethan!)
 build_distance = 3
 # Builds...
-builds = {} # Stores entity block itself at location (key).
+builds = Entity(model=cubeModel,texture=stoneTex)
 
 
 class BTYPE:
@@ -104,29 +107,93 @@ def buildTool():
 def build():
     # e = duplicate(bte)
     e = Entity(model='cube',position=bte.position)
-    e.collider = 'box'
+    e.scale *= 0.99999
+    # e.collider = 'box'
     e.texture = stoneTex
     e.color = blockType
     e.shake(duration=0.5,speed=0.01)
+    e.parent = builds
 def mine():
-    e = mouse.hovered_entity
-    destroy(e)
-    # Our real mining of the terrain :)
-    # Iterate over all the subsets that we have...
+    # First check against 'builds' subset.
+    
+    vChange = False
+            
+    for v in builds.model.vertices:
+        # Is the vertex close enough to
+        # where we want to mine (bte position)?
+        if (v[0] >= bte.x - 0.5 and
+            v[0] <= bte.x + 0.5 and
+            v[1] >= bte.y - 0.5 and
+            v[1] <= bte.y + 0.5 and
+            v[2] >= bte.z - 0.5 and
+            v[2] <= bte.z + 0.5):
+            # Yes!
+            # v[1] -= 1
+            v[1] = 999 # 'Delete' block.
+            if subDic.get('x'+str(bte.x)+'y'+str(bte.y-1)+'z'+str(bte.z))== None and \
+            subDic.get('x'+str(bte.x)+'y'+str(bte.y-1)+'z'+str(bte.z))!= 'gap':
+                e = Entity( model=cubeModel,
+                            texture=stoneTex,
+                            color=BTYPE.SOIL)
+                e.position = bte.position
+                e.scale *= 0.9
+                e.y -= 1
+                # We are also going to have to combine this
+                # new block into the current subset.
+                e.parent = builds
+                # Track new position of terrain.
+                subDic['x'+str(e.x)+'y'+str(e.y)+'z'+str(e.z)] = e.y
+                # Track position of mined gap.
+                subDic['x'+str(bte.x)+'y'+str(bte.y)+'z'+str(bte.z)] = 'gap'
+            # Note that we have made change.
+            vChange = True
+        # Record change of height in TERRAIN dictionary :)
+        # Which now records y as value. 
+    if vChange == True:
+        # subsets[s].model.generate() # We have to do this later.
+        x = floor(bte.x)
+        z = floor(bte.z)
+        y = floor(bte.y) - 1
+            
+        # Now we need to spawn surrounding cubes.
+        pos1 = (x+1,y+1,z)
+        pos2 = (x-1,y+1,z)
+        pos3 = (x,y+1,z+1)
+        pos4 = (x,y+1,z-1)
+        spawnPos = []
+        spawnPos.append(pos1)
+        spawnPos.append(pos2)
+        spawnPos.append(pos3)
+        spawnPos.append(pos4)
+        for i in range(4):
+            x = spawnPos[i][0]
+            z = spawnPos[i][2]
+            y = spawnPos[i][1]
+            if  subDic.get('x'+str(x)+'y'+str(y)+'z'+str(z)) == None and \
+                subDic.get('x'+str(x)+'y'+str(y-1)+'z'+str(z))== None and \
+                subDic.get('x'+str(x)+'y'+str(y-1)+'z'+str(z))!='gap' and \
+                subDic.get('x'+str(x)+'y'+str(y)+'z'+str(z))!='gap':
+                e = Entity( model=cubeModel,
+                            texture=stoneTex,
+                            color=BTYPE.SOIL)
+                e.position = spawnPos[i]
+                e.scale *= 0.99999
+                e.parent = builds
+                # Store position of block on main dictionary.
+                subDic['x'+str(e.x)+'y'+str(e.y)+'z'+str(e.z)] = e.y
+                # This is so that we can mine it (destroy it).
+                print('spawned mine wall ' + str(i))
+            # anush.makeCave(bte.x,bte.z,bte.y-1)
+        builds.model.generate()
+        builds.combine()   
+
+    # Now check through all terrain subsets...
     for s in range(len(subsets)):
         # First, check to see if built block here.
         # If so, we can destroy it, and break.
         # Oh, but how do we get hold of it?
         # Perhaps save it in a new dictionary?
         vChange = False
-        suspect = builds.get(  'x'+str(bte.x)+'y'+str(bte.y)+
-                        'z'+str(bte.z))
-        if suspect==type(Entity):
-            print('destroying built block...')
-            destroy(suspect)
-            # clear built block on builds dictionary.
-            builds['x'+str(bte.x)+'y'+str(bte.y)+'z'+str(bte.z)] = None
-            vChange = True
             
         for v in subsets[s].model.vertices:
             # Is the vertex close enough to
@@ -140,19 +207,21 @@ def mine():
                 # Yes!
                 # v[1] -= 1
                 v[1] = 999 # 'Delete' block.
-                if subDic.get('x'+str(bte.x)+'y'+str(bte.y-1)+'z'+str(bte.z))!= 'terrain' and \
-                   subDic.get('x'+str(bte.x)+'y'+str(bte.y-1)+'z'+str(bte.z))!= 'gap':
-                    e = Entity( model='cube',
+                if subDic.get('x'+str(bte.x)+'y'+str(bte.y-1)+'z'+str(bte.z))== None and \
+                subDic.get('x'+str(bte.x)+'y'+str(bte.y-1)+'z'+str(bte.z))!= 'gap':
+                    e = Entity( model=cubeModel,
                                 texture=stoneTex,
                                 color=BTYPE.SOIL)
                     e.position = bte.position
-                    e.scale *= 0.9
+                    e.scale *= 0.99999
                     e.y -= 1
                     # We are also going to have to combine this
                     # new block into the current subset.
-                    e.parent = subsets[s]
+                    e.parent = builds
                     # Track new position of terrain.
                     subDic['x'+str(e.x)+'y'+str(e.y)+'z'+str(e.z)] = e.y
+                    # Track position of mined gap.
+                    subDic['x'+str(bte.x)+'y'+str(bte.y)+'z'+str(bte.z)] = 'gap'
                 # Note that we have made change.
                 vChange = True
         # Record change of height in TERRAIN dictionary :)
@@ -163,8 +232,6 @@ def mine():
             z = floor(bte.z)
             y = floor(bte.y) - 1
             
-            # Track position of mined gap.
-            subDic['x'+str(x)+'y'+str(y+1)+'z'+str(z)] = 'gap'
             # Now we need to spawn surrounding cubes.
             pos1 = (x+1,y+1,z)
             pos2 = (x-1,y+1,z)
@@ -195,19 +262,19 @@ def mine():
                     subDic.get('x'+str(x)+'y'+str(y-1)+'z'+str(z))!='gap' and \
                     subDic.get('x'+str(x)+'y'+str(y)+'z'+str(z))!='gap':
                     e = Entity( model=cubeModel,
-                                texture=cubeTex,
+                                texture=stoneTex,
                                 color=BTYPE.SOIL)
                     e.position = spawnPos[i]
-                    e.scale *= 0.99
-                    e.parent = subsets[s]
+                    e.scale *= 0.99999
+                    e.parent = builds
                     # Store position of block on main dictionary.
                     subDic['x'+str(e.x)+'y'+str(e.y)+'z'+str(e.z)] = e.y
                     # This is so that we can mine it (destroy it).
                     print('spawned mine wall ' + str(i))
             # anush.makeCave(bte.x,bte.z,bte.y-1)
-                subsets[s].combine()
-                subsets[s].model.generate()
-            break    
+            subsets[s].model.generate()
+            builds.combine()   
+            break   
 
 
 
