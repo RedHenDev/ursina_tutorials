@@ -32,6 +32,7 @@ DONE future) (very basic) Mining!
 """
 
 
+from random import randint
 from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
 from numpy import floor,abs,sin,cos,radians, round
@@ -77,8 +78,9 @@ axeTex = 'diamond_axe_tex'
 bte = Entity(model='cube',texture=wireTex,scale=1.01)
 # distance of build (Thanks, Ethan!)
 build_distance = 3
+buildTex = 'build_texture.png'
 # Builds...
-builds = Entity(model=cubeModel,texture=stoneTex)
+builds = Entity(model=cubeModel,texture=buildTex)
 
 
 class BTYPE:
@@ -109,7 +111,7 @@ def build():
     e = Entity(model=cubeModel,position=bte.position)
     e.scale *= 0.99999
     # e.collider = 'box'
-    e.texture = stoneTex
+    e.texture = buildTex
     e.color = blockType
     # e.shake(duration=0.5,speed=0.01)
     subDic['x'+str(bte.x)+'y'+str(bte.y)+'z'+str(bte.z)] = bte.y
@@ -135,11 +137,12 @@ def mine():
             if subDic.get('x'+str(bte.x)+'y'+str(bte.y-1)+'z'+str(bte.z))== None and \
             subDic.get('x'+str(bte.x)+'y'+str(bte.y-1)+'z'+str(bte.z))!= 'gap':
                 e = Entity( model=cubeModel,
-                            texture=stoneTex,
+                            texture=buildTex,
                             color=BTYPE.SOIL)
                 e.position = bte.position
                 e.scale *= 0.99999
                 e.y -= 1
+                e.rotation_y = randint(0,3)*90
                 # We are also going to have to combine this
                 # new block into the current subset.
                 e.parent = builds
@@ -152,7 +155,6 @@ def mine():
         # Record change of height in TERRAIN dictionary :)
         # Which now records y as value. 
     if vChange == True:
-        # subsets[s].model.generate() # We have to do this later.
         x = round(bte.x)
         z = round(bte.z)
         y = round(bte.y) - 1
@@ -171,23 +173,25 @@ def mine():
             x = spawnPos[i][0]
             z = spawnPos[i][2]
             y = spawnPos[i][1]
+            # Not 100% about the second condition below...
             if  subDic.get('x'+str(x)+'y'+str(y)+'z'+str(z)) == None and \
                 subDic.get('x'+str(x)+'y'+str(y-1)+'z'+str(z))== None and \
                 subDic.get('x'+str(x)+'y'+str(y-1)+'z'+str(z))!='gap' and \
                 subDic.get('x'+str(x)+'y'+str(y)+'z'+str(z))!='gap':
                 e = Entity( model=cubeModel,
-                            texture=stoneTex,
+                            texture=buildTex,
                             color=BTYPE.SOIL)
                 e.position = spawnPos[i]
                 e.scale *= 0.99999
+                e.rotation_y = randint(0,3)*90
                 e.parent = builds
-                # Store position of block on main dictionary.
+                # Store position of block on terrain dictionary.
                 subDic['x'+str(e.x)+'y'+str(e.y)+'z'+str(e.z)] = e.y
-                # This is so that we can mine it (destroy it).
                 print('spawned mine wall ' + str(i))
             # anush.makeCave(bte.x,bte.z,bte.y-1)
         builds.model.generate()
-        builds.combine()   
+        builds.combine()
+        return
 
     # Now check through all terrain subsets...
     for s in range(len(subsets)):
@@ -212,11 +216,12 @@ def mine():
                 if subDic.get('x'+str(bte.x)+'y'+str(bte.y-1)+'z'+str(bte.z))== None and \
                 subDic.get('x'+str(bte.x)+'y'+str(bte.y-1)+'z'+str(bte.z))!= 'gap':
                     e = Entity( model=cubeModel,
-                                texture=stoneTex,
+                                texture=buildTex,
                                 color=BTYPE.SOIL)
                     e.position = bte.position
                     e.scale *= 0.99999
                     e.y -= 1
+                    e.rotation_y = randint(0,3)*90
                     # We are also going to have to combine this
                     # new block into the current subset.
                     e.parent = builds
@@ -229,7 +234,6 @@ def mine():
         # Record change of height in TERRAIN dictionary :)
         # Which now records y as value. 
         if vChange == True:
-            # subsets[s].model.generate() # We have to do this later.
             x = round(bte.x)
             z = round(bte.z)
             y = round(bte.y) - 1
@@ -248,37 +252,26 @@ def mine():
                 x = spawnPos[i][0]
                 z = spawnPos[i][2]
                 y = spawnPos[i][1]
-                # Only spawn if no block already there, or
-                # if block already underneath this pos.
-                # We also don't want to fill in mine shaft...
-                # which includes all the way below and above gap.
-                # OK -- this does not suffice. Sometimes,
-                # for instance, we do need a cave wall to spawn
-                # even when a gap exists higher up at this location,
-                # since there is intervening terrain. So, we need
-                # dictionaries that record x,z, and y to be recorded.
-                # So, we could just use one dictionary where the 
-                # values are 'gap', or 'terrain', or 'cave_wall', etc.
                 if  subDic.get('x'+str(x)+'y'+str(y)+'z'+str(z)) == None and \
                     subDic.get('x'+str(x)+'y'+str(y-1)+'z'+str(z))== None and \
                     subDic.get('x'+str(x)+'y'+str(y-1)+'z'+str(z))!='gap' and \
                     subDic.get('x'+str(x)+'y'+str(y)+'z'+str(z))!='gap':
                     e = Entity( model=cubeModel,
-                                texture=stoneTex,
+                                texture=buildTex,
                                 color=BTYPE.SOIL)
                     e.position = spawnPos[i]
                     e.scale *= 0.99999
                     e.parent = builds
+                    e.rotation_y = randint(0,3)*90
                     # Store position of block on main dictionary.
                     subDic['x'+str(e.x)+'y'+str(e.y)+'z'+str(e.z)] = e.y
                     # This is so that we can mine it (destroy it).
                     print('spawned mine wall ' + str(i))
             # anush.makeCave(bte.x,bte.z,bte.y-1)
             subsets[s].model.generate()
-            builds.combine()   
-            break   
-
-
+            builds.combine()
+            return   
+            # break   
 
 def input(key):
     global blockType, buildMode, generating
@@ -338,8 +331,8 @@ def update():
 
     buildTool()
 
-noise = PerlinNoise(octaves=1,seed=1220115)
-
+noise = PerlinNoise(octaves=1,seed=99)
+# seed=1220115
 megasets = []
 subsets = []
 subCubes = []
@@ -399,17 +392,23 @@ def genTerrain():
     if generating==-1: return
 
     # Decide where to place new terrain cube!
-    x = floor(origin.x + sin(radians(theta)) * rad)
-    z = floor(origin.z + cos(radians(theta)) * rad)
+    x = round(origin.x + sin(radians(theta)) * rad)
+    z = round(origin.z + cos(radians(theta)) * rad)
     # Check whether there is terrain here already...
-    if subDic.get('x'+str(x)+'y'+str(genPerlin(x,z))+'z'+str(z))==None:
+    testY = genPerlin(x,z)
+    if subDic.get('x'+str(x)+'y'+str(testY)+'z'+str(z))==None:
         subCubes[currentCube].enable()
         subCubes[currentCube].x = x
         subCubes[currentCube].z = z
         
         subCubes[currentCube].parent = subsets[currentSubset]
         # Pass in true to allow tree generation here.
-        y = subCubes[currentCube].y = genPerlin(x,z,True)
+        # i.e. genPerlin(x,z,True) - I've replaced this
+        # with testY, for speed up. We'll deal with trees
+        # again later...Oh that reminds me -- we need to
+        # combine trees into treeSubsets. They're bogging
+        # the game down at the moment.
+        y = subCubes[currentCube].y = testY
         subDic['x'+str(x)+'y'+str(y)+'z'+str(z)] = y
         # OK -- time to decide colours :D
         c = nMap(y,-8,21,132,212)
@@ -425,6 +424,10 @@ def genTerrain():
             currentSubset+=1
             currentCube=0
             
+            # Disable megasets, until inocorporated into
+            # mining function. I.e. after checking builds
+            # and subsets vertices, check megasets.
+            """
             # And ready to build a megaset?
             if currentSubset==numSubsets:
                 megasets.append(Entity( model=cubeModel,
@@ -439,7 +442,7 @@ def genTerrain():
                     s.parent=scene
                 currentSubset=0
                 print('Megaset #' + str(len(megasets))+'!')
-            
+            """
     else:
         pass
         # print('TC at ' + 'x'+str(x)+'y'+str(genPerlin(x,z))+'z'+str(z))
@@ -454,12 +457,12 @@ def genTerrain():
         theta = 0
         rad += 0.5
 
-shellies = []
-shellWidth = 3
-for i in range(shellWidth*shellWidth):
-    bud = Entity(model='cube',collider='box')
-    bud.visible=False
-    shellies.append(bud)
+# shellies = []
+# shellWidth = 3
+# for i in range(shellWidth*shellWidth):
+#     bud = Entity(model='cube',collider='box')
+#     bud.visible=False
+#     shellies.append(bud)
 
 # Our new gravity system for moving the subject :)
 def generateShell():
