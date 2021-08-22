@@ -106,13 +106,15 @@ def buildTool():
     bte.color = blockType
 def build():
     # e = duplicate(bte)
-    e = Entity(model='cube',position=bte.position)
+    e = Entity(model=cubeModel,position=bte.position)
     e.scale *= 0.99999
     # e.collider = 'box'
     e.texture = stoneTex
     e.color = blockType
-    e.shake(duration=0.5,speed=0.01)
+    # e.shake(duration=0.5,speed=0.01)
+    subDic['x'+str(bte.x)+'y'+str(bte.y)+'z'+str(bte.z)] = bte.y
     e.parent = builds
+    builds.combine()
 def mine():
     # First check against 'builds' subset.
     
@@ -136,7 +138,7 @@ def mine():
                             texture=stoneTex,
                             color=BTYPE.SOIL)
                 e.position = bte.position
-                e.scale *= 0.9
+                e.scale *= 0.99999
                 e.y -= 1
                 # We are also going to have to combine this
                 # new block into the current subset.
@@ -151,9 +153,9 @@ def mine():
         # Which now records y as value. 
     if vChange == True:
         # subsets[s].model.generate() # We have to do this later.
-        x = floor(bte.x)
-        z = floor(bte.z)
-        y = floor(bte.y) - 1
+        x = round(bte.x)
+        z = round(bte.z)
+        y = round(bte.y) - 1
             
         # Now we need to spawn surrounding cubes.
         pos1 = (x+1,y+1,z)
@@ -228,9 +230,9 @@ def mine():
         # Which now records y as value. 
         if vChange == True:
             # subsets[s].model.generate() # We have to do this later.
-            x = floor(bte.x)
-            z = floor(bte.z)
-            y = floor(bte.y) - 1
+            x = round(bte.x)
+            z = round(bte.z)
+            y = round(bte.y) - 1
             
             # Now we need to spawn surrounding cubes.
             pos1 = (x+1,y+1,z)
@@ -486,7 +488,7 @@ def generateShell():
         # What y is the terrain at this position?
         # terra = genPerlin(subject.x,subject.z)
         terra = subDic.get( 'x'+str((round(subject.x)))+
-                            'y'+str((floor(subject.y+i)))+
+                            'y'+str((round(subject.y+i)))+
                             'z'+str((round(subject.z))))
         if terra != None and terra != 'gap':
             # print('TERRAIN FOUND! ' + str(terra + 2))
