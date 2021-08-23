@@ -8,7 +8,9 @@ DONE 6) Axe model
 7) Fog darkens/changes colour as we descend height
 DONE 8) Trees
 
-9.-1) use round instead of floor for subject position.
+9.-1) use floor instead of floor for subject position.
+9.-1.1) although this creates a z-fight error for all
+        cubes on the axes (z=0 or x=0) across whole map.
 
 9.0) Break out of subsets loop after mining.
 9.1) 3D Cave_Dictionary - for recording y pos too.
@@ -18,14 +20,17 @@ DONE 8) Trees
 
 9.2) ELABORATION: adjust genTerrain for new 3D dictionary
         have to use Perlin twice. Also, need to correct
-        our walking system. We now record built blocks as
-        the object itself, and terrain cubes as 'terrain',
-        and gaps that have been mined as 'gap'.
-        So, how to use these to determine whether subject
-        is stepping up or down etc.?   
-        Need could use a new subset-like model into which
-        spawned blocks during mining and building are
-        combined.       
+        our walking system - by iterating potential blocks
+        above position, and then below, bound by step_height.
+        We start above, to bias stepping up.
+        We now combine built blocks into
+        their own subset Entity, 'builds'. Their positions
+        or lack of are recorded on the main terrain dictionary.
+        And gaps that have been mined as 'gap' on terrain dic. 
+        When building, we have to take off shake animation,
+        since Entity is being combined into builds Entity.
+        Ah, we only use the builds Entity so as to have freedom
+        of texture (i.e. the new 'build_texture.png').
 ...
 DONE near future) axe draw bug
 DONE future) (very basic) Mining! 
@@ -35,7 +40,7 @@ DONE future) (very basic) Mining!
 from random import randint
 from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
-from numpy import floor,abs,sin,cos,radians, round
+from numpy import floor,abs,sin,cos,radians, floor
 import time
 from perlin_noise import PerlinNoise  
 from nMap import nMap
@@ -65,7 +70,7 @@ stoneTex = 'grass_mono.png'
 
 cubeTex = 'block_texture.png'
 
-cubeModel = 'moonCube'
+cubeModel = 'moonCube.obj'
 
 # ***
 axoTex = 'b_axolotl.png'
@@ -81,7 +86,7 @@ build_distance = 3
 buildTex = 'build_texture.png'
 # Builds...
 builds = Entity(model=cubeModel,texture=buildTex)
-
+# builds.y = 999
 
 class BTYPE:
     STONE= color.rgb(255,255,255) 
@@ -99,20 +104,26 @@ def buildTool():
         bte.visible = False
         return
     else: bte.visible = True
-    bte.position = round(subject.position +
+    bte.position = floor(subject.position +
                     camera.forward * build_distance)
     bte.y += 2
-    bte.y = round(bte.y)
-    bte.x = round(bte.x)
-    bte.z = round(bte.z)
+    bte.y = floor(bte.y)
+    bte.x = floor(bte.x)
+    bte.z = floor(bte.z)
     bte.color = blockType
 def build():
+    # First, make sure not already terrain there.
+    # Gaps are OK, of course.
+    if subDic.get('x'+str(bte.x)+'y'+str(bte.y)+'z'+str(bte.z))!='gap' and\
+        subDic.get('x'+str(bte.x)+'y'+str(bte.y)+'z'+str(bte.z))!=None:
+        return
     # e = duplicate(bte)
     e = Entity(model=cubeModel,position=bte.position)
     e.scale *= 0.99999
     # e.collider = 'box'
     e.texture = buildTex
     e.color = blockType
+    e.rotation_y = randint(0,3)*90
     # e.shake(duration=0.5,speed=0.01)
     subDic['x'+str(bte.x)+'y'+str(bte.y)+'z'+str(bte.z)] = bte.y
     e.parent = builds
@@ -155,9 +166,9 @@ def mine():
         # Record change of height in TERRAIN dictionary :)
         # Which now records y as value. 
     if vChange == True:
-        x = round(bte.x)
-        z = round(bte.z)
-        y = round(bte.y) - 1
+        x = floor(bte.x)
+        z = floor(bte.z)
+        y = floor(bte.y) - 1
             
         # Now we need to spawn surrounding cubes.
         pos1 = (x+1,y+1,z)
@@ -189,6 +200,7 @@ def mine():
                 subDic['x'+str(e.x)+'y'+str(e.y)+'z'+str(e.z)] = e.y
                 print('spawned mine wall ' + str(i))
             # anush.makeCave(bte.x,bte.z,bte.y-1)
+        # Here we are in 'vChange==True'.
         builds.model.generate()
         builds.combine()
         return
@@ -223,7 +235,7 @@ def mine():
                     e.y -= 1
                     e.rotation_y = randint(0,3)*90
                     # We are also going to have to combine this
-                    # new block into the current subset.
+                    # new block into the builds subset.
                     e.parent = builds
                     # Track new position of terrain.
                     subDic['x'+str(e.x)+'y'+str(e.y)+'z'+str(e.z)] = e.y
@@ -234,11 +246,11 @@ def mine():
         # Record change of height in TERRAIN dictionary :)
         # Which now records y as value. 
         if vChange == True:
-            x = round(bte.x)
-            z = round(bte.z)
-            y = round(bte.y) - 1
+            x = floor(bte.x)
+            z = floor(bte.z)
+            y = floor(bte.y) - 1
             
-            # Now we need to spawn surrounding cubes.
+            # Now we need to spawn surflooring cubes.
             pos1 = (x+1,y+1,z)
             pos2 = (x-1,y+1,z)
             pos3 = (x,y+1,z+1)
@@ -392,8 +404,8 @@ def genTerrain():
     if generating==-1: return
 
     # Decide where to place new terrain cube!
-    x = round(origin.x + sin(radians(theta)) * rad)
-    z = round(origin.z + cos(radians(theta)) * rad)
+    x = floor(origin.x + sin(radians(theta)) * rad)
+    z = floor(origin.z + cos(radians(theta)) * rad)
     # Check whether there is terrain here already...
     testY = genPerlin(x,z)
     if subDic.get('x'+str(x)+'y'+str(testY)+'z'+str(z))==None:
@@ -482,7 +494,7 @@ def generateShell():
     """
 
     # How high or low can we step/drop?
-    step_height = 5
+    step_height = 3
     gravityON = True
     
     target_y = subject.y
@@ -490,9 +502,9 @@ def generateShell():
     for i in range(step_height,-step_height,-1):
         # What y is the terrain at this position?
         # terra = genPerlin(subject.x,subject.z)
-        terra = subDic.get( 'x'+str((round(subject.x)))+
-                            'y'+str((round(subject.y+i)))+
-                            'z'+str((round(subject.z))))
+        terra = subDic.get( 'x'+str((floor(subject.x)))+
+                            'y'+str((floor(subject.y+i)))+
+                            'z'+str((floor(subject.z))))
         if terra != None and terra != 'gap':
             # print('TERRAIN FOUND! ' + str(terra + 2))
             target_y = terra + 2
@@ -507,7 +519,7 @@ def generateShell():
         subject.y -= grav_speed
     else:
         subject.y = lerp(subject.y, target_y, 9.807*time.dt)
-        grav_speed = 0 # Reset gravity speed: grounded.
+        grav_speed = 0 # Reset gravity speed: gfloored.
 
     """
     # How far are we from the target y?
@@ -519,7 +531,7 @@ def generateShell():
     # Can we step up or down?
     if target_dist < step_height and target_dist > -step_height:
         subject.y = lerp(subject.y, target_y, 9.807*time.dt)
-        grav_speed = 0 # Reset gravity speed: grounded.
+        grav_speed = 0 # Reset gravity speed: gfloored.
     elif target_dist < -step_height:
         # This means we're falling!
         grav_speed += (grav_acc * time.dt)
@@ -540,7 +552,7 @@ subject.gravity = 0
 grav_speed = 0
 grav_acc = 0.1
 subject.x = subject.z = 5
-subject.y = 32
+subject.y = 16
 prevZ = subject.z
 prevX = subject.x
 origin = subject.position # Vec3 object? .x .y .z
