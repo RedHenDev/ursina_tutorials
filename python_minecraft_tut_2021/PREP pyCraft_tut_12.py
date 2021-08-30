@@ -486,7 +486,7 @@ def generateShell():
     are any blocks above us and <= step_height.
     If yes, lerp to there as target_y.
     If no, then SECOND check whether there are any blocks
-    below us and >= step_height. If yes, lerp to there.
+    below us and <= step_height. If yes, lerp to there.
     If neither, then use gravity.
     NB that we have to iterate * step_height during our
     check of terrain cubes above or below subject's
