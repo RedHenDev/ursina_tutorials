@@ -509,7 +509,6 @@ def generateShell():
             # print('TERRAIN FOUND! ' + str(terra + 2))
             target_y = terra + 2
             # subject.y = terra + 2
-            grav_speed = 0
             gravityON = False
             break
 

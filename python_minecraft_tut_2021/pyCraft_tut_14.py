@@ -21,6 +21,7 @@ DONE 9.4) Correct spawning when 'mining' a built block
 9.5) Improve block type selection via number keys
 
 10.0) Smooth performance when building etc.
+10.01) Plus at very start of game - move player forward?
 10.1) Combine trees for efficiency
 10.2) Improve build tool UI system (closer to Minecraft)
 11) Save file -- e.g. current terrain with builds etc.
