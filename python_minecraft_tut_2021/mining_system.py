@@ -197,9 +197,9 @@ class Mining_system:
         # e.color = this.blockTypes[this.blockType]
         e.parent = this.builds
         # Record newly built block on dictionary.
-        this.tDic[  'x'+str(e.x)+
-                    'y'+str(e.y)+
-                    'z'+str(e.z)] = 'b'
+        this.tDic[  'x'+str(this.bte.x)+
+                    'y'+str(this.bte.y)+
+                    'z'+str(this.bte.z)] = 'b'
         this.builds.combine()
         # Shaking animation won't work since we're
         # destroying the temp block (.combine()).
@@ -208,7 +208,7 @@ class Mining_system:
     def mine(this):
 
         vChange = False
-            
+        vChanged = 0
         for v in this.builds.model.vertices:
             # Is the vertex close enough to
             # where we want to mine (bte position)?
@@ -224,24 +224,36 @@ class Mining_system:
                 v[1] = 9999
                 # Note that we have made change.
                 vChange = True
+                vChanged += 1
+                if vChanged >= 36: break
+                
+                
+        if vChange == True:
+            # Was this a 'built' (non-terrain/spawned) block?
+            if this.tDic.get(   'x'+str(this.bte.x)+
+                                'y'+str(this.bte.y)+
+                                'z'+str(this.bte.z)) \
+                =='b':
                 # Record new gap on dictionary.
                 this.tDic[  'x'+str(this.bte.x)+
                             'y'+str(this.bte.y)+
                             'z'+str(this.bte.z)] = 'gap'
-                
-        if vChange == True:
-            buildBlock = True
-            if this.tDic.get(   'x'+str(this.bte.x)+
-                                'y'+str(this.bte.y)+
-                                'z'+str(this.bte.z)) \
-                !='b':
-                buildBlock = False
-                this.mineSpawn()
+                # Update the builds model to show gap.
+                this.builds.model.generate()
+                # Job done. No need to spawn cave walls.
+                return
+            # If here, then we are dealing with
+            # a spawned block (cave-wall).
+            # Record new gap on dictionary.
+            this.tDic[  'x'+str(this.bte.x)+
+                        'y'+str(this.bte.y)+
+                        'z'+str(this.bte.z)] = 'gap'
+            # Check whether we want to spawn cave walls.
+            this.mineSpawn()
+            # Combine walls into builds model & update it.
+            this.builds.combine()
             this.builds.model.generate()
-            if buildBlock == False:
-                this.builds.combine()
-            # Not done! Also combine newly spawned blocks
-            # into builds entity :)
+            print('Mined cave-wall!')
             return  
 
         # Our real mining of the terrain :)
@@ -267,17 +279,17 @@ class Mining_system:
                     # Note that we have made change.
                     # Gather average height for cave dic.
                     vChange = True
-                    # Record new gap on dictionary.
-                    this.tDic[  'x'+str(this.bte.x)+
-                                'y'+str(this.bte.y)+
-                                'z'+str(this.bte.z)] = 'gap'
+                    
                     totalV += 1
                     # The mystery of 36 vertices!! :o
                     # print('tV= ' + str(totalV))
                     if totalV==36: break
             
             if vChange == True:
-
+                # Record new gap on dictionary.
+                this.tDic[  'x'+str(this.bte.x)+
+                            'y'+str(this.bte.y)+
+                            'z'+str(this.bte.z)] = 'gap'
                 # Now we need to spawn a new cube below
                 # the bte's position -- if no cube or
                 # gap there already.
@@ -291,4 +303,5 @@ class Mining_system:
                 # we need to, update subset model. Done.
                 this.subsets[s].model.generate()
                 this.builds.combine()
+                print('Mined terrain!')
                 return
