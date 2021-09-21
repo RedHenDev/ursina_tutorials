@@ -161,7 +161,7 @@ def input(key):
 # Main game loop :D
 def update():
     global prevZ, prevX, prevTime, genSpeed, perCycle
-    global rad, origin, generating, canGenerate
+    global rad, origin, generating, canGenerate, theta
     if  abs(subject.z - prevZ) > 1 or \
         abs(subject.x - prevX) > 1:
             origin=subject.position
@@ -307,11 +307,22 @@ def generateShell():
                                 'y'+str((floor(subject.y+i+1)))+
                                 'z'+str((floor(subject.z+0.5))))
         if terra != None and terra != 'gap':
+            # *** tower bug solved...
+            gravityON = False
             if terraTop == None or terraTop == 'gap':
                 # print('TERRAIN FOUND! ' + str(terra + 2))
                 target_y = floor(subject.y+i) + 2
-                gravityON = False
                 break
+            # *** solidify hack...
+            # Would be better to first figure which
+            # way to nudge subject...
+            if subject.rotation_y > 180:
+                subject.z -= 0.6
+                subject.x -= 0.6
+            else: 
+                subject.z += 0.6
+                subject.x += 0.6
+            
 
     if gravityON==True:
         # This means we're falling!
