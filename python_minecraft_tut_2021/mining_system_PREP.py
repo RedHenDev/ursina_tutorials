@@ -109,13 +109,11 @@ class Mining_system:
                             'z'+str(this.bte.z)
                             ) == None:
 
-            """
             # Record gap location in dictionary.
             this.tDic[  'x'+str(this.bte.x)+
                         'y'+str(this.bte.y)+
                         'z'+str(this.bte.z)] = 'gap'
-            """
-
+                    
             e = Entity( model=this.cubeModel,
                         texture=this.buildTex)
             # Shrink spawned block so that it
@@ -188,15 +186,6 @@ class Mining_system:
     def build(this):
         if this.buildMode == -1: return
 
-        # Is there already a block here?
-        whatsHere = this.tDic.get(  'x'+str(this.bte.x)+
-                                    'y'+str(this.bte.y)+
-                                    'z'+str(this.bte.z))
-        # Is so, return. No buildy.
-        if whatsHere != 'gap' and whatsHere != None:
-            print(str(whatsHere))
-            return
-
         e = Entity( model=this.cubeModel,
                     position=this.bte.position)
         # e.collider = 'box'
@@ -208,9 +197,9 @@ class Mining_system:
         # e.color = this.blockTypes[this.blockType]
         e.parent = this.builds
         # Record newly built block on dictionary.
-        this.tDic[  'x'+str(e.x)+
-                    'y'+str(e.y)+
-                    'z'+str(e.z)] = 'b'
+        this.tDic[  'x'+str(this.bte.x)+
+                    'y'+str(this.bte.y)+
+                    'z'+str(this.bte.z)] = 'b'
         this.builds.combine()
         # Shaking animation won't work since we're
         # destroying the temp block (.combine()).
@@ -219,7 +208,7 @@ class Mining_system:
     def mine(this):
 
         vChange = False
-        totalV = 0    
+        vChanged = 0
         for v in this.builds.model.vertices:
             # Is the vertex close enough to
             # where we want to mine (bte position)?
@@ -235,27 +224,36 @@ class Mining_system:
                 v[1] = 9999
                 # Note that we have made change.
                 vChange = True
-                totalV += 1
-                if totalV >= 36: break
+                vChanged += 1
+                if vChanged >= 36: break
                 
                 
         if vChange == True:
-
-            whatsHere = this.tDic.get(  'x'+str(this.bte.x)+
-                                        'y'+str(this.bte.y)+
-                                        'z'+str(this.bte.z))
+            # Was this a 'built' (non-terrain/spawned) block?
+            if this.tDic.get(   'x'+str(this.bte.x)+
+                                'y'+str(this.bte.y)+
+                                'z'+str(this.bte.z)) \
+                =='b':
+                # Record new gap on dictionary.
+                this.tDic[  'x'+str(this.bte.x)+
+                            'y'+str(this.bte.y)+
+                            'z'+str(this.bte.z)] = 'gap'
+                # Update the builds model to show gap.
+                this.builds.model.generate()
+                # Job done. No need to spawn cave walls.
+                return
+            # If here, then we are dealing with
+            # a spawned block (cave-wall).
             # Record new gap on dictionary.
             this.tDic[  'x'+str(this.bte.x)+
                         'y'+str(this.bte.y)+
                         'z'+str(this.bte.z)] = 'gap'
-            if whatsHere !='b': 
-                this.mineSpawn()
-                this.builds.combine()
-            # Update builds model Entity so that we
-            # see the gaps -- update vertices.
-            this.builds.model.generate()    
-            # Not done! Also combine newly spawned blocks
-            # into builds entity :)
+            # Check whether we want to spawn cave walls.
+            this.mineSpawn()
+            # Combine walls into builds model & update it.
+            this.builds.combine()
+            this.builds.model.generate()
+            print('Mined cave-wall!')
             return  
 
         # Our real mining of the terrain :)
@@ -281,13 +279,17 @@ class Mining_system:
                     # Note that we have made change.
                     # Gather average height for cave dic.
                     vChange = True
+                    
                     totalV += 1
                     # The mystery of 36 vertices!! :o
                     # print('tV= ' + str(totalV))
                     if totalV==36: break
             
             if vChange == True:
-
+                # Record new gap on dictionary.
+                this.tDic[  'x'+str(this.bte.x)+
+                            'y'+str(this.bte.y)+
+                            'z'+str(this.bte.z)] = 'gap'
                 # Now we need to spawn a new cube below
                 # the bte's position -- if no cube or
                 # gap there already.
@@ -295,13 +297,11 @@ class Mining_system:
                 # of more layers -- if each position is
                 # neither a gap nor a place where terrain
                 # already is.
-                # Record new gap on dictionary.
-                this.tDic[  'x'+str(this.bte.x)+
-                            'y'+str(this.bte.y)+
-                            'z'+str(this.bte.z)] = 'gap'
+
                 this.mineSpawn()
                 # Now that we've spawned what (if anything)
                 # we need to, update subset model. Done.
                 this.subsets[s].model.generate()
                 this.builds.combine()
+                print('Mined terrain!')
                 return
