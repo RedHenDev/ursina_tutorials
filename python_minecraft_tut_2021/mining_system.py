@@ -3,6 +3,7 @@ Build tool system for mining and building :)
 Good luck!
 """
 
+from random import randrange, randint, random
 from ursina import Entity, color, texture, Vec3
 from numpy import floor
 
@@ -80,12 +81,13 @@ class Mining_system:
         if key == 'f': this.buildMode *= -1
         
         # Hey, future you -- improve this system. Thaaanks.
-        """
-        if key == '1': blockType=BTYPE.SOIL
-        if key == '2': blockType=BTYPE.GRASS
-        if key == '3': blockType=BTYPE.STONE
-        if key == '4': blockType=BTYPE.RUBY
-        """
+        
+        if key == '1': this.blockType=0
+        if key == '2': this.blockType=1
+        if key == '3': this.blockType=2
+        if key == '4': this.blockType=3
+        if key == '5': this.blockType=4
+    
 
     # This is called from the main update loop.
     def buildTool(this):
@@ -103,18 +105,13 @@ class Mining_system:
         this.bte.color = this.blockTypes[this.blockType]
 
     def mineSpawn(this):
+        from copy import copy # For copying colours.
+
         # Spawn one block below dig position?
         if this.tDic.get(   'x'+str(this.bte.x)+
                             'y'+str(this.bte.y-1)+
                             'z'+str(this.bte.z)
                             ) == None:
-
-            """
-            # Record gap location in dictionary.
-            this.tDic[  'x'+str(this.bte.x)+
-                        'y'+str(this.bte.y)+
-                        'z'+str(this.bte.z)] = 'gap'
-            """
 
             e = Entity( model=this.cubeModel,
                         texture=this.buildTex)
@@ -122,17 +119,26 @@ class Mining_system:
             # matches the size of ordinary terrain.
             e.scale *= 0.99999
             # Change colour to soil (this.blockTypes[2]).
-            e.color = this.blockTypes[0]
+            e.color = copy(this.blockTypes[0])
+            # Adjust the tint of this block's colour.
+            shade = random()
+            e.color[0] *= shade
+            e.color[1] *= shade
+            e.color[2] *= shade
             # Position under mined area.
             e.position = this.bte.position
             e.y -= 1
+            # Add random rotation.
+            e.rotation_y = (90 * randint(0,3))
+            e.rotation_z = (90 * randint(0,3))
+            e.rotation_x = (90 * randint(0,3))
             # Parent spawned cube into builds entity.
             e.parent = this.builds
             # Record newly spawned block on dictionary.
             this.tDic[  'x'+str(this.bte.x)+
                         'y'+str(e.y)+
                         'z'+str(this.bte.z)] = e.y
-
+            this.builds.combine()
             # OK -- now spawn 4 'cave wall' cubes.
             # For each cube, first check whether:
             # 1) No terrain there already
@@ -204,8 +210,8 @@ class Mining_system:
         e.texture = this.buildTex
         e.scale *= 0.99999
         # Netherite colour for testing :)
-        e.color = this.blockTypes[4]
-        # e.color = this.blockTypes[this.blockType]
+        # e.color = this.blockTypes[4]
+        e.color = this.blockTypes[this.blockType]
         e.parent = this.builds
         # Record newly built block on dictionary.
         this.tDic[  'x'+str(e.x)+

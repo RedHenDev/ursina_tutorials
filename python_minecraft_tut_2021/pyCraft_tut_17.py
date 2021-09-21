@@ -1,7 +1,11 @@
 """
-Minecraft in Python, with Ursina, tut 15
+Minecraft in Python, with Ursina, tut 17
 Petter Amland :)
-3.2) Dictionary for stepping onto built blocks
+DONE 3.2) Dictionary for stepping onto built blocks
+DONE 3.3) Tower-step algorithm - prevent smooth climb
+3.4) Improve tower-step algorithm -- prevent pushing us
+        through terrain bottom. Also, seems to require
+        too tall a tower (i.e. > step-height + 1).
 4) Caves - adapt the legacy system
 DONE 5) Layers of terrain
 DONE 6) Axe model
@@ -16,25 +20,29 @@ DONE 9.0) Layers/Depth in terrain
 DONE 9.1) Break from loop once mined
 DONE 9.2) Create dedicated mining/building module
 DONE 9.2.1) Does it work?
-9.3) Different material types in layers (ores etc.)
+DONE 9.3) Different material types in layers (ores etc.)
+9.31) Biomes! :D - colours and perlin changes
 DONE 9.4) Correct spawning when 'mining' a built block
-9.5) Improve block type selection via number keys
+DONE 9.5) Improve block type selection via number keys
+9.6) Bug - prevent gaps in terrain when spawning sometimes.
 
 10.0) Smooth performance when building etc.
 10.01) Plus at very start of game - move player forward?
 10.1) Combine trees for efficiency
 10.2) Improve build tool UI system (closer to Minecraft)
 11) Save file -- e.g. current terrain with builds etc.
-12) Axe animation
+DONE 12) Axe animation
+12.2) Improve axe animation.
 DONE 13) Disable megaset system (for now)
 DONE 14) Random seed for the terrain - display seed with Text()
 DONE 15.0) Update the walking/gravity system (xYz)
-15.01) Subject not aligned with terrain perfectly?
+DONE 15.01) Subject not aligned with terrain perfectly?
         (Do we just add 0.5 to both x and z in gravity system?)
 DONE 15.1) Incorporate building in the new mining system
 
 16.0) Enums for blocktypes
 17) Add seed stuff to its own module - thank you.
+DONE 18) Prevent building on top of extant blocks.
 
 """
 
@@ -292,11 +300,18 @@ def generateShell():
         terra = varch.tDic.get( 'x'+str((floor(subject.x+0.5)))+
                                 'y'+str((floor(subject.y+i)))+
                                 'z'+str((floor(subject.z+0.5))))
+        # *** Tower algorithm -- to prevent being sucked up
+        # beyond step-height -- bug is that it may force us
+        # through the bottom of terrain.
+        terraTop = varch.tDic.get( 'x'+str((floor(subject.x+0.5)))+
+                                'y'+str((floor(subject.y+i+1)))+
+                                'z'+str((floor(subject.z+0.5))))
         if terra != None and terra != 'gap':
-            # print('TERRAIN FOUND! ' + str(terra + 2))
-            target_y = floor(subject.y+i) + 2
-            gravityON = False
-            break
+            if terraTop == None or terraTop == 'gap':
+                # print('TERRAIN FOUND! ' + str(terra + 2))
+                target_y = floor(subject.y+i) + 2
+                gravityON = False
+                break
 
     if gravityON==True:
         # This means we're falling!
