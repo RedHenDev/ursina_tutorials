@@ -11,9 +11,9 @@ class Trees:
     def __init__(this):
         this.noise = PerlinNoise(seed=4)
 
-        # New tree mega model... ***
-        this.mummaTree = Entity()
-        this.treeCount = 0
+        # Parent of trees for optimization.
+        this.trees = Entity()
+        this.treesCounter = 0
 
     def checkTree(this, _x,_y,_z):
         freq = 5
@@ -41,11 +41,10 @@ class Trees:
         trunk.parent=tree
         tree.y += 4
         tree.rotation_y = randint(0,360)
-        
-        # New tree mega model... ***
-        tree.parent = this.mummaTree
-        this.treeCount += 1
-        if this.treeCount % 100 == 0:
-            this.mummaTree.combine()
-            this.mummaTree.collider=this.mummaTree.model
+
+        tree.parent = this.trees
+        this.treesCounter += 1
+        if this.treesCounter % 4 == 0:
+            this.trees.combine()
+            this.trees.collider = this.trees.model
 

@@ -49,7 +49,7 @@ class Mining_system:
         # Grass - 1
         this.blockTypes.append(color.rgb(0,255,0))
         # Soil - 2
-        this.blockTypes.append(color.rgb(255,80,100))
+        this.blockTypes.append(color.rgb(102,51,0))
         # Ruby - 3
         this.blockTypes.append(color.rgb(255,0,0))
         # Netherite - 4
@@ -104,6 +104,21 @@ class Mining_system:
         this.bte.z = round(this.bte.z)
         this.bte.color = this.blockTypes[this.blockType]
 
+    def adjustShadeAndRotation(this,_block):
+        from copy import copy
+        # Change colour to soil.
+        _block.color = copy(this.blockTypes[2])
+        # Adjust the tint of this block's colour.
+        shade = randrange(-16,64)/256
+        _block.color[0] += shade
+        _block.color[1] += shade
+        _block.color[2] += shade
+
+        # Add random rotation.
+        _block.rotation_y = (90 * randint(0,3))
+        _block.rotation_z = (90 * randint(0,3))
+        _block.rotation_x = (90 * randint(0,3))
+
     def mineSpawn(this):
         from copy import copy # For copying colours.
 
@@ -118,20 +133,13 @@ class Mining_system:
             # Shrink spawned block so that it
             # matches the size of ordinary terrain.
             e.scale *= 0.99999
-            # Change colour to soil (this.blockTypes[2]).
-            e.color = copy(this.blockTypes[0])
-            # Adjust the tint of this block's colour.
-            shade = random()
-            e.color[0] *= shade
-            e.color[1] *= shade
-            e.color[2] *= shade
+            
             # Position under mined area.
             e.position = this.bte.position
             e.y -= 1
-            # Add random rotation.
-            e.rotation_y = (90 * randint(0,3))
-            e.rotation_z = (90 * randint(0,3))
-            e.rotation_x = (90 * randint(0,3))
+            
+            this.adjustShadeAndRotation(e)
+
             # Parent spawned cube into builds entity.
             e.parent = this.builds
             # Record newly spawned block on dictionary.
@@ -179,10 +187,9 @@ class Mining_system:
                             # Shrink spawned block so that it
                             # matches the size of ordinary terrain.
                             e.scale *= 0.99999
-                            # Change colour to soil (this.blockTypes[2]).
-                            e.color = this.blockTypes[0]
                             # Position around mined area.
                             e.position = spawnPos[i]
+                            this.adjustShadeAndRotation(e)
                             # Parent spawned cube into builds entity.
                             e.parent = this.builds
                             # Record newly spawned block on dictionary.
