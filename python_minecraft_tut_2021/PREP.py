@@ -1,11 +1,13 @@
 """
-Minecraft in Python, with Ursina, tut 17
+Minecraft in Python, with Ursina, tut 18
 Petter Amland :)
 DONE 3.2) Dictionary for stepping onto built blocks
 DONE 3.3) Tower-step algorithm - prevent smooth climb
-3.4) Improve tower-step algorithm -- prevent pushing us
+DONE 3.4) Improve tower-step algorithm -- prevent pushing us
         through terrain bottom. Also, seems to require
         too tall a tower (i.e. > step-height + 1).
+3.5) Teleport glitch -- how to make tower-builds solid? Hack
+        just glitches us through walls etc. at the moment.
 4) Caves - adapt the legacy system
 DONE 5) Layers of terrain
 DONE 6) Axe model
@@ -28,7 +30,7 @@ DONE 9.5) Improve block type selection via number keys
 
 10.0) Smooth performance when building etc.
 10.01) Plus at very start of game - move player forward?
-10.1) Combine trees for efficiency
+DONE 10.1) Combine trees for efficiency
 10.2) Improve build tool UI system (closer to Minecraft)
 11) Save file -- e.g. current terrain with builds etc.
 DONE 12) Axe animation
@@ -78,7 +80,7 @@ stoneTex = 'grass_mono.png'
 
 cubeTex = 'block_texture.png'
 
-cubeModel = 'moonCube'
+cubeModel = 'moonCube.obj'
 
 axoTex = 'axolotl.png'
 axoModel = 'axolotl.obj'
@@ -108,8 +110,9 @@ genSpeed = 0
 perCycle = 64
 currentCube = 0
 currentSubset = 0
+currentMegaset = 0
 numSubCubes = 64
-numSubsets = 420 # I.e. how many combined into a megaset?
+numSubsets = 16 # I.e. how many combined into a megaset?
 theta = 0
 rad = 0
 # Dictionary for recording whether terrain blocks exist
@@ -123,6 +126,13 @@ for i in range(numSubsets):
     bud.disable()
     subsets.append(bud)
 
+# Instantiate our empty subsets.
+for i in range(420):
+    bud = Entity(model=cubeModel)
+    bud.texture = cubeTex
+    bud.disable()
+    megasets.append(bud)
+
 # Our axe :D
 axe = Entity(   model=axeModel,
                 texture=axeTex,
@@ -135,7 +145,7 @@ anush = Caves()
 # Same again, but for trees :)
 sol4r = Trees()
 # And again, but for out mining system (built tools etc.).
-varch = Mining_system(subject,axe,camera,subsets)
+varch = Mining_system(subject,axe,camera,subsets,megasets)
 
 window.color = color.rgb(0,200,211)
 window.exit_button.visible = False
@@ -151,12 +161,20 @@ def input(key):
 
     # Deal with mining system's key inputs. Thanks.
     varch.input(key)
-
+    # 'Smooth building' -- i.e. switch off
+    # terrain generation when in build mode automatically.
+    # On again if not in build mode (not automatic).
+    if varch.buildMode == 1:
+        generating = -1
+        canGenerate = -1
+    
     if key == 'q' or key == 'escape':
         quit()
     if key == 'g': 
         generating *= -1
         canGenerate *= -1
+    
+    
 
 # Main game loop :D
 def update():
@@ -171,7 +189,6 @@ def update():
             prevZ = subject.z
             prevX = subject.x
             
-    
     generateShell()
 
     if time.time() - prevTime > genSpeed:
@@ -218,7 +235,7 @@ def genPerlin(_x, _z, plantTree=False):
 
 def genTerrain():
     global currentCube, theta, rad, currentSubset
-    global generating
+    global generating, currentMegaset
 
     if generating==-1: return
 
@@ -245,6 +262,9 @@ def genTerrain():
 
         # Ready to build a subset?
         if currentCube==numSubCubes:
+            # ***
+            # Declare and set 'location' of subset to centre subCube...
+            subsets[currentSubset].location = subCubes[32].position
             subsets[currentSubset].combine(auto_destroy=False)
             subsets[currentSubset].enable()
             currentSubset+=1
@@ -255,20 +275,21 @@ def genTerrain():
                 currentSubset=0
                 print('Hey -- is everything working?')
                 print('*** Check the megaset stuff! :)')
-                """
-                megasets.append(Entity( model=cubeModel,
-                                        texture=cubeTex))
+                
+                # megasets.append(Entity( model=cubeModel,
+                #                         texture=cubeTex))
                 # Parent all subsets to our new megaset.
                 for s in subsets:
-                    s.parent=megasets[-1]
+                    s.parent=megasets[currentMegaset]
                 # In case user has Ursina version 3.6.0.
                 # safe_combine(megasets[-1],auto_destroy=False)
-                megasets[-1].combine(auto_destroy=False)
+                megasets[currentMegaset].combine(auto_destroy=False)
                 for s in subsets:
                     s.parent=scene
                 currentSubset=0
-                print('Megaset #' + str(len(megasets))+'!')
-                """
+                print('Megaset #' + str(currentMegaset)+'!')
+                currentMegaset+=1
+                
     else:
         pass
         # There was terrain already there, so
@@ -290,6 +311,7 @@ def generateShell():
     # New 'new' system :D
     # How high or low can we step/drop?
     step_height = 3
+    subjectHeight = 2
     gravityON = True
     
     target_y = subject.y
@@ -307,22 +329,16 @@ def generateShell():
                                 'y'+str((floor(subject.y+i+1)))+
                                 'z'+str((floor(subject.z+0.5))))
         if terra != None and terra != 'gap':
-            # *** tower bug solved...
             gravityON = False
             if terraTop == None or terraTop == 'gap':
                 # print('TERRAIN FOUND! ' + str(terra + 2))
-                target_y = floor(subject.y+i) + 2
+                target_y = floor(subject.y+i) + subjectHeight
                 break
-            # *** solidify hack...
-            # Would be better to first figure which
-            # way to nudge subject...
-            if subject.rotation_y > 180:
-                subject.z -= 0.6
-                subject.x -= 0.6
-            else: 
-                subject.z += 0.6
-                subject.x += 0.6
             
+            # If here, then tower is too tall.
+            # So, move subject from this position.
+            subject.x -= 0.6
+            subject.z -= 0.6
 
     if gravityON==True:
         # This means we're falling!
@@ -381,21 +397,3 @@ baby = Entity(model=axoModel,scale=10,
 generateShell()
 
 app.run()
-
-
-"""
-Tree notes...
-
-# New tree mega model... ***
-        this.mummaTree = Entity()
-        this.treeCount = 0
-
-# New tree mega model... ***
-        tree.parent = this.mummaTree
-        this.treeCount += 1
-        if this.treeCount % 100 == 0:
-            this.mummaTree.combine()
-            this.mummaTree.collider=this.mummaTree.model
-
-
-"""
