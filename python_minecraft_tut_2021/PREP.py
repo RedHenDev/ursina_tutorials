@@ -157,6 +157,8 @@ scene.fog_density = 0.02
 
 
 def input(key):
+    import pickle
+    import os
     global generating, canGenerate
 
     # Deal with mining system's key inputs. Thanks.
@@ -174,6 +176,10 @@ def input(key):
         generating *= -1
         canGenerate *= -1
     
+    if key == 'b':
+        # os.path.realpath(__file__)
+        with open('test_save.anush', 'wb') as f:
+            pickle.dump(varch.tDic, f)
     
 
 # Main game loop :D
