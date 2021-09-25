@@ -4,7 +4,7 @@ Good luck!
 """
 
 from random import randrange, randint, random
-from ursina import Entity, color, texture, Vec3
+from ursina import Entity, color
 from numpy import floor
 
 class Mining_system:

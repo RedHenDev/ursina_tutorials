@@ -119,19 +119,31 @@ rad = 0
 # at location specified in key.
 subDic = {}
 
-# Instantiate our empty subsets.
-for i in range(numSubsets):
-    bud = Entity(model=cubeModel)
-    bud.texture = cubeTex
-    bud.disable()
-    subsets.append(bud)
+def instantiateTerrainEnts():
+    # global numSubsets, cubeModel,cubeTex, subCubes,subsets, megasets
+    # Instantiate our empty subsets.
+    for i in range(numSubsets):
+        bud = Entity(model=cubeModel)
+        bud.texture = cubeTex
+        bud.disable()
+        subsets.append(bud)
 
-# Instantiate our empty subsets.
-for i in range(420):
-    bud = Entity(model=cubeModel)
-    bud.texture = cubeTex
-    bud.disable()
-    megasets.append(bud)
+    # Instantiate our empty subsets.
+    for i in range(420):
+        bud = Entity(model=cubeModel)
+        bud.texture = cubeTex
+        bud.disable()
+        megasets.append(bud)
+
+    # Instantiate our 'ghost' subset cubes.
+    for i in range(numSubCubes):
+        bud = Entity(model=cubeModel,texture=cubeTex)
+        bud.scale *= 0.99999
+        bud.rotation_y = random.randint(1,4)*90
+        bud.disable()
+        subCubes.append(bud)
+
+instantiateTerrainEnts()
 
 # Our axe :D
 axe = Entity(   model=axeModel,
@@ -158,8 +170,12 @@ scene.fog_density = 0.02
 
 def input(key):
     import pickle
-    import os
+    from os.path import abspath
+    import sys
     global generating, canGenerate
+    global subDic, megasets, subsets, subCubes, noise
+    global currentMegaset, currentSubset, currentCube
+    global theta, rad
 
     # Deal with mining system's key inputs. Thanks.
     varch.input(key)
@@ -177,10 +193,54 @@ def input(key):
         canGenerate *= -1
     
     if key == 'b':
-        # os.path.realpath(__file__)
-        with open('test_save.anush', 'wb') as f:
-            pickle.dump(varch.tDic, f)
+        path = os.path.dirname(os.path.abspath(sys.argv[0]))
+        os.chdir(path)
+        with open('test_save.anush','wb') as f:
+            e = Entity()
+            for s in subsets:
+                # s.model = Mesh()
+                s.parent = e
+            for m in megasets:
+                # m.model = Mesh()
+                m.parent = e
+            e.combine(auto_destroy=False)
+            terrainModel = e.model
+
+            newlist = [varch.tDic,subDic,noise,terrainModel]
+            pickle.dump(newlist, f)
     
+    if key=='n':
+        path = os.path.dirname(os.path.abspath(sys.argv[0]))
+        os.chdir(path)
+        with open('test_save.anush','rb') as f:
+            nd = pickle.load(f)
+            varch.tDic = copy(nd[0])
+            subDic = copy(nd[1])
+            noise = copy(nd[2])
+            terrainModel = copy(nd[3])
+            tm = Entity(model=terrainModel,texture=cubeTex)
+            
+            for m in megasets:
+                destroy(m)
+            for m in subsets:
+                destroy(m)
+            for m in subCubes:
+                destroy(m)
+
+            megasets.clear()
+            subsets.clear()
+            subCubes.clear()
+            
+            instantiateTerrainEnts()
+            
+            theta = 0
+            rad = 0
+            currentMegaset = 0
+            currentSubset = 0
+            currentCube = 0
+            generating = -1
+            canGenerate = -1
+
 
 # Main game loop :D
 def update():
@@ -207,18 +267,6 @@ def update():
 
     # Controls mining and building functions.
     varch.buildTool()
-
-
-
-# Instantiate our 'ghost' subset cubes.
-for i in range(numSubCubes):
-    bud = Entity(model=cubeModel,texture=cubeTex)
-    bud.scale *= 0.99999
-    bud.rotation_y = random.randint(1,4)*90
-    bud.disable()
-    subCubes.append(bud)
-
-
 
 def genPerlin(_x, _z, plantTree=False):
     y = 0
@@ -268,9 +316,6 @@ def genTerrain():
 
         # Ready to build a subset?
         if currentCube==numSubCubes:
-            # ***
-            # Declare and set 'location' of subset to centre subCube...
-            subsets[currentSubset].location = subCubes[32].position
             subsets[currentSubset].combine(auto_destroy=False)
             subsets[currentSubset].enable()
             currentSubset+=1
