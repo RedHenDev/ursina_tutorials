@@ -8,7 +8,7 @@ from ursina import Entity, color, texture, Vec3
 from numpy import floor
 
 class Mining_system:
-    def __init__(this, _subject, _axe, _camera, _subsets):
+    def __init__(this, _subject, _axe, _camera, _subsets, _megasets):
 
         # We create a reference to these here,
         # so that we can use them in buildTool()
@@ -25,9 +25,10 @@ class Mining_system:
         this.builds = Entity(model=this.cubeModel,
                             texture=this.buildTex)
 
-        # A reference to the terrain's subsets
-        # is needed for mining etc.
+        # References to the terrain's subsets & megasets
+        # are needed for mining etc. :)
         this.subsets = _subsets
+        this.megasets = _megasets
 
         this.wireTex = 'wireframe.png'
         this.stoneTex = 'grass_mono.png'
@@ -316,5 +317,53 @@ class Mining_system:
                 # Now that we've spawned what (if anything)
                 # we need to, update subset model. Done.
                 this.subsets[s].model.generate()
+                this.builds.combine()
+                return
+
+        # Our real mining of the terrain :)
+        # Iterate over all the subsets that we have...
+        totalV = 0
+        for s in range(len(this.megasets)):
+            vChange = False
+            
+            for v in this.megasets[s].model.vertices:
+                # Is the vertex close enough to
+                # where we want to mine (bte position)?
+                if (v[0] >=this.bte.x - 0.5 and
+                    v[0] <=this.bte.x + 0.5 and
+                    v[1] >=this.bte.y - 0.5 and
+                    v[1] <=this.bte.y + 0.5 and
+                    v[2] >=this.bte.z - 0.5 and
+                    v[2] <=this.bte.z + 0.5):
+                    # Yes!
+                    #v[1] -= 1
+                    # Move vertex high into air to
+                    # give illusion of being destroyed.
+                    v[1] = 9999
+                    # Note that we have made change.
+                    # Gather average height for cave dic.
+                    vChange = True
+                    totalV += 1
+                    # The mystery of 36 vertices!! :o
+                    # print('tV= ' + str(totalV))
+                    if totalV==36: break
+            
+            if vChange == True:
+
+                # Now we need to spawn a new cube below
+                # the bte's position -- if no cube or
+                # gap there already.
+                # Next, spawn 4 cubes to create illusion
+                # of more layers -- if each position is
+                # neither a gap nor a place where terrain
+                # already is.
+                # Record new gap on dictionary.
+                this.tDic[  'x'+str(this.bte.x)+
+                            'y'+str(this.bte.y)+
+                            'z'+str(this.bte.z)] = 'gap'
+                this.mineSpawn()
+                # Now that we've spawned what (if anything)
+                # we need to, update subset model. Done.
+                this.megasets[s].model.generate()
                 this.builds.combine()
                 return

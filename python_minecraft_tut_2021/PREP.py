@@ -118,8 +118,6 @@ rad = 0
 # Dictionary for recording whether terrain blocks exist
 # at location specified in key.
 subDic = {}
-# Model loaded from saved terrain.
-tm = None
 
 def instantiateTerrainEnts():
     # global numSubsets, cubeModel,cubeTex, subCubes,subsets, megasets
@@ -177,7 +175,7 @@ def input(key):
     global generating, canGenerate
     global subDic, megasets, subsets, subCubes, noise
     global currentMegaset, currentSubset, currentCube
-    global theta, rad, tm
+    global theta, rad
 
     # Deal with mining system's key inputs. Thanks.
     varch.input(key)
@@ -198,19 +196,31 @@ def input(key):
         path = os.path.dirname(os.path.abspath(sys.argv[0]))
         os.chdir(path)
         with open('test_save3.anush','wb') as f:
+            # Create temporary terrain model for save file.
             e = Entity()
             for s in subsets:
-                s.parent = e
+                if s.enabled==True:
+                    s.parent = e
             for m in megasets:
-                m.parent = e
+                if m.enabled==True:
+                    m.parent = e
             e.combine(auto_destroy=False)
             terrainModel = [e.model.vertices,
                             e.model.triangles,
                             e.model.colors,
                             e.model.uvs]
+            # Destroy temporary terrain model...
+            for s in subsets:
+                s.parent = scene
+            for m in megasets:
+                m.parent = scene
+            destroy(e)
 
             newlist = [varch.tDic,subDic,noise,terrainModel]
             pickle.dump(newlist, f)
+            newlist.clear()
+            terrainModel.clear()
+
     
     if key=='n':
         path = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -344,8 +354,6 @@ def genTerrain():
                 # Parent all subsets to our new megaset.
                 for s in subsets:
                     s.parent=megasets[currentMegaset]
-                # In case user has Ursina version 3.6.0.
-                # safe_combine(megasets[-1],auto_destroy=False)
                 megasets[currentMegaset].combine(auto_destroy=False)
                 for s in subsets:
                     s.parent=scene

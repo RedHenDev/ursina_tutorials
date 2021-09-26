@@ -298,7 +298,7 @@ class Mining_system:
                     totalV += 1
                     # The mystery of 36 vertices!! :o
                     # print('tV= ' + str(totalV))
-                    if totalV==36: break
+                    if totalV>=36: break
             
             if vChange == True:
 
@@ -344,7 +344,7 @@ class Mining_system:
                     totalV += 1
                     # The mystery of 36 vertices!! :o
                     # print('tV= ' + str(totalV))
-                    if totalV==36: break
+                    if totalV>=36: break
             
             if vChange == True:
 
