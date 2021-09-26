@@ -118,6 +118,8 @@ rad = 0
 # Dictionary for recording whether terrain blocks exist
 # at location specified in key.
 subDic = {}
+# Model loaded from saved terrain.
+tm = None
 
 def instantiateTerrainEnts():
     # global numSubsets, cubeModel,cubeTex, subCubes,subsets, megasets
@@ -128,8 +130,8 @@ def instantiateTerrainEnts():
         bud.disable()
         subsets.append(bud)
 
-    # Instantiate our empty subsets.
-    for i in range(420):
+    # Instantiate our empty megasets.
+    for i in range(42):
         bud = Entity(model=cubeModel)
         bud.texture = cubeTex
         bud.disable()
@@ -170,12 +172,12 @@ scene.fog_density = 0.02
 
 def input(key):
     import pickle
-    from os.path import abspath
+    import os
     import sys
     global generating, canGenerate
     global subDic, megasets, subsets, subCubes, noise
     global currentMegaset, currentSubset, currentCube
-    global theta, rad
+    global theta, rad, tm
 
     # Deal with mining system's key inputs. Thanks.
     varch.input(key)
@@ -195,16 +197,17 @@ def input(key):
     if key == 'b':
         path = os.path.dirname(os.path.abspath(sys.argv[0]))
         os.chdir(path)
-        with open('test_save.anush','wb') as f:
+        with open('test_save3.anush','wb') as f:
             e = Entity()
             for s in subsets:
-                # s.model = Mesh()
                 s.parent = e
             for m in megasets:
-                # m.model = Mesh()
                 m.parent = e
             e.combine(auto_destroy=False)
-            terrainModel = e.model
+            terrainModel = [e.model.vertices,
+                            e.model.triangles,
+                            e.model.colors,
+                            e.model.uvs]
 
             newlist = [varch.tDic,subDic,noise,terrainModel]
             pickle.dump(newlist, f)
@@ -212,13 +215,12 @@ def input(key):
     if key=='n':
         path = os.path.dirname(os.path.abspath(sys.argv[0]))
         os.chdir(path)
-        with open('test_save.anush','rb') as f:
+        with open('test_save3.anush','rb') as f:
             nd = pickle.load(f)
             varch.tDic = copy(nd[0])
             subDic = copy(nd[1])
             noise = copy(nd[2])
             terrainModel = copy(nd[3])
-            tm = Entity(model=terrainModel,texture=cubeTex)
             
             for m in megasets:
                 destroy(m)
@@ -232,14 +234,24 @@ def input(key):
             subCubes.clear()
             
             instantiateTerrainEnts()
-            
+
+            megasets[0].enable()
+            megasets[0] = Entity(model=Mesh( terrainModel[0],
+                                    terrainModel[1],
+                                    colors=terrainModel[2],
+                                    uvs=terrainModel[3]),
+                        texture=cubeTex)
+            # megasets[0].model.generate()
+
             theta = 0
             rad = 0
-            currentMegaset = 0
+            currentMegaset = 1
             currentSubset = 0
             currentCube = 0
             generating = -1
             canGenerate = -1
+
+            subject.position = Vec3(0,32,0)
 
 
 # Main game loop :D
