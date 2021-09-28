@@ -1,5 +1,5 @@
 """
-Minecraft in Python, with Ursina, tut 18
+Minecraft in Python, with Ursina, tut 20
 Petter Amland :)
 DONE 3.2) Dictionary for stepping onto built blocks
 DONE 3.3) Tower-step algorithm - prevent smooth climb
@@ -56,7 +56,7 @@ import time
 from perlin_noise import PerlinNoise  
 from nMap import nMap
 from cave_system import Caves 
-from tree_system import Trees
+from tree_PREP import Trees
 from mining_PREP import Mining_system
 
 app = Ursina()
@@ -80,7 +80,7 @@ stoneTex = 'grass_mono.png'
 
 cubeTex = 'block_texture.png'
 
-cubeModel = 'moonCube.obj'
+cubeModel = 'moonCube'
 
 axoTex = 'axolotl.png'
 axoModel = 'axolotl.obj'
@@ -110,31 +110,16 @@ genSpeed = 0
 perCycle = 64
 currentCube = 0
 currentSubset = 0
-currentMegaset = 0
+currentMegaset = 2  # *** reserve first two for saved terrain.
 numSubCubes = 64
-numSubsets = 16 # I.e. how many combined into a megaset?
+numSubsets = 64 # I.e. how many combined into a megaset?
 theta = 0
 rad = 0
 # Dictionary for recording whether terrain blocks exist
 # at location specified in key.
 subDic = {}
 
-def instantiateTerrainEnts():
-    # global numSubsets, cubeModel,cubeTex, subCubes,subsets, megasets
-    # Instantiate our empty subsets.
-    for i in range(numSubsets):
-        bud = Entity(model=cubeModel)
-        bud.texture = cubeTex
-        bud.disable()
-        subsets.append(bud)
-
-    # Instantiate our empty megasets.
-    for i in range(42):
-        bud = Entity(model=cubeModel)
-        bud.texture = cubeTex
-        bud.disable()
-        megasets.append(bud)
-
+def createTerrainEntities():
     # Instantiate our 'ghost' subset cubes.
     for i in range(numSubCubes):
         bud = Entity(model=cubeModel,texture=cubeTex)
@@ -143,7 +128,159 @@ def instantiateTerrainEnts():
         bud.disable()
         subCubes.append(bud)
 
-instantiateTerrainEnts()
+    # Instantiate our empty subsets.
+    for i in range(numSubsets):
+        bud = Entity(model=cubeModel)
+        bud.texture = cubeTex
+        bud.disable()
+        subsets.append(bud)
+
+    # Instantiate our empty megasets.
+    for i in range(99):
+        bud = Entity(model=cubeModel)
+        bud.texture = cubeTex
+        # *** - delete this -- doesn't work.
+        # bud.scale *= 0
+        bud.disable()
+        megasets.append(bud)
+
+createTerrainEntities()
+
+# Save and load file functions :D
+def save():
+    global subDic, megasets, subsets, subCubes, noise
+    import pickle, os, sys
+    # Create a new entity that combines all our
+    # subsets and megasets, which we can
+    # place onto a file.
+
+    # First, let's open/create a file in the 
+    # folder we are working in (working directory)
+    # that we can save to.
+    path = os.path.dirname(os.path.abspath(sys.argv[0]))
+    os.chdir(path)
+    with open('p_test.txt','wb') as f:
+        e = Entity()
+        for s in subsets:
+            if s.enabled == True:
+                s.parent = e
+        for m in megasets:
+            if m.enabled == True:
+                m.parent = e
+        e.combine(auto_destroy=False)
+        terrainModel = [    e.model.vertices,
+                            e.model.triangles,
+                            e.model.colors,
+                            e.model.uvs]
+        buildsModel = [     varch.builds.model.vertices,
+                            varch.builds.model.triangles,
+                            varch.builds.model.colors,
+                            varch.builds.model.uvs]
+        # Set parents to default (scene).
+        # And destroy our temporary terrain model.
+        for s in subsets:
+            s.parent = scene
+        for m in megasets:
+            m.parent = scene
+        destroy(e)
+
+        newlist = [ subject.position,
+                    varch.tDic,
+                    subDic,
+                    terrainModel,
+                    noise,
+                    buildsModel,
+                    sol4r.treeslist
+                    ]
+        
+        # Write game state objects to file.
+        pickle.dump(newlist, f)
+        # Clear out temporary lists.
+        newlist.clear()
+        terrainModel.clear()
+
+def load():
+    import pickle, sys, os
+    global subDic, rad, theta, currentSubset
+    global currentCube, currentMegaset, noise
+    global canGenerate, generating
+
+    # Open main module directory for correct file.
+    path = os.path.dirname(os.path.abspath(sys.argv[0]))
+    os.chdir(path)
+
+    with open('p_test.txt', 'rb') as f:
+        nd = pickle.load(f)
+
+        # Populate our familiar terrain variables
+        # with data from the saved file.
+
+        subject.position = copy(nd[0])
+        varch.tDic = copy(nd[1])
+        subDic = copy(nd[2])
+        tm = copy(nd[3])
+        noise = copy(nd[4])
+        bm = copy(nd[5])
+        entslist = copy(nd[6])
+
+        # Now, let's delete all the current terrain.
+        #  And builds!
+        for s in subCubes:
+            destroy(s)
+        for s in subsets:
+            destroy(s)
+        for m in megasets:
+            destroy(m)
+        destroy(varch.builds)
+        subCubes.clear()
+        subsets.clear()
+        megasets.clear()
+        # ***
+        sol4r.treesCounter = 0
+        sol4r.treeslist.clear()
+        sol4r.trees.combine()
+        destroy(sol4r.trees)
+        sol4r.trees=Entity()
+        sol4r.treeslist=entslist
+
+        createTerrainEntities()
+        # Reset terrain generation variables.
+        # ***
+        # varch.builds=Entity(model=cubeModel,
+        #                     texture='build_texture.png')
+        for t in entslist:
+            sol4r.plantTree(t[0],t[1],t[2])
+        # To correct textures that have been saved
+        # twice -- i.e. having been transferred from
+        # megasets to builds...hmmm. Why not just
+        # populate builds?
+
+        megasets[0] = Entity(model=Mesh(
+                        vertices=tm[0],
+                        triangles=tm[1],
+                        colors=tm[2],
+                        uvs=tm[3]),
+                        texture=cubeTex)
+        # *** 
+        # Don't give this to builds...
+        # but another megaset :) This will mean we
+        # can mine it, as well as saving it next time.
+        varch.builds = Entity(model=Mesh(
+                        vertices=bm[0],
+                        triangles=bm[1],
+                        colors=bm[2],
+                        uvs=bm[3]),
+                        texture='build_texture.png')
+
+        # Reset gamestate.
+        currentCube = 0
+        currentMegaset = 2 # NB different. ***
+        currentSubset = 0
+        rad = 0
+        theta = 0
+        generating = -1
+        canGenerate = -1
+        subject.rotation_x = 0.0
 
 # Our axe :D
 axe = Entity(   model=axeModel,
@@ -169,13 +306,7 @@ scene.fog_density = 0.02
 
 
 def input(key):
-    import pickle
-    import os
-    import sys
     global generating, canGenerate
-    global subDic, megasets, subsets, subCubes, noise
-    global currentMegaset, currentSubset, currentCube
-    global theta, rad
 
     # Deal with mining system's key inputs. Thanks.
     varch.input(key)
@@ -193,76 +324,10 @@ def input(key):
         canGenerate *= -1
     
     if key == 'b':
-        path = os.path.dirname(os.path.abspath(sys.argv[0]))
-        os.chdir(path)
-        with open('test_save3.anush','wb') as f:
-            # Create temporary terrain model for save file.
-            e = Entity()
-            for s in subsets:
-                if s.enabled==True:
-                    s.parent = e
-            for m in megasets:
-                if m.enabled==True:
-                    m.parent = e
-            e.combine(auto_destroy=False)
-            terrainModel = [e.model.vertices,
-                            e.model.triangles,
-                            e.model.colors,
-                            e.model.uvs]
-            # Destroy temporary terrain model...
-            for s in subsets:
-                s.parent = scene
-            for m in megasets:
-                m.parent = scene
-            destroy(e)
+        save()
 
-            newlist = [varch.tDic,subDic,noise,terrainModel]
-            pickle.dump(newlist, f)
-            newlist.clear()
-            terrainModel.clear()
-
-    
-    if key=='n':
-        path = os.path.dirname(os.path.abspath(sys.argv[0]))
-        os.chdir(path)
-        with open('test_save3.anush','rb') as f:
-            nd = pickle.load(f)
-            varch.tDic = copy(nd[0])
-            subDic = copy(nd[1])
-            noise = copy(nd[2])
-            terrainModel = copy(nd[3])
-            
-            for m in megasets:
-                destroy(m)
-            for m in subsets:
-                destroy(m)
-            for m in subCubes:
-                destroy(m)
-
-            megasets.clear()
-            subsets.clear()
-            subCubes.clear()
-            
-            instantiateTerrainEnts()
-
-            megasets[0].enable()
-            megasets[0] = Entity(model=Mesh( terrainModel[0],
-                                    terrainModel[1],
-                                    colors=terrainModel[2],
-                                    uvs=terrainModel[3]),
-                        texture=cubeTex)
-            # megasets[0].model.generate()
-
-            theta = 0
-            rad = 0
-            currentMegaset = 1
-            currentSubset = 0
-            currentCube = 0
-            generating = -1
-            canGenerate = -1
-
-            subject.position = Vec3(0,32,0)
-
+    if key == 'n':
+        load()
 
 # Main game loop :D
 def update():
@@ -277,6 +342,7 @@ def update():
             prevZ = subject.z
             prevX = subject.x
             
+    
     generateShell()
 
     if time.time() - prevTime > genSpeed:
@@ -345,21 +411,19 @@ def genTerrain():
             
             # And ready to build a megaset?
             if currentSubset==numSubsets:
-                currentSubset=0
-                print('Hey -- is everything working?')
-                print('*** Check the megaset stuff! :)')
-                
-                # megasets.append(Entity( model=cubeModel,
-                #                         texture=cubeTex))
                 # Parent all subsets to our new megaset.
                 for s in subsets:
                     s.parent=megasets[currentMegaset]
+                # In case user has Ursina version 3.6.0.
+                # safe_combine(megasets[-1],auto_destroy=False)
                 megasets[currentMegaset].combine(auto_destroy=False)
                 for s in subsets:
                     s.parent=scene
+                    # Invisible? Delete this line :)
+                    # s.disable()
                 currentSubset=0
-                print('Megaset #' + str(currentMegaset)+'!')
                 currentMegaset+=1
+                print('Megaset #' + str(len(megasets))+'!')
                 
     else:
         pass

@@ -4,7 +4,7 @@ Good luck!
 """
 
 from random import randrange, randint, random
-from ursina import Entity, color
+from ursina import Entity, color, texture, Vec3
 from numpy import floor
 
 class Mining_system:
@@ -25,8 +25,8 @@ class Mining_system:
         this.builds = Entity(model=this.cubeModel,
                             texture=this.buildTex)
 
-        # A reference to the terrain's subsets
-        # is needed for mining etc.
+        # References to the terrain's subsets & megasets
+        # are needed for mining etc. :)
         this.subsets = _subsets
         this.megasets = _megasets
 
@@ -298,7 +298,7 @@ class Mining_system:
                     totalV += 1
                     # The mystery of 36 vertices!! :o
                     # print('tV= ' + str(totalV))
-                    if totalV>=36: break
+                    if totalV==36: break
             
             if vChange == True:
 
@@ -319,7 +319,9 @@ class Mining_system:
                 this.subsets[s].model.generate()
                 this.builds.combine()
                 return
-        
+
+        # Our real mining of the terrain :)
+        # Iterate over all the subsets that we have...
         totalV = 0
         for s in range(len(this.megasets)):
             vChange = False
@@ -344,7 +346,7 @@ class Mining_system:
                     totalV += 1
                     # The mystery of 36 vertices!! :o
                     # print('tV= ' + str(totalV))
-                    if totalV>=36: break
+                    if totalV==36: break
             
             if vChange == True:
 
