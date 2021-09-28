@@ -1,5 +1,5 @@
 """
-Minecraft in Python, with Ursina, tut 19
+Minecraft in Python, with Ursina, tut 20
 Petter Amland :)
 DONE 3.2) Dictionary for stepping onto built blocks
 DONE 3.3) Tower-step algorithm - prevent smooth climb
