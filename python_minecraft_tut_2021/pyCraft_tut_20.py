@@ -242,12 +242,17 @@ def load():
                         colors=tm[2],
                         uvs=tm[3]),
                         texture=cubeTex)
+        # Bug solved! Note the texture needs to 
+        # be 'varch.buildTex' for the builds model,
+        # not 'cubeTex'. The bug was caused by
+        # shining the builds colours through the
+        # terrain cube model.
         varch.builds = Entity(model=Mesh(
                         vertices=bm[0],
                         triangles=bm[1],
                         colors=bm[2],
                         uvs=bm[3]),
-                        texture=cubeTex)
+                        texture=varch.buildTex)
 
         # Reset gamestate.
         currentCube = 0
