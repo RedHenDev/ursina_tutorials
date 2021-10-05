@@ -56,8 +56,8 @@ import time
 from perlin_noise import PerlinNoise  
 from nMap import nMap
 from cave_system import Caves 
-from tree_PREP import Trees
-from mining_PREP import Mining_system
+from tree_system import Trees
+from mining_system import Mining_system
 
 app = Ursina()
 
@@ -110,9 +110,9 @@ genSpeed = 0
 perCycle = 64
 currentCube = 0
 currentSubset = 0
-currentMegaset = 2  # *** reserve first two for saved terrain.
+currentMegaset = 2
 numSubCubes = 64
-numSubsets = 64 # I.e. how many combined into a megaset?
+numSubsets = 10 # I.e. how many combined into a megaset?
 theta = 0
 rad = 0
 # Dictionary for recording whether terrain blocks exist
@@ -139,8 +139,6 @@ def createTerrainEntities():
     for i in range(99):
         bud = Entity(model=cubeModel)
         bud.texture = cubeTex
-        # *** - delete this -- doesn't work.
-        # bud.scale *= 0
         bud.disable()
         megasets.append(bud)
 
@@ -159,7 +157,7 @@ def save():
     # that we can save to.
     path = os.path.dirname(os.path.abspath(sys.argv[0]))
     os.chdir(path)
-    with open('p_test.txt','wb') as f:
+    with open('pickling.txt','wb') as f:
         e = Entity()
         for s in subsets:
             if s.enabled == True:
@@ -192,7 +190,6 @@ def save():
                     buildsModel,
                     sol4r.treeslist
                     ]
-                    # ***
         
         # Write game state objects to file.
         pickle.dump(newlist, f)
@@ -210,7 +207,7 @@ def load():
     path = os.path.dirname(os.path.abspath(sys.argv[0]))
     os.chdir(path)
 
-    with open('p_test.txt', 'rb') as f:
+    with open('pickling.txt', 'rb') as f:
         nd = pickle.load(f)
 
         # Populate our familiar terrain variables
@@ -222,7 +219,7 @@ def load():
         tm = copy(nd[3])
         noise = copy(nd[4])
         bm = copy(nd[5])
-        entslist = copy(nd[6]) # ***
+        entslist = copy(nd[6]) # Trees :)
 
         # Now, let's delete all the current terrain.
         #  And builds!
@@ -236,25 +233,22 @@ def load():
         subCubes.clear()
         subsets.clear()
         megasets.clear()
-        # ***
+        # Destroy all current trees in scene.
         sol4r.treesCounter = 0
         sol4r.treeslist.clear()
         sol4r.trees.combine()
         destroy(sol4r.trees)
         sol4r.trees=Entity()
+        # Repopulate list of tree locations with
+        # loaded data from file.
         sol4r.treeslist=entslist
 
         createTerrainEntities()
         # Reset terrain generation variables.
-        # ***
-        # varch.builds=Entity(model=cubeModel,
-        #                     texture='build_texture.png')
+
+        # Go and plant loaded trees from list.
         for t in entslist:
             sol4r.plantTree(t[0],t[1],t[2])
-        # To correct textures that have been saved
-        # twice -- i.e. having been transferred from
-        # megasets to builds...hmmm. Why not just
-        # populate builds?
 
         megasets[0] = Entity(model=Mesh(
                         vertices=tm[0],
@@ -262,22 +256,27 @@ def load():
                         colors=tm[2],
                         uvs=tm[3]),
                         texture=cubeTex)
-
+        # Bug solved! Note the texture needs to 
+        # be 'varch.buildTex' for the builds model,
+        # not 'cubeTex'. The bug was caused by
+        # shining the builds colours through the
+        # terrain cube model.
         varch.builds = Entity(model=Mesh(
                         vertices=bm[0],
                         triangles=bm[1],
                         colors=bm[2],
                         uvs=bm[3]),
-                        texture='build_texture.png')
+                        texture=varch.buildTex)
 
         # Reset gamestate.
         currentCube = 0
-        currentMegaset = 2 # NB different. ***
+        currentMegaset = 2 # NB different.
         currentSubset = 0
         rad = 0
         theta = 0
         generating = -1
         canGenerate = -1
+
 
 # Our axe :D
 axe = Entity(   model=axeModel,

@@ -14,6 +14,8 @@ class Trees:
         # Parent of trees for optimization.
         this.trees = Entity()
         this.treesCounter = 0
+        # List of all trees planted.
+        this.treeslist = []
 
     def checkTree(this, _x,_y,_z):
         freq = 5
@@ -22,6 +24,8 @@ class Trees:
         # print(str(treeChance))
         if treeChance > 30:
             this.plantTree(_x,_y,_z)
+            # Record tree location to list of trees.
+            this.treeslist.append(Vec3(_x,_y,_z))
 
     def plantTree(this,_x,_y,_z):
         from random import randint
@@ -44,7 +48,7 @@ class Trees:
 
         tree.parent = this.trees
         this.treesCounter += 1
-        if this.treesCounter % 4 == 0:
+        if this.treesCounter % 42 == 0:
             this.trees.combine()
             this.trees.collider = this.trees.model
 
