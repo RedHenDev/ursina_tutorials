@@ -1,5 +1,5 @@
 """
-Minecraft in Python, with Ursina, tut 20
+Minecraft in Python, with Ursina, tut 22
 Petter Amland :)
 DONE 3.2) Dictionary for stepping onto built blocks
 DONE 3.3) Tower-step algorithm - prevent smooth climb
@@ -26,13 +26,15 @@ DONE 9.3) Different material types in layers (ores etc.)
 9.31) Biomes! :D - colours and perlin changes
 DONE 9.4) Correct spawning when 'mining' a built block
 DONE 9.5) Improve block type selection via number keys
-9.6) Bug - prevent gaps in terrain when spawning sometimes.
+DONE 9.6) Bug - prevent gaps in terrain when spawning sometimes.
 
-10.0) Smooth performance when building etc.
+DONE 10.0) Smooth performance when building etc.
 10.01) Plus at very start of game - move player forward?
+10.012) Load prepared/saved terrain (large) to give
+        illusion of a world at beginning. 
 DONE 10.1) Combine trees for efficiency
 10.2) Improve build tool UI system (closer to Minecraft)
-11) Save file -- e.g. current terrain with builds etc.
+DONE 11) Save file -- e.g. current terrain with builds etc.
 DONE 12) Axe animation
 12.2) Improve axe animation.
 DONE 13) Disable megaset system (for now)
@@ -56,8 +58,9 @@ import time
 from perlin_noise import PerlinNoise  
 from nMap import nMap
 from cave_system import Caves 
-from tree_PREP import Trees
+from tree_system import Trees
 from mining_PREP import Mining_system
+
 
 app = Ursina()
 
@@ -110,9 +113,9 @@ genSpeed = 0
 perCycle = 64
 currentCube = 0
 currentSubset = 0
-currentMegaset = 2  # *** reserve first two for saved terrain.
+currentMegaset = 2
 numSubCubes = 64
-numSubsets = 64 # I.e. how many combined into a megaset?
+numSubsets = 10 # I.e. how many combined into a megaset?
 theta = 0
 rad = 0
 # Dictionary for recording whether terrain blocks exist
@@ -139,12 +142,11 @@ def createTerrainEntities():
     for i in range(99):
         bud = Entity(model=cubeModel)
         bud.texture = cubeTex
-        # *** - delete this -- doesn't work.
-        # bud.scale *= 0
         bud.disable()
         megasets.append(bud)
 
 createTerrainEntities()
+
 
 # Save and load file functions :D
 def save():
@@ -159,7 +161,7 @@ def save():
     # that we can save to.
     path = os.path.dirname(os.path.abspath(sys.argv[0]))
     os.chdir(path)
-    with open('p_test.txt','wb') as f:
+    with open('test_a.pc','wb') as f:
         e = Entity()
         for s in subsets:
             if s.enabled == True:
@@ -192,7 +194,6 @@ def save():
                     buildsModel,
                     sol4r.treeslist
                     ]
-                    # ***
         
         # Write game state objects to file.
         pickle.dump(newlist, f)
@@ -201,7 +202,7 @@ def save():
         terrainModel.clear()
 
 def load():
-    import pickle, sys, os
+    import pickle, sys, os, copy as c
     global subDic, rad, theta, currentSubset
     global currentCube, currentMegaset, noise
     global canGenerate, generating
@@ -210,19 +211,20 @@ def load():
     path = os.path.dirname(os.path.abspath(sys.argv[0]))
     os.chdir(path)
 
-    with open('p_test.txt', 'rb') as f:
+    with open('test_a.pc', 'rb') as f:
+        global subject, varch
         nd = pickle.load(f)
 
         # Populate our familiar terrain variables
         # with data from the saved file.
 
-        subject.position = copy(nd[0])
-        varch.tDic = copy(nd[1])
-        subDic = copy(nd[2])
-        tm = copy(nd[3])
-        noise = copy(nd[4])
-        bm = copy(nd[5])
-        entslist = copy(nd[6]) # ***
+        subject.position = c.copy(nd[0])
+        varch.tDic = c.copy(nd[1])
+        subDic = c.copy(nd[2])
+        tm = c.copy(nd[3])
+        noise = c.copy(nd[4])
+        bm = c.copy(nd[5])
+        entslist = c.copy(nd[6]) # Trees :)
 
         # Now, let's delete all the current terrain.
         #  And builds!
@@ -236,25 +238,22 @@ def load():
         subCubes.clear()
         subsets.clear()
         megasets.clear()
-        # ***
+        # Destroy all current trees in scene.
         sol4r.treesCounter = 0
         sol4r.treeslist.clear()
         sol4r.trees.combine()
         destroy(sol4r.trees)
         sol4r.trees=Entity()
+        # Repopulate list of tree locations with
+        # loaded data from file.
         sol4r.treeslist=entslist
 
         createTerrainEntities()
         # Reset terrain generation variables.
-        # ***
-        # varch.builds=Entity(model=cubeModel,
-        #                     texture='build_texture.png')
+
+        # Go and plant loaded trees from list.
         for t in entslist:
             sol4r.plantTree(t[0],t[1],t[2])
-        # To correct textures that have been saved
-        # twice -- i.e. having been transferred from
-        # megasets to builds...hmmm. Why not just
-        # populate builds?
 
         megasets[0] = Entity(model=Mesh(
                         vertices=tm[0],
@@ -262,17 +261,21 @@ def load():
                         colors=tm[2],
                         uvs=tm[3]),
                         texture=cubeTex)
-
+        # Bug solved! Note the texture needs to 
+        # be 'varch.buildTex' for the builds model,
+        # not 'cubeTex'. The bug was caused by
+        # shining the builds colours through the
+        # terrain cube model.
         varch.builds = Entity(model=Mesh(
                         vertices=bm[0],
                         triangles=bm[1],
                         colors=bm[2],
                         uvs=bm[3]),
-                        texture='build_texture.png')
+                        texture=varch.buildTex)
 
         # Reset gamestate.
         currentCube = 0
-        currentMegaset = 2 # NB different. ***
+        currentMegaset = 2 # NB different.
         currentSubset = 0
         rad = 0
         theta = 0
@@ -293,7 +296,8 @@ sol4r = Trees()
 # And again, but for out mining system (built tools etc.).
 varch = Mining_system(subject,axe,camera,subsets,megasets)
 
-window.color = color.rgb(0,200,211)
+# window.color = color.rgb(0,200,211)
+window.color = color.rgb(0,0,0)
 window.exit_button.visible = False
 
 prevTime = time.time()
@@ -301,6 +305,7 @@ prevTime = time.time()
 scene.fog_color = color.rgb(0,222,0)
 scene.fog_density = 0.02
 
+load()
 
 def input(key):
     global generating, canGenerate

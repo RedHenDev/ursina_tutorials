@@ -66,7 +66,7 @@ class Mining_system:
             this.build_distance += 1
         if key == 'scroll down':
             this.build_distance -= 1
-        # *** have swapped mouse controls.
+
         if this.buildMode == 1 and key == 'right mouse up':
             this.build()
             # this.axe.position = Vec3(0.3, -0.5, 2.8)
@@ -144,14 +144,11 @@ class Mining_system:
             # Parent spawned cube into builds entity.
             e.parent = this.builds
             # Record newly spawned block on dictionary.
-            # *** record spawned blocks as 's',
-            # i.e. neither a number nor 'b'.
             this.tDic[  'x'+str(this.bte.x)+
                         'y'+str(e.y)+
                         'z'+str(this.bte.z)] = 's'
             this.builds.combine()
 
-        # *** remove tab for all this below!
         # OK -- now spawn 4 'cave wall' cubes.
         # For each cube, first check whether:
         # 1) No terrain there already
@@ -179,17 +176,13 @@ class Mining_system:
             # being in these positions (i.e
             # potential cave wall and below
             # potential cave wall.
-            # ***
             here = this.tDic.get(   'x'+str(x)+
                                     'y'+str(y)+
-                                    'z'+str(z))
-            above = this.tDic.get(  'x'+str(x)+
-                                    'y'+str(y+1)+
                                     'z'+str(z))
             below = this.tDic.get(  'x'+str(x)+
                                     'y'+str(y-1)+
                                     'z'+str(z))
-            # *** this is the logic we want, NB ref to new 's'.
+            
             if here == None and (below == 's' or below == None):
                         e = Entity( model=this.cubeModel,
                                     texture=this.buildTex)
@@ -202,11 +195,9 @@ class Mining_system:
                         # Parent spawned cube into builds entity.
                         e.parent = this.builds
                         # Record newly spawned block on dictionary.
-                        # *** Also 's'
                         this.tDic[  'x'+str(x)+
                                     'y'+str(y)+
                                     'z'+str(z)] = 's'
-            # else: print(here) # For debugging.
 
     # Place a block at the bte's position.
     def build(this):
