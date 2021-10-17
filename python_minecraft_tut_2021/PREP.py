@@ -367,13 +367,16 @@ def genPerlin(_x, _z, plantTree=False):
     amp = 21
     y += ((noise([_x/freq,_z/freq]))*amp)
 
+    # *** - no longer use legacy cave system.
+    """
     # Is there are cave-gap here?
     # If so, lower the cube by 32...or something ;)
-    whatCaveHeight = anush.checkCave(_x, _z)
+    # whatCaveHeight = anush.checkCave(_x, _z)
     if whatCaveHeight != None:
         y = whatCaveHeight
     elif plantTree==True:
         sol4r.checkTree(_x,y,_z)
+    """
 
     return floor(y)
 
