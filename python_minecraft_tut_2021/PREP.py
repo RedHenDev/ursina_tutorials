@@ -297,7 +297,8 @@ sol4r = Trees()
 varch = Mining_system(subject,axe,camera,subsets,megasets)
 
 # window.color = color.rgb(0,200,211)
-window.color = color.rgb(0,0,0)
+# window.color = color.rgb(0,0,0)
+Sky(color=color.cyan)
 window.exit_button.visible = False
 
 prevTime = time.time()
@@ -396,6 +397,14 @@ def genTerrain():
         subCubes[currentCube].z = z
         subCubes[currentCube].parent = subsets[currentSubset]
         y = subCubes[currentCube].y = genPerlin(x,z,True)
+
+        # ***
+        # Biomes...
+        if z > 100:
+            y = floor(lerp(y,0,0.01))
+            subCubes[currentCube].y = y
+
+
         # Record position of this terrain in both
         # the subDic and the mining system's dictionary.
         subDic['x'+str(x)+'z'+str(z)] = 'i'
@@ -404,6 +413,10 @@ def genTerrain():
         c = nMap(y,-8,21,132,212)
         c += random.randint(-32,32)
         subCubes[currentCube].color = color.rgb(c,c,c)
+        
+        # ***
+        if z > 100: subCubes[currentCube].color = color.white
+        
         subCubes[currentCube].disable()
         currentCube+=1
 
