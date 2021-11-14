@@ -1,31 +1,47 @@
-"""
-MeshTerrain class :)
-"""
+from random import randrange
 from ursina import *
 
 class MeshTerrain:
     def __init__(this):
+        
+        this.block = load_model('block.obj')
+        this.textureAtlas = 'texture_atlas_3.png'
 
         this.subsets = []
-        this.subNum = 128
-        this.subWidth = 4
-        this.blockTotal = this.subWidth*this.subWidth
-        this.blockCount = 0
+        this.numSubsets = 1
+        this.subWidth = 128
 
-        this.block = load_model('block.obj')
-        this.texture = 'texture_atlas_3.png'
-
-    def setup_subsets(this):
-
-        for i in range(this.subNum):
+        for i in range(0,this.numSubsets):
             e = Entity( model=Mesh(),
-                        texture=this.texture)
-            e.scale*=64/e.texture.width
+                        texture=this.textureAtlas)
+            e.texture_scale*=64/e.texture.width
             this.subsets.append(e)
+        
 
-    def paintTerrain(this):
+    def genBlock(this,x,y,z):
+        # Extend or add to the vertices of our model.
+        model = this.subsets[0].model
 
-        wid = this.subWidth
+        model.vertices.extend([ Vec3(x,y,z) + v for v in 
+                                this.block.vertices])
+        
+        # This is the texture atlas co-ord for grass :)
+        uu = 8
+        uv = 7
+        model.uvs.extend([Vec2(uu,uv) + u for u in this.block.uvs])
 
-        for j in range(-wid, wid):
-            for k in range(-wid,wid)
+
+    def genTerrain(this):
+
+        x = 0
+        z = 0
+
+        d = int(this.subWidth*0.5)
+
+        for k in range(-d,d):
+            for j in range(-d,d):
+
+                y = randrange(-1,1)
+                this.genBlock(x+k,y,z+j)
+
+        this.subsets[0].model.generate()

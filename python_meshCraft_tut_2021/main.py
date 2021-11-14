@@ -1,12 +1,20 @@
 from ursina import *
+from ursina.prefabs.first_person_controller import FirstPersonController
+from mesh_terrain import MeshTerrain
 
 app = Ursina()
 
-terrain = MeshTerrain()
+window.color = color.rgb(200,0,255)
+subject = FirstPersonController()
+subject.gravity = 0.0
+
+terrain = MeshTerrain() 
 
 def update():
-    # terrain.paintTerrain()
+    pass
+    # updateTerrain()
 
-terrain.paintTerrain()
+
+terrain.genTerrain()
 
 app.run()
