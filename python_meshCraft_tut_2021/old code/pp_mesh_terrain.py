@@ -1,5 +1,5 @@
-from perlin import Perlin
 from ursina import *
+from perlin import Perlin
 
 class MeshTerrain:
     def __init__(this):
@@ -9,10 +9,10 @@ class MeshTerrain:
 
         this.subsets = []
         this.numSubsets = 1
-        this.subWidth = 128
+        this.subWidth = 64
 
-        # Our terrain dictionary :D
-        this.td = {}
+        # Our terrain dictionary.
+        this.td = {} 
 
         this.perlin = Perlin()
 
@@ -29,7 +29,8 @@ class MeshTerrain:
 
         model.vertices.extend([ Vec3(x,y,z) + v for v in 
                                 this.block.vertices])
-        # Record terrain in dictionary :)
+        
+        # Add new terrain to the terrain dictionary.
         this.td["x"+str(floor(x))+
                 "y"+str(floor(y))+
                 "z"+str(floor(z))] = "t"
@@ -42,7 +43,6 @@ class MeshTerrain:
             uv = 6
         model.uvs.extend([Vec2(uu,uv) + u for u in this.block.uvs])
 
-
     def genTerrain(this):
 
         x = 0
@@ -53,7 +53,8 @@ class MeshTerrain:
         for k in range(-d,d):
             for j in range(-d,d):
 
-                y = floor(this.perlin.getHeight(x+k,z+j))
+                y = this.perlin.getHeight(x+k,z+j)
+                y = floor(y)
                 this.genBlock(x+k,y,z+j)
 
         this.subsets[0].model.generate()
