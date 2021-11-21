@@ -9,28 +9,30 @@ indra = Sky()
 indra.color = window.color
 subject = FirstPersonController()
 subject.gravity = 0.0
+# ***
 subject.cursor.visible=False
-window.fullscreen=False
 
 terrain = MeshTerrain() 
 
+# ***
 pX = subject.x
 pZ = subject.z
-
 count = 0
 def update():
     global count, pX, pZ
     count+=1
-    if count == 2:
-        # Generate terrain at current swirl position.
-        terrain.genTerrain()
-        count=0
+    if count > 4:
+        count = 0
+        if terrain.currentSubset < 1000:
+            terrain.genTerrain()
 
-    # Change subset position based on subject position.
-    if abs(subject.x-pX)>4 or abs(subject.z-pZ)>4:
-        pX=subject.x
-        pZ=subject.z 
-        terrain.swirlEngine.reset(pX,pZ)
+    # ***
+    if abs(subject.x - pX) > 4 or abs(subject.z - pZ) > 4:
+        terrain.swirlEngine.pos.x = round(subject.x)
+        terrain.swirlEngine.pos.y = round(subject.z)
+        terrain.swirlEngine.reset()
+        pX = subject.x
+        pZ = subject.z
 
     blockFound=False
     step = 2

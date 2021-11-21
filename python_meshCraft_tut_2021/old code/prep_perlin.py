@@ -1,8 +1,10 @@
 from perlin_module import PerlinNoise
+from ursina import math
 
 class Perlin:
     def __init__(this):
-        
+
+        # ***
         this.seed = ord('y')+ord('o')
         this.octaves = 8
         this.freq = 256
