@@ -12,10 +12,10 @@ class MeshTerrain:
         this.numVertices = len(this.block.vertices)
 
         this.subsets = []
-        this.numSubsets = 128
+        this.numSubsets = 64
         
         # Must be even number! See genTerrain()
-        this.subWidth = 8 
+        this.subWidth = 8
         this.swirlEngine = SwirlEngine(this.subWidth)
         this.currentSubset = 0
 

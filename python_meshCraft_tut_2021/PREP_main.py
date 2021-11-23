@@ -25,6 +25,8 @@ def update():
         # Generate terrain at current swirl position.
         terrain.genTerrain()
         count=0
+        # ***
+        # terrain.update(subject.position,camera)
 
     # Change subset position based on subject position.
     if abs(subject.x-pX)>4 or abs(subject.z-pZ)>4:
@@ -38,8 +40,7 @@ def update():
     x = str(floor(subject.x+0.5))
     z = str(floor(subject.z+0.5))
     y = floor(subject.y+0.5)
-    # ***
-    terrain.update(subject.position,camera)
+    
     for i in range(-step,step):
         if terrain.td.get("x"+x+"y"+str(y+i)+"z"+z)=="t":
             target = y+i+height
