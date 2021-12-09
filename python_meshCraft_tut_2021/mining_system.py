@@ -4,6 +4,7 @@ Oh- we could add colider to this object too :) - for
 building relative to specific face...?
 """
 from ursina import color, Entity, floor
+from ursina.vec3 import Vec3
 
 bte = Entity(model='cube',color=color.rgba(1,1,0,0.4))
 bte.scale*=1.001
@@ -11,10 +12,6 @@ bte.scale*=1.001
 # ***
 def plantIdea(td,vd,subsets):
     if not bte.visible: return
-    # e = Entity(model='sphere')
-    # e.x = bte.x
-    # e.y = bte.y + 1
-    # e.z = bte.z
     wv = vd.get('x'+str(floor(bte.x))+
                 'y'+str(floor(bte.y))+
                 'z'+str(floor(bte.z)))
@@ -28,7 +25,9 @@ def plantIdea(td,vd,subsets):
     vd[ 'x'+str(floor(bte.x))+
         'y'+str(floor(bte.y))+
         'z'+str(floor(bte.z))] = None
+    return (bte.position + Vec3(0,-0.5,0), wv[0])
 
+# ***
 def highlight(pos,cam,td):
     for i in range(1,15):
         wp=pos+cam.forward*i
@@ -43,6 +42,8 @@ def highlight(pos,cam,td):
                     "y"+str(y)+
                     "z"+str(z))=="t":
             bte.visible=True
+            e = Entity(model='cube')
+            e.collider='box'
             break
         else:
             bte.visible=False   

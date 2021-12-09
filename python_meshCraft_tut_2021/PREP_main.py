@@ -24,10 +24,11 @@ def input(key):
 count = 0
 def update():
     global count, pX, pZ
+    # Generate terrain at current swirl position.
+    terrain.genTerrain()
     count+=1
-    if count == 2:
-        # Generate terrain at current swirl position.
-        terrain.genTerrain()
+    if count == 4:
+        
         count=0
         # ***
         terrain.update(subject.position,camera)

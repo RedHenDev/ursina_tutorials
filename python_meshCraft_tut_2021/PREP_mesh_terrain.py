@@ -12,7 +12,7 @@ class MeshTerrain:
         this.numVertices = len(this.block.vertices)
 
         this.subsets = []
-        this.numSubsets = 32
+        this.numSubsets = 128
         
         # Must be even number! See genTerrain()
         this.subWidth = 4
@@ -35,11 +35,32 @@ class MeshTerrain:
     # ***
     def input(this,key):
         if key=='left mouse up':
-            plantIdea(this.td,this.vd,this.subsets)
+            epi=plantIdea(  this.td,
+                            this.vd,
+                            this.subsets)
+            this.genWalls(epi[0],epi[1])
+            this.subsets[epi[1]].model.generate()
 
-    def genBlock(this,x,y,z):
+    def genWalls(this,epicentre,subset):
+        if epicentre==None:return
+        wp =    [   Vec3(0,1,0),
+                    Vec3(0,-1,0),
+                    Vec3(-1,0,0),
+                    Vec3(1,0,0),
+                    Vec3(0,0,-1),
+                    Vec3(0,0,1)]
+        for i in range(0,6):
+            np = epicentre + wp[i]
+            if this.td.get( 'x'+str(floor(np.x))+
+                            'y'+str(floor(np.y))+
+                            'z'+str(floor(np.z)))==None:
+                this.genBlock(np.x,np.y,np.z,subset)
+
+    def genBlock(this,x,y,z,subset=-1):
+        # ***
+        if subset==-1: subset=this.currentSubset
         # Extend or add to the vertices of our model.
-        model = this.subsets[this.currentSubset].model
+        model = this.subsets[subset].model
 
         model.vertices.extend([ Vec3(x,y,z) + v for v in 
                                 this.block.vertices])
@@ -48,9 +69,16 @@ class MeshTerrain:
                 "y"+str(floor(y))+
                 "z"+str(floor(z))] = "t"
         # ***
+        # Mark 1 above as 'gap'. To prevent
+        # walls of mine sites spawning there.
+        key =  ("x"+str(floor(x))+
+                "y"+str(floor(y+1))+
+                "z"+str(floor(z)))
+        if this.td.get(key)==None:
+            this.td[key] = "g"
         # Record which subset and index of first vertex
         # on vd dictionary for Mining.
-        vob = (this.currentSubset,len(model.vertices)-37)
+        vob = (subset,len(model.vertices)-37)
         this.vd["x"+str(floor(x))+
                 "y"+str(floor(y))+
                 "z"+str(floor(z))] = vob
