@@ -17,16 +17,20 @@ terrain = MeshTerrain()
 pX = subject.x
 pZ = subject.z
 
+# ***
+def input(key):
+    terrain.input(key)
+
 count = 0
 def update():
     global count, pX, pZ
     count+=1
-    if count == 4:
+    if count == 2:
         # Generate terrain at current swirl position.
         terrain.genTerrain()
         count=0
         # ***
-        # terrain.update(subject.position,camera)
+        terrain.update(subject.position,camera)
 
     # Change subset position based on subject position.
     if abs(subject.x-pX)>4 or abs(subject.z-pZ)>4:

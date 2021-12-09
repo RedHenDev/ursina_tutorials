@@ -12,15 +12,17 @@ class MeshTerrain:
         this.numVertices = len(this.block.vertices)
 
         this.subsets = []
-        this.numSubsets = 64
+        this.numSubsets = 32
         
         # Must be even number! See genTerrain()
-        this.subWidth = 8
+        this.subWidth = 4
         this.swirlEngine = SwirlEngine(this.subWidth)
         this.currentSubset = 0
 
         # Our terrain dictionary :D
         this.td = {}
+        # *** Our vertices dictionary.
+        this.vd = {}
 
         this.perlin = Perlin()
 
@@ -30,6 +32,10 @@ class MeshTerrain:
             e.texture_scale*=64/e.texture.width
             this.subsets.append(e)
         
+    # ***
+    def input(this,key):
+        if key=='left mouse up':
+            plantIdea(this.td,this.vd,this.subsets)
 
     def genBlock(this,x,y,z):
         # Extend or add to the vertices of our model.
@@ -41,6 +47,13 @@ class MeshTerrain:
         this.td["x"+str(floor(x))+
                 "y"+str(floor(y))+
                 "z"+str(floor(z))] = "t"
+        # ***
+        # Record which subset and index of first vertex
+        # on vd dictionary for Mining.
+        vob = (this.currentSubset,len(model.vertices)-37)
+        this.vd["x"+str(floor(x))+
+                "y"+str(floor(y))+
+                "z"+str(floor(z))] = vob
         # Decide random tint for colour of block :)
         c = random()-0.5
         model.colors.extend( (Vec4(1-c,1-c,1-c,1),)*
@@ -50,9 +63,10 @@ class MeshTerrain:
         uu = 8
         uv = 7
         # ***
-        # Occasionally place a soil block.
+        # Occasionally place a stone block.
         if random() > 0.8:
-            uu = 10
+            uu = 8
+            uv = 5
         if y > 2:
             uu = 8
             uv = 6
@@ -69,9 +83,10 @@ class MeshTerrain:
             for j in range(-d,d):
 
                 y = floor(this.perlin.getHeight(x+k,z+j))
+                # *** ==None instead of !="t". For mining.
                 if this.td.get( "x"+str(floor(x+k))+
                                 "y"+str(floor(y))+
-                                "z"+str(floor(z+j)))!="t":
+                                "z"+str(floor(z+j)))==None:
                     this.genBlock(x+k,y,z+j)
 
         this.subsets[this.currentSubset].model.generate()
