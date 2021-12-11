@@ -10,7 +10,7 @@ indra.color = window.color
 subject = FirstPersonController()
 subject.gravity = 0.0
 subject.cursor.visible=False
-window.fullscreen=True
+# window.fullscreen=True
 
 terrain = MeshTerrain() 
 

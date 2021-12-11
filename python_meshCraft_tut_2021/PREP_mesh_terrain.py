@@ -2,7 +2,7 @@ from perlin import Perlin
 from ursina import *
 from random import random
 from swirl_engine import SwirlEngine
-from mining_system import *
+from PREP_mining_system import *
 
 class MeshTerrain:
     def __init__(this):

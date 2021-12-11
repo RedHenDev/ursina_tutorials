@@ -2,6 +2,7 @@ from perlin import Perlin
 from ursina import *
 from random import random
 from swirl_engine import SwirlEngine
+from mining_system import *
 
 class MeshTerrain:
     def __init__(this):
@@ -21,6 +22,9 @@ class MeshTerrain:
         # Our terrain dictionary :D
         this.td = {}
 
+        # Our vertex dictionary -- for mining.
+        this.vd = {}
+
         this.perlin = Perlin()
 
         for i in range(0,this.numSubsets):
@@ -29,10 +33,38 @@ class MeshTerrain:
             e.texture_scale*=64/e.texture.width
             this.subsets.append(e)
         
+    # Highlight looked-at block :)
+    def update(this,pos,cam):
+        highlight(pos,cam,this.td)
+    
+    def input(this,key):
+        if key=='left mouse up':
+            epi = mine(this.td,this.vd,this.subsets)
+            this.genWalls(epi[0],epi[1])
+            this.subsets[epi[1]].model.generate()
+    
+    # I.e. after mining, to create illusion of depth.
+    def genWalls(this,epi,subset):
+        if epi==None: return
+        # Refactor this -- place in mining_system 
+        # except for cal to genBlock?
+        wp =    [   Vec3(0,1,0),
+                    Vec3(0,-1,0),
+                    Vec3(-1,0,0),
+                    Vec3(1,0,0),
+                    Vec3(0,0,-1),
+                    Vec3(0,0,1)]
+        for i in range(0,6):
+            np = epi + wp[i]
+            if this.td.get( 'x'+str(floor(np.x))+
+                            'y'+str(floor(np.y))+
+                            'z'+str(floor(np.z)))==None:
+                this.genBlock(np.x,np.y,np.z,subset)
 
-    def genBlock(this,x,y,z):
+    def genBlock(this,x,y,z,subset=-1):
+        if subset==-1: subset=this.currentSubset
         # Extend or add to the vertices of our model.
-        model = this.subsets[this.currentSubset].model
+        model = this.subsets[subset].model
 
         model.vertices.extend([ Vec3(x,y,z) + v for v in 
                                 this.block.vertices])
@@ -40,6 +72,20 @@ class MeshTerrain:
         this.td["x"+str(floor(x))+
                 "y"+str(floor(y))+
                 "z"+str(floor(z))] = "t"
+        # Also, record gap above this position to
+        # correct for spawning walls after mining.
+        key =  ("x"+str(floor(x))+
+                "y"+str(floor(y+1))+
+                "z"+str(floor(z)))
+        if this.td.get(key)==None:
+            this.td[key] = "g"
+
+        # Record subset index and first vertex of this block.
+        vob = (subset, len(model.vertices)-37)
+        this.vd["x"+str(floor(x))+
+                "y"+str(floor(y))+
+                "z"+str(floor(z))] = vob
+
         # Decide random tint for colour of block :)
         c = random()-0.5
         model.colors.extend( (Vec4(1-c,1-c,1-c,1),)*
@@ -66,7 +112,7 @@ class MeshTerrain:
                 y = floor(this.perlin.getHeight(x+k,z+j))
                 if this.td.get( "x"+str(floor(x+k))+
                                 "y"+str(floor(y))+
-                                "z"+str(floor(z+j)))!="t":
+                                "z"+str(floor(z+j)))==None:
                     this.genBlock(x+k,y,z+j)
 
         this.subsets[this.currentSubset].model.generate()
