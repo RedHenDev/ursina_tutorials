@@ -38,7 +38,7 @@ class MeshTerrain:
         highlight(pos,cam,this.td)
     
     def input(this,key):
-        if key=='left mouse up':
+        if key=='left mouse up' and bte.visible:
             epi = mine(this.td,this.vd,this.subsets)
             this.genWalls(epi[0],epi[1])
             this.subsets[epi[1]].model.generate()

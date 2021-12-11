@@ -1,6 +1,6 @@
 from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
-from PREP_mesh_terrain import MeshTerrain
+from pd_mesh_terrain import MeshTerrain
 
 app = Ursina()
 
@@ -10,27 +10,29 @@ indra.color = window.color
 subject = FirstPersonController()
 subject.gravity = 0.0
 subject.cursor.visible=False
-# window.fullscreen=True
+window.fullscreen=False
 
 terrain = MeshTerrain() 
 
 pX = subject.x
 pZ = subject.z
 
-# ***
 def input(key):
     terrain.input(key)
 
 count = 0
 def update():
     global count, pX, pZ
+
     # Generate terrain at current swirl position.
     terrain.genTerrain()
+
     count+=1
     if count == 4:
         
         count=0
-        # ***
+
+        # Highlight terrain block for mining/building...
         terrain.update(subject.position,camera)
 
     # Change subset position based on subject position.
@@ -45,7 +47,6 @@ def update():
     x = str(floor(subject.x+0.5))
     z = str(floor(subject.z+0.5))
     y = floor(subject.y+0.5)
-    
     for i in range(-step,step):
         if terrain.td.get("x"+x+"y"+str(y+i)+"z"+z)=="t":
             target = y+i+height

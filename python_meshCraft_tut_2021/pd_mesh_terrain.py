@@ -2,7 +2,7 @@ from perlin import Perlin
 from ursina import *
 from random import random
 from swirl_engine import SwirlEngine
-from PREP_mining_system import *
+from pd_mining_system import *
 
 class MeshTerrain:
     def __init__(this):
@@ -15,13 +15,14 @@ class MeshTerrain:
         this.numSubsets = 128
         
         # Must be even number! See genTerrain()
-        this.subWidth = 4
+        this.subWidth = 4 
         this.swirlEngine = SwirlEngine(this.subWidth)
         this.currentSubset = 0
 
         # Our terrain dictionary :D
         this.td = {}
-        # *** Our vertices dictionary.
+
+        # Our vertex dictionary -- for mining.
         this.vd = {}
 
         this.perlin = Perlin()
@@ -32,17 +33,23 @@ class MeshTerrain:
             e.texture_scale*=64/e.texture.width
             this.subsets.append(e)
         
-    # ***
+    # Highlight looked-at block :)
+    def update(this,pos,cam):
+        highlight(pos,cam,this.td)
+    
     def input(this,key):
-        if key=='left mouse up':
-            epi=plantIdea(  this.td,
-                            this.vd,
-                            this.subsets)
-            this.genWalls(epi[0],epi[1])
-            this.subsets[epi[1]].model.generate()
-
-    def genWalls(this,epicentre,subset):
-        if epicentre==None:return
+        if key=='left mouse up' and bte.visible:
+            epi = mine(this.td,this.vd,this.subsets)
+            # ***
+            if not epi == None:
+                this.genWalls(epi[0],epi[1])
+                this.subsets[epi[1]].model.generate()
+    
+    # I.e. after mining, to create illusion of depth.
+    def genWalls(this,epi,subset):
+        if epi==None: return
+        # Refactor this -- place in mining_system 
+        # except for cal to genBlock?
         wp =    [   Vec3(0,1,0),
                     Vec3(0,-1,0),
                     Vec3(-1,0,0),
@@ -50,14 +57,13 @@ class MeshTerrain:
                     Vec3(0,0,-1),
                     Vec3(0,0,1)]
         for i in range(0,6):
-            np = epicentre + wp[i]
+            np = epi + wp[i]
             if this.td.get( 'x'+str(floor(np.x))+
                             'y'+str(floor(np.y))+
                             'z'+str(floor(np.z)))==None:
                 this.genBlock(np.x,np.y,np.z,subset)
 
     def genBlock(this,x,y,z,subset=-1):
-        # ***
         if subset==-1: subset=this.currentSubset
         # Extend or add to the vertices of our model.
         model = this.subsets[subset].model
@@ -68,20 +74,20 @@ class MeshTerrain:
         this.td["x"+str(floor(x))+
                 "y"+str(floor(y))+
                 "z"+str(floor(z))] = "t"
-        # ***
-        # Mark 1 above as 'gap'. To prevent
-        # walls of mine sites spawning there.
+        # Also, record gap above this position to
+        # correct for spawning walls after mining.
         key =  ("x"+str(floor(x))+
                 "y"+str(floor(y+1))+
                 "z"+str(floor(z)))
         if this.td.get(key)==None:
             this.td[key] = "g"
-        # Record which subset and index of first vertex
-        # on vd dictionary for Mining.
-        vob = (subset,len(model.vertices)-37)
+
+        # Record subset index and first vertex of this block.
+        vob = (subset, len(model.vertices)-37)
         this.vd["x"+str(floor(x))+
                 "y"+str(floor(y))+
                 "z"+str(floor(z))] = vob
+
         # Decide random tint for colour of block :)
         c = random()-0.5
         model.colors.extend( (Vec4(1-c,1-c,1-c,1),)*
@@ -90,11 +96,6 @@ class MeshTerrain:
         # This is the texture atlas co-ord for grass :)
         uu = 8
         uv = 7
-        # ***
-        # Occasionally place a stone block.
-        if random() > 0.8:
-            uu = 8
-            uv = 5
         if y > 2:
             uu = 8
             uv = 6
@@ -111,7 +112,6 @@ class MeshTerrain:
             for j in range(-d,d):
 
                 y = floor(this.perlin.getHeight(x+k,z+j))
-                # *** ==None instead of !="t". For mining.
                 if this.td.get( "x"+str(floor(x+k))+
                                 "y"+str(floor(y))+
                                 "z"+str(floor(z+j)))==None:
@@ -123,7 +123,3 @@ class MeshTerrain:
             this.currentSubset+=1
         else: this.currentSubset=0
         this.swirlEngine.move()
-
-    # ***
-    def update(this,pos,cam):
-        highlight(pos,cam,this.td)
