@@ -24,8 +24,11 @@ def mine(td,vd,subsets):
     if not bte.visible: return
 
     wv = vd.get('x'+str(floor(bte.x))+
-                'y'+str(floor(bte.y))+
+                'y'+str(floor(bte.y-0.5))+
                 'z'+str(floor(bte.z)))
+    
+    # Have we got a block highlighted? If not, return.
+    if wv==None: return
     
     for i in range(wv[1]+1,wv[1]+37):
         subsets[wv[0]].model.vertices[i][1]+=999
@@ -34,10 +37,10 @@ def mine(td,vd,subsets):
 
     # g for gap in terrain. And wipe vd entry.
     td[ 'x'+str(floor(bte.x))+
-        'y'+str(floor(bte.y))+
+        'y'+str(floor(bte.y-0.5))+
         'z'+str(floor(bte.z))] = 'g'
     vd[ 'x'+str(floor(bte.x))+
-        'y'+str(floor(bte.y))+
+        'y'+str(floor(bte.y-0.5))+
         'z'+str(floor(bte.z))] = None
     
     return (bte.position + Vec3(0,-0.5,0), wv[0])

@@ -12,10 +12,10 @@ class MeshTerrain:
         this.numVertices = len(this.block.vertices)
 
         this.subsets = []
-        this.numSubsets = 128
+        this.numSubsets = 512
         
         # Must be even number! See genTerrain()
-        this.subWidth = 4 
+        this.subWidth = 8 
         this.swirlEngine = SwirlEngine(this.subWidth)
         this.currentSubset = 0
 
@@ -38,10 +38,11 @@ class MeshTerrain:
         highlight(pos,cam,this.td)
     
     def input(this,key):
-        if key=='left mouse up' and bte.visible:
+        if key=='left mouse up' and bte.visible==True:
             epi = mine(this.td,this.vd,this.subsets)
-            this.genWalls(epi[0],epi[1])
-            this.subsets[epi[1]].model.generate()
+            if epi != None:
+                this.genWalls(epi[0],epi[1])
+                this.subsets[epi[1]].model.generate()
     
     # I.e. after mining, to create illusion of depth.
     def genWalls(this,epi,subset):
@@ -59,9 +60,9 @@ class MeshTerrain:
             if this.td.get( 'x'+str(floor(np.x))+
                             'y'+str(floor(np.y))+
                             'z'+str(floor(np.z)))==None:
-                this.genBlock(np.x,np.y,np.z,subset)
+                this.genBlock(np.x,np.y,np.z,subset,gap=False,blockType='soil')
 
-    def genBlock(this,x,y,z,subset=-1):
+    def genBlock(this,x,y,z,subset=-1,gap=True,blockType='grass'):
         if subset==-1: subset=this.currentSubset
         # Extend or add to the vertices of our model.
         model = this.subsets[subset].model
@@ -74,11 +75,12 @@ class MeshTerrain:
                 "z"+str(floor(z))] = "t"
         # Also, record gap above this position to
         # correct for spawning walls after mining.
-        key =  ("x"+str(floor(x))+
-                "y"+str(floor(y+1))+
-                "z"+str(floor(z)))
-        if this.td.get(key)==None:
-            this.td[key] = "g"
+        if gap==True:
+            key =  ("x"+str(floor(x))+
+                    "y"+str(floor(y+1))+
+                    "z"+str(floor(z)))
+            if this.td.get(key)==None:
+                this.td[key] = "g"
 
         # Record subset index and first vertex of this block.
         vob = (subset, len(model.vertices)-37)
@@ -94,6 +96,20 @@ class MeshTerrain:
         # This is the texture atlas co-ord for grass :)
         uu = 8
         uv = 7
+        if blockType=='soil':
+            uu = 10
+            uv = 7
+        elif blockType=='stone':
+            uu = 8
+            uv = 5
+        elif blockType=='ice':
+            uu = 9
+            uv = 7
+        # Randomly place stone blocks.
+        if random() > 0.86:
+            uu = 8
+            uv = 5
+        # If high enough, cap with snow blocks :D
         if y > 2:
             uu = 8
             uv = 6
@@ -113,7 +129,7 @@ class MeshTerrain:
                 if this.td.get( "x"+str(floor(x+k))+
                                 "y"+str(floor(y))+
                                 "z"+str(floor(z+j)))==None:
-                    this.genBlock(x+k,y,z+j)
+                    this.genBlock(x+k,y,z+j,blockType='ice')
 
         this.subsets[this.currentSubset].model.generate()
         # Current subset hack ;)
