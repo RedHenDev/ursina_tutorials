@@ -2,6 +2,7 @@ from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
 from mesh_terrain import MeshTerrain
 from random import random
+from snowflake import Snowflake
 
 app = Ursina()
 
@@ -15,42 +16,17 @@ window.fullscreen=False
 scene.fog_color = color.white
 scene.fog_density = 0.04
 
+# ***
+jackFrost = Snowflake()
+Snowflake.populate()
+
 terrain = MeshTerrain() 
 
 pX = subject.x
 pZ = subject.z
-
+# ***
 grassVox = Audio('step.ogg',autoplay=False,loop=False)
 snowVox = Audio('snowStep.mp3',autoplay=False,loop=False)
-class Flake:
-    def __init__(this):
-        this.ent=Entity(model='quad',texture='flake_1.png')
-        # this.ent.rotation_x = 90
-        this.ent.double_sided=True
-        # this.ent.scale=10
-        this.ent.scale=random()*0.2
-        this.rotSpeed=random()*500
-
-    def update(this):
-        this.ent.rotation_y += this.rotSpeed*time.dt
-        this.ent.y+=-1*time.dt
-        if this.ent.y < -8:
-        # if terrain.td.get(  'x'+str(floor(this.ent.x))+
-        #                     'y'+str(floor(this.ent.y))+
-        #                     'z'+str(floor(this.ent.z)))=='t':
-            this.ent.y = subject.y + 3 + random() * 5
-            this.ent.x = subject.x + random() * 20 - 10
-            this.ent.z = subject.z + random() * 20 - 10
-
-flakes = []
-
-for i in range(1024):
-    e = Flake()
-    e.ent.y = 5 + random()*5-2.5
-    e.ent.x = random()*20-10
-    e.ent.z = random()*20-10
-    flakes.append(e)
-
 
 def input(key):
     terrain.input(key)
@@ -58,9 +34,6 @@ def input(key):
 count = 0
 def update():
     global count, pX, pZ
-
-    for f in flakes:
-        f.update()
 
     count+=1
     if count == 4:
@@ -80,6 +53,7 @@ def update():
         terrain.swirlEngine.reset(pX,pZ)
         # ***
         # terrain.td.get("x"+x+"y"+str(y+i)+"z"+z)
+        
         if subject.y > 4:
             if not snowVox.playing:
                 snowVox.pitch=random()+0.5-0.25
@@ -87,7 +61,7 @@ def update():
         elif not grassVox.playing:
                 grassVox.pitch=random()+0.7
                 grassVox.play()
-
+        
     blockFound=False
     step = 2
     height = 1.86
