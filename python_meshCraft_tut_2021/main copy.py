@@ -17,8 +17,10 @@ scene.fog_color = color.white
 scene.fog_density = 0.04
 
 # ***
-jackFrost = Snowflake()
-Snowflake.populate()
+flakes=[]
+for i in range(1024):
+    e = Snowflake()
+    flakes.append(e)
 
 terrain = MeshTerrain() 
 
@@ -40,6 +42,11 @@ def update():
         
         count=0
 
+        #***
+        # Let it snow!
+        for i in range(1024):
+            flakes[i].update()
+
         # Generate terrain at current swirl position.
         terrain.genTerrain()
 
@@ -51,9 +58,9 @@ def update():
         pX=subject.x
         pZ=subject.z 
         terrain.swirlEngine.reset(pX,pZ)
+        
         # ***
         # terrain.td.get("x"+x+"y"+str(y+i)+"z"+z)
-        
         if subject.y > 4:
             if not snowVox.playing:
                 snowVox.pitch=random()+0.5-0.25

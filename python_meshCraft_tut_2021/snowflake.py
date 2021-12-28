@@ -1,7 +1,6 @@
 """Snowflake"""
-from builtins import staticmethod
 from random import random
-from ursina import Entity
+from ursina import Entity, time
 
 class Snowflake(Entity):
     def __init__(this):
@@ -13,9 +12,7 @@ class Snowflake(Entity):
         )
         this.x = random()*20-10
         this.z = random()*20-10
-        this.y = random()*10-5
+        this.y = random()*10-5+5
 
-    @staticmethod
-    def populate():
-        for i in range(128):
-            e=Snowflake()
+    def update(this):
+        this.y-=0.01*time.dt
