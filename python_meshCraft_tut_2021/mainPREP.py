@@ -1,10 +1,8 @@
 from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
 from mesh_terrainPREP import MeshTerrain
-# from flake import SnowFall
+from flake import SnowFall
 from random import random
-from ursina.shaders import camera_grayscale_shader
-
 
 app = Ursina()
 
@@ -13,7 +11,7 @@ indra = Sky()
 indra.color = window.color
 subject = FirstPersonController()
 subject.gravity = 0.0
-# subject.cursor.visible=False
+subject.cursor.visible=False
 window.fullscreen=False
 
 terrain = MeshTerrain() 
@@ -23,8 +21,7 @@ terrain = MeshTerrain()
 #     e = Flake(subject.position)
 #     flakes.append(e)
 # ***
-# snowfall = SnowFall(subject)
-# Flake.setSub(subject)
+snowfall = SnowFall(subject)
 
 grass_audio = Audio('step.ogg',autoplay=False,loop=False)
 snow_audio = Audio('snowStep.mp3',autoplay=False,loop=False)
@@ -79,9 +76,16 @@ def update():
     for i in range(-step,step):
         # ***
         if terrain.td.get((x,y+i,z))=="t":
-            target = y+i+height
-            blockFound=True
-            break
+            # ***
+            # Now make sure there isn't a block on top...
+            if terrain.td.get((x,y+i+1,z))!="t":
+                target = y+i+height
+                blockFound=True
+                break
+            else: 
+                target = y+i+height+1
+                blockFound=True
+                break
     if blockFound==True:
         # Step up or down :>
         subject.y = lerp(subject.y, target, 6 * time.dt)

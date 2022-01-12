@@ -21,8 +21,8 @@ class Flake(Entity):
             double_sided=True,
             scale=0.2
             )
-        this.x+=random()*40-20
-        this.z+=random()*40-20
+        this.x+=random()*20-10
+        this.z+=random()*20-10
         this.y+=random()*10+5
 
         minSpeed=1
@@ -40,9 +40,9 @@ class Flake(Entity):
         this.rotation_y += this.spinSpeed * time.dt
         # Hit ground? If so, respawn above subject.
         if this.y<0:
-            this.x=subPos.x+(random()*40-20)
+            this.x=subPos.x+(random()*20-10)
             # ***
-            this.z=subPos.z+(random()*40-20)
+            this.z=subPos.z+(random()*20-10)
             this.y+=subPos.y+(random()*10+5)
             # Would be better to check if we've
             # actually hit a terrain block :|
@@ -51,6 +51,6 @@ class SnowFall():
     def __init__(this, _subref):
         this.flakes = []
         Flake.setSub(_subref)
-        for i in range(512):
+        for i in range(128):
             e = Flake(_subref.position)
             this.flakes.append(e)
