@@ -44,6 +44,9 @@ class MeshTerrain:
             if epi != None:
                 this.genWalls(epi[0],epi[1])
                 this.subsets[epi[1]].model.generate()
+        epi = checkBuild(key,bte)
+        if epi!= None:
+            this.genBlock(epi.x,epi.y,epi.z)
     
     # I.e. after mining, to create illusion of depth.
     def genWalls(this,epi,subset):
