@@ -1,11 +1,18 @@
 """
 Snowflake module :)
-Merry Christmas!
+Merry Christmas! 2021
 """
-from ursina import Entity, Vec3, time
+from ursina import Entity, time
 from random import random
 
 class Flake(Entity):
+    # ***
+    sub = None
+
+    @staticmethod
+    def setSub(_subjectEntity):
+        Flake.sub = _subjectEntity
+
     def __init__(this,orig):
         super().__init__(   
             model='quad',
@@ -22,16 +29,28 @@ class Flake(Entity):
         this.fallSpeed=random()*4+minSpeed
         minSpin=100
         this.spinSpeed=random()*40+minSpin
-    
-    def physics(this,subPos):
+    # ***
+    def update(this):
+        this.physics()
+    # ***
+    def physics(this):
+        subPos=Flake.sub.position
         this.y-=this.fallSpeed*time.dt
 
         this.rotation_y += this.spinSpeed * time.dt
         # Hit ground? If so, respawn above subject.
         if this.y<0:
             this.x=subPos.x+(random()*40-20)
-            this.z+=subPos.z+(random()*40-20)
+            # ***
+            this.z=subPos.z+(random()*40-20)
             this.y+=subPos.y+(random()*10+5)
             # Would be better to check if we've
             # actually hit a terrain block :|
-        
+# ***
+class SnowFall():
+    def __init__(this, _subref):
+        this.flakes = []
+        Flake.setSub(_subref)
+        for i in range(512):
+            e = Flake(_subref.position)
+            this.flakes.append(e)
