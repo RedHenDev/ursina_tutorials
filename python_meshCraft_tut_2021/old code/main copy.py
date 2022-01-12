@@ -1,8 +1,8 @@
 from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
 from mesh_terrain import MeshTerrain
+from flake import Flake
 from random import random
-from snowflake import Snowflake
 
 app = Ursina()
 
@@ -13,22 +13,18 @@ subject = FirstPersonController()
 subject.gravity = 0.0
 subject.cursor.visible=False
 window.fullscreen=False
-scene.fog_color = color.white
-scene.fog_density = 0.04
-
-# ***
-flakes=[]
-for i in range(1024):
-    e = Snowflake()
-    flakes.append(e)
 
 terrain = MeshTerrain() 
+flakes = []
+for i in range(512):
+    e = Flake(subject.position)
+    flakes.append(e)
+
+grass_audio = Audio('step.ogg',autoplay=False,loop=False)
+snow_audio = Audio('snowStep.mp3',autoplay=False,loop=False)
 
 pX = subject.x
 pZ = subject.z
-# ***
-grassVox = Audio('step.ogg',autoplay=False,loop=False)
-snowVox = Audio('snowStep.mp3',autoplay=False,loop=False)
 
 def input(key):
     terrain.input(key)
@@ -37,18 +33,16 @@ count = 0
 def update():
     global count, pX, pZ
 
+    for i in range(512):
+        flakes[i].physics(subject.position)
+
+    # Generate terrain at current swirl position.
+    terrain.genTerrain()
+
     count+=1
     if count == 4:
         
         count=0
-
-        #***
-        # Let it snow!
-        for i in range(1024):
-            flakes[i].update()
-
-        # Generate terrain at current swirl position.
-        terrain.genTerrain()
 
         # Highlight terrain block for mining/building...
         terrain.update(subject.position,camera)
@@ -58,17 +52,15 @@ def update():
         pX=subject.x
         pZ=subject.z 
         terrain.swirlEngine.reset(pX,pZ)
-        
-        # ***
-        # terrain.td.get("x"+x+"y"+str(y+i)+"z"+z)
+        # Sound :)
         if subject.y > 4:
-            if not snowVox.playing:
-                snowVox.pitch=random()+0.5-0.25
-                snowVox.play()
-        elif not grassVox.playing:
-                grassVox.pitch=random()+0.7
-                grassVox.play()
-        
+            if snow_audio.playing==False:
+                snow_audio.pitch=random()+0.25
+                snow_audio.play()
+        elif grass_audio.playing==False:
+            grass_audio.pitch=random()+0.7
+            grass_audio.play()
+
     blockFound=False
     step = 2
     height = 1.86
