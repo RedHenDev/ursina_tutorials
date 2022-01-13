@@ -5,16 +5,15 @@ bte.scale=1.001
 
 def highlight(pos,cam,td):
     for i in range(1,15):
-        wp=pos+cam.forward*i
+        # Adjust for player's height!
+        wp=pos+Vec3(0,1.86,0)+cam.forward*i
         x = floor(wp.x)
-        y = floor(wp.y+3)
+        y = floor(wp.y)
         z = floor(wp.z)
         bte.x = x
         bte.y = y+0.5
         bte.z = z
-        if td.get(  "x"+str(x)+
-                    "y"+str(y)+
-                    "z"+str(z))=="t":
+        if td.get((x,y,z))=='t':
             bte.visible = True
             break
         else:
@@ -23,9 +22,7 @@ def highlight(pos,cam,td):
 def mine(td,vd,subsets):
     if not bte.visible: return
 
-    wv = vd.get('x'+str(floor(bte.x))+
-                'y'+str(floor(bte.y-0.5))+
-                'z'+str(floor(bte.z)))
+    wv=vd.get((floor(bte.x),floor(bte.y-0.5),floor(bte.z)))
     
     # Have we got a block highlighted? If not, return.
     if wv==None: return
@@ -36,11 +33,7 @@ def mine(td,vd,subsets):
     subsets[wv[0]].model.generate()
 
     # g for gap in terrain. And wipe vd entry.
-    td[ 'x'+str(floor(bte.x))+
-        'y'+str(floor(bte.y-0.5))+
-        'z'+str(floor(bte.z))] = 'g'
-    vd[ 'x'+str(floor(bte.x))+
-        'y'+str(floor(bte.y-0.5))+
-        'z'+str(floor(bte.z))] = None
+    td[ (floor(bte.x),floor(bte.y-0.5),floor(bte.z))]='g'
+    vd[ (floor(bte.x),floor(bte.y-0.5),floor(bte.z))] = None
     
     return (bte.position + Vec3(0,-0.5,0), wv[0])

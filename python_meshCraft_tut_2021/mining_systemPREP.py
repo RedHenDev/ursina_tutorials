@@ -5,7 +5,6 @@ bte.scale=1.001
 
 def highlight(pos,cam,td):
     for i in range(1,15):
-        # ***
         wp=pos+Vec3(0,1.86,0)+cam.forward*i
         x = round(wp.x)
         y = floor(wp.y)
@@ -13,7 +12,7 @@ def highlight(pos,cam,td):
         bte.x = x
         bte.y = y+0.5
         bte.z = z
-        if td.get((x,y,z))=="t":
+        if td.get((x,y,z))=='t':
             bte.visible = True
             break
         else:

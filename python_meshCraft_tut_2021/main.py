@@ -1,7 +1,7 @@
 from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
 from mesh_terrain import MeshTerrain
-from flake import Flake
+from flake import SnowFall
 from random import random
 
 app = Ursina()
@@ -11,14 +11,11 @@ indra = Sky()
 indra.color = window.color
 subject = FirstPersonController()
 subject.gravity = 0.0
-subject.cursor.visible=False
+# subject.cursor.visible=False
 window.fullscreen=False
 
-terrain = MeshTerrain() 
-flakes = []
-for i in range(512):
-    e = Flake(subject.position)
-    flakes.append(e)
+terrain = MeshTerrain()
+# snowfall = SnowFall(subject)
 
 grass_audio = Audio('step.ogg',autoplay=False,loop=False)
 snow_audio = Audio('snowStep.mp3',autoplay=False,loop=False)
@@ -32,9 +29,6 @@ def input(key):
 count = 0
 def update():
     global count, pX, pZ
-
-    for i in range(512):
-        flakes[i].physics(subject.position)
 
     # Generate terrain at current swirl position.
     terrain.genTerrain()
@@ -64,11 +58,15 @@ def update():
     blockFound=False
     step = 2
     height = 1.86
-    x = str(floor(subject.x+0.5))
-    z = str(floor(subject.z+0.5))
+    x = floor(subject.x+0.5)
+    z = floor(subject.z+0.5)
     y = floor(subject.y+0.5)
     for i in range(-step,step):
-        if terrain.td.get("x"+x+"y"+str(y+i)+"z"+z)=="t":
+        if terrain.td.get((x,y+i,z))=='t':
+            if terrain.td.get((x,y+i+1,z))=='t':
+                target = y+i+height+1
+                blockFound=True
+                break
             target = y+i+height
             blockFound=True
             break

@@ -6,7 +6,6 @@ from ursina import Entity, time
 from random import random
 
 class Flake(Entity):
-    # ***
     sub = None
 
     @staticmethod
@@ -29,10 +28,10 @@ class Flake(Entity):
         this.fallSpeed=random()*4+minSpeed
         minSpin=100
         this.spinSpeed=random()*40+minSpin
-    # ***
+    
     def update(this):
         this.physics()
-    # ***
+    
     def physics(this):
         subPos=Flake.sub.position
         this.y-=this.fallSpeed*time.dt
@@ -41,12 +40,11 @@ class Flake(Entity):
         # Hit ground? If so, respawn above subject.
         if this.y<0:
             this.x=subPos.x+(random()*20-10)
-            # ***
             this.z=subPos.z+(random()*20-10)
             this.y+=subPos.y+(random()*10+5)
             # Would be better to check if we've
             # actually hit a terrain block :|
-# ***
+
 class SnowFall():
     def __init__(this, _subref):
         this.flakes = []

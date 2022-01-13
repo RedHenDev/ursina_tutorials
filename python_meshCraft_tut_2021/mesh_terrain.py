@@ -3,6 +3,7 @@ from ursina import *
 from random import random
 from swirl_engine import SwirlEngine
 from mining_system import *
+from building_system import *
 
 class MeshTerrain:
     def __init__(this):
@@ -15,7 +16,7 @@ class MeshTerrain:
         this.numSubsets = 512
         
         # Must be even number! See genTerrain()
-        this.subWidth = 8 
+        this.subWidth = 4 
         this.swirlEngine = SwirlEngine(this.subWidth)
         this.currentSubset = 0
 
@@ -43,6 +44,13 @@ class MeshTerrain:
             if epi != None:
                 this.genWalls(epi[0],epi[1])
                 this.subsets[epi[1]].model.generate()
+        # Building :)
+        if key=='right mouse up' and bte.visible==True:
+            bsite = checkBuild(bte.position,this.td)
+            if bsite!=None:
+                this.genBlock(floor(bsite.x),floor(bsite.y),floor(bsite.z),subset=0,blockType='grass')
+                gapShell(this.td,bsite)
+                this.subsets[0].model.generate()
     
     # I.e. after mining, to create illusion of depth.
     def genWalls(this,epi,subset):
@@ -57,10 +65,11 @@ class MeshTerrain:
                     Vec3(0,0,1)]
         for i in range(0,6):
             np = epi + wp[i]
-            if this.td.get( 'x'+str(floor(np.x))+
-                            'y'+str(floor(np.y))+
-                            'z'+str(floor(np.z)))==None:
+            if this.td.get( (floor(np.x),
+                            floor(np.y),
+                            floor(np.z)))==None:
                 this.genBlock(np.x,np.y,np.z,subset,gap=False,blockType='soil')
+
 
     def genBlock(this,x,y,z,subset=-1,gap=True,blockType='grass'):
         if subset==-1: subset=this.currentSubset
@@ -70,23 +79,19 @@ class MeshTerrain:
         model.vertices.extend([ Vec3(x,y,z) + v for v in 
                                 this.block.vertices])
         # Record terrain in dictionary :)
-        this.td["x"+str(floor(x))+
-                "y"+str(floor(y))+
-                "z"+str(floor(z))] = "t"
+        this.td[(floor(x),floor(y),floor(z))] = 't'
         # Also, record gap above this position to
         # correct for spawning walls after mining.
         if gap==True:
-            key =  ("x"+str(floor(x))+
-                    "y"+str(floor(y+1))+
-                    "z"+str(floor(z)))
+            key=((floor(x),floor(y+1),floor(z)))
             if this.td.get(key)==None:
-                this.td[key] = "g"
+                this.td[key]='g'
 
         # Record subset index and first vertex of this block.
         vob = (subset, len(model.vertices)-37)
-        this.vd["x"+str(floor(x))+
-                "y"+str(floor(y))+
-                "z"+str(floor(z))] = vob
+        this.vd[(floor(x),
+                floor(y),
+                floor(z))] = vob
 
         # Decide random tint for colour of block :)
         c = random()-0.5
@@ -126,9 +131,9 @@ class MeshTerrain:
             for j in range(-d,d):
 
                 y = floor(this.perlin.getHeight(x+k,z+j))
-                if this.td.get( "x"+str(floor(x+k))+
-                                "y"+str(floor(y))+
-                                "z"+str(floor(z+j)))==None:
+                if this.td.get( (floor(x+k),
+                                floor(y),
+                                floor(z+j)))==None:
                     this.genBlock(x+k,y,z+j,blockType='ice')
 
         this.subsets[this.currentSubset].model.generate()
