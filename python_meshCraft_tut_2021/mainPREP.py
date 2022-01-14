@@ -30,16 +30,14 @@ count = 0
 def update():
     global count, pX, pZ
 
-    # Generate terrain at current swirl position.
-    terrain.genTerrain()
-
+    # ***
+    # Highlight terrain block for mining/building...
+    terrain.update(subject.position,camera)
     count+=1
     if count == 4:
-        
+        # Generate terrain at current swirl position.
+        terrain.genTerrain()
         count=0
-
-        # Highlight terrain block for mining/building...
-        terrain.update(subject.position,camera)
 
     # Change subset position based on subject position.
     if abs(subject.x-pX)>1 or abs(subject.z-pZ)>1:

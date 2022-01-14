@@ -2,7 +2,7 @@ from perlin import Perlin
 from ursina import *
 from random import random
 from swirl_engine import SwirlEngine
-from mining_system import *
+from mining_systemPREP import *
 from building_system import *
 
 class MeshTerrain:
@@ -13,11 +13,12 @@ class MeshTerrain:
         this.numVertices = len(this.block.vertices)
 
         this.subsets = []
-        this.numSubsets = 512
+        this.numSubsets = 128
         
         # Must be even number! See genTerrain()
-        this.subWidth = 4 
+        this.subWidth = 6 
         this.swirlEngine = SwirlEngine(this.subWidth)
+        # ***
         this.currentSubset = 1
 
         # Our terrain dictionary :D
