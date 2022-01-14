@@ -10,7 +10,7 @@ def highlight(pos,cam,td):
         wp=pos+Vec3(0,1.86,0)+cam.forward*(i*0.5)
         # ***
         x = round(wp.x)
-        y = round(wp.y)
+        y = floor(wp.y)
         z = round(wp.z)
         bte.x = x
         bte.y = y+0.5

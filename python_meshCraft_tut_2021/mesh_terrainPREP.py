@@ -13,9 +13,10 @@ class MeshTerrain:
         this.numVertices = len(this.block.vertices)
 
         this.subsets = []
-        this.numSubsets = 128
+        this.numSubsets = 256
         
         # Must be even number! See genTerrain()
+        # ***
         this.subWidth = 6 
         this.swirlEngine = SwirlEngine(this.subWidth)
         # ***
@@ -49,7 +50,7 @@ class MeshTerrain:
         if key=='right mouse up' and bte.visible==True:
             bsite = checkBuild(bte.position,this.td)
             if bsite!=None:
-                this.genBlock(floor(bsite.x),floor(bsite.y),floor(bsite.z),subset=0,blockType='grass')
+                this.genBlock(floor(bsite.x),floor(bsite.y),floor(bsite.z),subset=0,blockType='soil')
                 gapShell(this.td,bsite)
                 this.subsets[0].model.generate()
     
@@ -135,7 +136,7 @@ class MeshTerrain:
                 if this.td.get( (floor(x+k),
                                 floor(y),
                                 floor(z+j)))==None:
-                    this.genBlock(x+k,y,z+j,blockType='ice')
+                    this.genBlock(x+k,y,z+j,blockType='grass')
 
         this.subsets[this.currentSubset].model.generate()
         # Current subset hack ;)

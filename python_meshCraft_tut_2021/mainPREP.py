@@ -13,6 +13,9 @@ subject = FirstPersonController()
 subject.gravity = 0.0
 # subject.cursor.visible=False
 window.fullscreen=False
+# ***
+scene.fog_density=0.02
+scene.fog_color=color.rgb(0,255,255)
 
 terrain = MeshTerrain()
 # snowfall = SnowFall(subject)
@@ -34,7 +37,7 @@ def update():
     # Highlight terrain block for mining/building...
     terrain.update(subject.position,camera)
     count+=1
-    if count == 4:
+    if count == 1:
         # Generate terrain at current swirl position.
         terrain.genTerrain()
         count=0
