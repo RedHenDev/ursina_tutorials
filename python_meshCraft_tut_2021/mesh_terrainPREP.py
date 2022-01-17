@@ -3,7 +3,7 @@ from ursina import *
 from random import random
 from swirl_engine import SwirlEngine
 from mining_systemPREP import *
-from building_system import *
+from building_systemPREP import *
 
 class MeshTerrain:
     def __init__(this):
@@ -13,11 +13,12 @@ class MeshTerrain:
         this.numVertices = len(this.block.vertices)
 
         this.subsets = []
-        this.numSubsets = 256
+        this.numSubsets = 1024
         
         # Must be even number! See genTerrain()
         # ***
-        this.subWidth = 6 
+        this.subWidth = 12 
+        this.d=int(this.subWidth*0.5)
         this.swirlEngine = SwirlEngine(this.subWidth)
         # ***
         this.currentSubset = 1
@@ -39,7 +40,15 @@ class MeshTerrain:
     # Highlight looked-at block :)
     def update(this,pos,cam):
         highlight(pos,cam,this.td)
-    
+        # *** Instamine!
+        if bte.visible==True:
+            for key, value in held_keys.items():
+                if key=='left mouse' and value == 1:
+                    epi = mine(this.td,this.vd,this.subsets)
+                    if epi != None:
+                        this.genWalls(epi[0],epi[1])
+                        this.subsets[epi[1]].model.generate()
+        
     def input(this,key):
         if key=='left mouse up' and bte.visible==True:
             epi = mine(this.td,this.vd,this.subsets)
@@ -127,7 +136,9 @@ class MeshTerrain:
         x = floor(this.swirlEngine.pos.x)
         z = floor(this.swirlEngine.pos.y)
 
-        d = int(this.subWidth*0.5)
+        # ***
+        # d = int(this.subWidth*0.5)
+        d = this.d
 
         for k in range(-d,d):
             for j in range(-d,d):
@@ -142,5 +153,9 @@ class MeshTerrain:
         # Current subset hack ;)
         if this.currentSubset<this.numSubsets-1:
             this.currentSubset+=1
-        else: this.currentSubset=0
+        # ***
+        else: 
+            this.currentSubset=1
+            print('all subsets filled')
+        
         this.swirlEngine.move()
