@@ -18,11 +18,12 @@ scene.fog_density=0.02
 scene.fog_color=color.rgb(0,255,255)
 # ***
 indra.scale*=0.01
-camera.clip_plane_far=400
+# camera.clip_plane_far=400
 
-terrain = MeshTerrain()
+terrain = MeshTerrain(subject,camera)
 # snowfall = SnowFall(subject)
-generating=False
+# ***
+generating=True
 
 for i in range(128):
     terrain.genTerrain()
@@ -33,7 +34,7 @@ snow_audio = Audio('snowStep.mp3',autoplay=False,loop=False)
 pX = subject.x
 pZ = subject.z
 # ***
-pRot = subject.rotation_y
+# pRot = subject.rotation_y
 
 def input(key):
     global generating
@@ -52,9 +53,9 @@ def update():
     # ***
     if generating:
         count+=1
-        if count == 8:
+        if count == 4:
             # Generate terrain at current swirl position.
-            for i in range(2):
+            for i in range(4):
                 terrain.genTerrain()
             count=0
     

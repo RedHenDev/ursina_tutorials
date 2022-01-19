@@ -6,7 +6,7 @@ from mining_systemPREP import *
 from building_systemPREP import *
 
 class MeshTerrain:
-    def __init__(this):
+    def __init__(this,subj,cam):
         
         this.block = load_model('block.obj')
         this.textureAtlas = 'texture_atlas_3.png'
@@ -17,7 +17,7 @@ class MeshTerrain:
         
         # Must be even number! See genTerrain()
         # ***
-        this.subWidth = 12 
+        this.subWidth = 6 
         this.d=int(this.subWidth*0.5)
         this.swirlEngine = SwirlEngine(this.subWidth)
         # ***

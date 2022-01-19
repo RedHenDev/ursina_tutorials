@@ -2,10 +2,7 @@
 Our building system :) 2022
 Happy New Year!
 """
-from ursina import Vec3, floor,Entity
-
-itin = Entity(model='quad')
-itin.always_on_top=True
+from ursina import Vec3, floor
 
 def checkBuild(_bsite,_td):
     # Adjust build site, since build-tool-entity (bte) offset.
