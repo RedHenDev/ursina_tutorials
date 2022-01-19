@@ -16,6 +16,10 @@ window.fullscreen=False
 
 terrain = MeshTerrain()
 # snowfall = SnowFall(subject)
+generatingTerrain=True
+
+for i in range(128):
+    terrain.genTerrain()
 
 grass_audio = Audio('step.ogg',autoplay=False,loop=False)
 snow_audio = Audio('snowStep.mp3',autoplay=False,loop=False)
@@ -24,22 +28,27 @@ pX = subject.x
 pZ = subject.z
 
 def input(key):
+    global generatingTerrain
     terrain.input(key)
+    if key=='g':
+        generatingTerrain = not generatingTerrain
 
 count = 0
 def update():
     global count, pX, pZ
 
-    # Generate terrain at current swirl position.
-    terrain.genTerrain()
+    # Highlight terrain block for mining/building...
+    terrain.update(subject.position,camera)
 
     count+=1
     if count == 4:
         
         count=0
-
-        # Highlight terrain block for mining/building...
-        terrain.update(subject.position,camera)
+        # Generate terrain at current swirl position.
+        if generatingTerrain:
+            for i in range(4):
+                terrain.genTerrain()
+        
 
     # Change subset position based on subject position.
     if abs(subject.x-pX)>1 or abs(subject.z-pZ)>1:
@@ -77,6 +86,9 @@ def update():
         # Gravity fall :<
         subject.y -= 9.8 * time.dt
 
-terrain.genTerrain()
+# Mobs deserve their own module :)
+guy = Entity(model='panda_mod',texture='panda_tex.png')
+guy.position = Vec3(0,-2.9,10)
+# guy.scale*=3
 
 app.run()

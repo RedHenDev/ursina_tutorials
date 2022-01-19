@@ -13,10 +13,10 @@ class MeshTerrain:
         this.numVertices = len(this.block.vertices)
 
         this.subsets = []
-        this.numSubsets = 512
+        this.numSubsets = 1024
         
         # Must be even number! See genTerrain()
-        this.subWidth = 4 
+        this.subWidth = 6 
         this.swirlEngine = SwirlEngine(this.subWidth)
         this.currentSubset = 0
 
@@ -33,17 +33,26 @@ class MeshTerrain:
                         texture=this.textureAtlas)
             e.texture_scale*=64/e.texture.width
             this.subsets.append(e)
-        
+
+    def do_mining(this):
+        epi = mine(this.td,this.vd,this.subsets)
+        if epi != None:
+            this.genWalls(epi[0],epi[1])
+            this.subsets[epi[1]].model.generate()
+
     # Highlight looked-at block :)
     def update(this,pos,cam):
         highlight(pos,cam,this.td)
+        # Blister-mining!
+        if bte.visible==True:
+            for key, value in held_keys.items():
+                if key=='left mouse' and value==1:
+                    this.do_mining()
+
     
     def input(this,key):
         if key=='left mouse up' and bte.visible==True:
-            epi = mine(this.td,this.vd,this.subsets)
-            if epi != None:
-                this.genWalls(epi[0],epi[1])
-                this.subsets[epi[1]].model.generate()
+            this.do_mining()
         # Building :)
         if key=='right mouse up' and bte.visible==True:
             bsite = checkBuild(bte.position,this.td)
@@ -134,7 +143,7 @@ class MeshTerrain:
                 if this.td.get( (floor(x+k),
                                 floor(y),
                                 floor(z+j)))==None:
-                    this.genBlock(x+k,y,z+j,blockType='ice')
+                    this.genBlock(x+k,y,z+j,blockType='grass')
 
         this.subsets[this.currentSubset].model.generate()
         # Current subset hack ;)
