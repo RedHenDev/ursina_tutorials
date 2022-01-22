@@ -5,17 +5,19 @@ Mob system and ai
 # only way to get texturing loading to work.
 from ursina import *
 
-guy = FrameAnimation3d('panda_mod_',1)
+guy = FrameAnimation3d('test_model_',fps=1)
 guy.position = Vec3(0,-2.9,10)
 guy.texture = 'panda_tex'
+guy.speed = 1
+guy.turn_speed = 5
 
-def move(mob,sub_pos,_td):
-    # Looks like we can access lookAt instead of 
-    # look_at and therefore pass in a speed.
+def mob_move(mob,sub_pos,_td):
+    # Looks like we can access lookAt() instead of 
+    # look_at() and therefore pass in a speed.
     # NB 100*time.dt will be close to instant.
-    mob.lookAt(sub_pos,10*time.dt)
+    mob.lookAt(sub_pos,mob.turn_speed*time.dt)
     mob.rotation = Vec3(0,mob.rotation.y+180,0)
-    mob.position = lerp(mob.position,sub_pos,time.dt*0.08)
+    mob.position+=-mob.forward*time.dt*mob.speed
     
     blockFound=False
     step = 4
@@ -34,7 +36,7 @@ def move(mob,sub_pos,_td):
             break
     if blockFound==True:
         # Step up or down :>
-        mob.y = lerp(mob.y, target, 6 * time.dt)
+        mob.y = lerp(mob.y, target, 10 * time.dt)
     else:
         # Gravity fall :<
         mob.y -= 9.8 * time.dt

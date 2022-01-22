@@ -12,14 +12,14 @@ indra = Sky()
 indra.color = window.color
 subject = FirstPersonController()
 subject.gravity = 0.0
-# subject.cursor.visible=False
-window.fullscreen=False
+subject.cursor.visible=False
+window.fullscreen=True
 
 terrain = MeshTerrain()
-# snowfall = SnowFall(subject)
+snowfall = SnowFall(subject)
 generatingTerrain=True
 
-for i in range(128):
+for i in range(64):
     terrain.genTerrain()
 
 grass_audio = Audio('step.ogg',autoplay=False,loop=False)
@@ -74,7 +74,7 @@ def update():
             grass_audio.play()
 
     # ***
-    move(guy,subject.position,terrain.td)
+    mob_move(guy,subject.position,terrain.td)
 
     blockFound=False
     step = 2
