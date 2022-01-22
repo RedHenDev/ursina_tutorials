@@ -2,7 +2,8 @@ from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
 from mesh_terrain import MeshTerrain
 from flake import SnowFall
-from random import random
+# *** to circumvent TypeError: 'module' object is not callable
+import random as ra
 
 app = Ursina()
 
@@ -45,9 +46,6 @@ count = 0
 def update():
     global count, pX, pZ
 
-    # ***
-    move(guy,subject.position,terrain.td)
-
     # Highlight terrain block for mining/building...
     terrain.update(subject.position,camera)
 
@@ -69,11 +67,14 @@ def update():
         # Sound :)
         if subject.y > 4:
             if snow_audio.playing==False:
-                # snow_audio.pitch=random()+0.25
+                snow_audio.pitch=ra.random()+0.25
                 snow_audio.play()
         elif grass_audio.playing==False:
-            # grass_audio.pitch=random()+0.7
+            grass_audio.pitch=ra.random()+0.7
             grass_audio.play()
+
+    # ***
+    move(guy,subject.position,terrain.td)
 
     blockFound=False
     step = 2

@@ -1,15 +1,13 @@
 """
 Mob system and ai
 """
-# from ursina import lerp, time, floor, Entity
-# from ursina import load_texture, FrameAnimation3d, Vec3
+# Importing everything from ursina module seems
+# only way to get texturing loading to work.
 from ursina import *
 
-# guy = Entity(model='panda_mod',texture='panda_tex.png')
 guy = FrameAnimation3d('panda_mod_',1)
 guy.position = Vec3(0,-2.9,10)
 guy.texture = 'panda_tex'
-# guy.scale*=3
 
 def move(mob,sub_pos,_td):
     # Looks like we can access lookAt instead of 
@@ -17,9 +15,7 @@ def move(mob,sub_pos,_td):
     # NB 100*time.dt will be close to instant.
     mob.lookAt(sub_pos,10*time.dt)
     mob.rotation = Vec3(0,mob.rotation.y+180,0)
-
     mob.position = lerp(mob.position,sub_pos,time.dt*0.08)
-    # mob.y = _td.get((mob.x,mob.y,mob.z))
     
     blockFound=False
     step = 4
