@@ -2,26 +2,23 @@ from perlin import Perlin
 from ursina import *
 from random import random
 from swirl_engine import SwirlEngine
-from mining_systemPREP import *
-from building_systemPREP import *
+from mining_system import *
+from building_system import *
 
 class MeshTerrain:
-    def __init__(this,subj,cam):
+    def __init__(this):
         
         this.block = load_model('block.obj')
         this.textureAtlas = 'texture_atlas_3.png'
         this.numVertices = len(this.block.vertices)
 
         this.subsets = []
-        this.numSubsets = 1024
+        this.numSubsets = 64
         
         # Must be even number! See genTerrain()
-        # ***
         this.subWidth = 6 
-        this.d=int(this.subWidth*0.5)
         this.swirlEngine = SwirlEngine(this.subWidth)
-        # ***
-        this.currentSubset = 1
+        this.currentSubset = 0
 
         # Our terrain dictionary :D
         this.td = {}
@@ -36,30 +33,31 @@ class MeshTerrain:
                         texture=this.textureAtlas)
             e.texture_scale*=64/e.texture.width
             this.subsets.append(e)
-        
+
+    def do_mining(this):
+        epi = mine(this.td,this.vd,this.subsets)
+        if epi != None:
+            this.genWalls(epi[0],epi[1])
+            this.subsets[epi[1]].model.generate()
+
     # Highlight looked-at block :)
     def update(this,pos,cam):
         highlight(pos,cam,this.td)
-        # *** Instamine!
+        # Blister-mining!
         if bte.visible==True:
             for key, value in held_keys.items():
-                if key=='left mouse' and value == 1:
-                    epi = mine(this.td,this.vd,this.subsets)
-                    if epi != None:
-                        this.genWalls(epi[0],epi[1])
-                        this.subsets[epi[1]].model.generate()
-        
+                if key=='left mouse' and value==1:
+                    this.do_mining()
+
+    
     def input(this,key):
         if key=='left mouse up' and bte.visible==True:
-            epi = mine(this.td,this.vd,this.subsets)
-            if epi != None:
-                this.genWalls(epi[0],epi[1])
-                this.subsets[epi[1]].model.generate()
+            this.do_mining()
         # Building :)
         if key=='right mouse up' and bte.visible==True:
             bsite = checkBuild(bte.position,this.td)
             if bsite!=None:
-                this.genBlock(floor(bsite.x),floor(bsite.y),floor(bsite.z),subset=0,blockType='soil')
+                this.genBlock(floor(bsite.x),floor(bsite.y),floor(bsite.z),subset=0,blockType='grass')
                 gapShell(this.td,bsite)
                 this.subsets[0].model.generate()
     
@@ -136,9 +134,7 @@ class MeshTerrain:
         x = floor(this.swirlEngine.pos.x)
         z = floor(this.swirlEngine.pos.y)
 
-        # ***
-        # d = int(this.subWidth*0.5)
-        d = this.d
+        d = int(this.subWidth*0.5)
 
         for k in range(-d,d):
             for j in range(-d,d):
@@ -153,9 +149,5 @@ class MeshTerrain:
         # Current subset hack ;)
         if this.currentSubset<this.numSubsets-1:
             this.currentSubset+=1
-        # ***
-        else: 
-            this.currentSubset=1
-            print('all subsets filled')
-        
+        else: this.currentSubset=0
         this.swirlEngine.move()

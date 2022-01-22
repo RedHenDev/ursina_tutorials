@@ -19,14 +19,83 @@ terrain = MeshTerrain()
 snowfall = SnowFall(subject)
 generatingTerrain=True
 
-for i in range(64):
-    terrain.genTerrain()
+# for i in range(64):
+#     terrain.genTerrain()
 
 grass_audio = Audio('step.ogg',autoplay=False,loop=False)
 snow_audio = Audio('snowStep.mp3',autoplay=False,loop=False)
 
 pX = subject.x
 pZ = subject.z
+
+# ***
+def load_world():
+    import pickle, sys, os
+
+    # Open main module directory for correct file.
+    path = os.path.dirname(os.path.abspath(sys.argv[0]))
+    os.chdir(path)
+    with open('test_map.mm', 'rb') as f:
+        nd = pickle.load(f)
+
+        # Populate our familiar terrain variables
+        # with data from the saved file.
+        subject.position = copy(nd[0])
+        terrain.td = copy(nd[1])
+        terrain.vd = copy(nd[2])
+        tm = copy(nd[3])
+
+        # Alter vertex dictionary to single model...
+        tot=0
+        for key in terrain.vd:
+            terrain.vd.get(key)[0]=0
+            terrain.vd.get(key)[1]=tot+terrain.vd.get(key)[1]
+            tot += terrain.vd.get(key)[1]
+
+        # Build single mesh from saved data.
+        world = Entity(model=Mesh(
+                            vertices=tm[0],
+                            triangles=tm[1],
+                            colors=tm[2],
+                            uvs=tm[3]))
+        world.texture='texture_atlas_3.png'
+        world.texture_scale*=64/world.texture.width
+        
+        terrain.subsets[0].model=copy(world.model)
+
+def save_world():
+    import pickle, sys, os
+
+    # Open main module directory for correct file.
+    path = os.path.dirname(os.path.abspath(sys.argv[0]))
+    os.chdir(path)
+    with open('test_map.mm', 'wb') as f:
+        e=Entity()
+        e.model=Mesh()
+        for s in terrain.subsets:
+            for v in s.model.vertices:
+                e.model.vertices.append(v)
+            for t in s.model.triangles:
+                e.model.triangles.append(t)
+            for c in s.model.colors:
+                e.model.colors.append(c)
+            for u in s.model.uvs:
+                e.model.uvs.append(u)
+        # e.combine(auto_destroy=False)
+
+        terrain_model = [   e.model.vertices,
+                            e.model.triangles,
+                            e.model.colors,
+                            e.model.uvs]
+        destroy(e)
+
+        new_data = [subject.position,
+                    terrain.td,
+                    terrain.vd,
+                    terrain_model]
+        
+        pickle.dump(new_data, f)
+        new_data.clear()
 
 def input(key):
     global generatingTerrain
@@ -41,6 +110,11 @@ def input(key):
         else: 
             guy.resume()
             guy.is_playing=True
+    # ***
+    if key=='b':
+        save_world()
+    if key=='n':
+        load_world()
 
 count = 0
 def update():
@@ -49,7 +123,7 @@ def update():
     # Highlight terrain block for mining/building...
     terrain.update(subject.position,camera)
 
-    count+=1
+    # count+=1
     if count == 4:
         
         count=0
@@ -99,6 +173,7 @@ def update():
         subject.y -= 9.8 * time.dt
 
 # ***
+load_world()
 # Mobs deserve their own module :)
 # ***
 from mob_system import *
