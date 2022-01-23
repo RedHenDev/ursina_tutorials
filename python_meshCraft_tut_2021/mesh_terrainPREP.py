@@ -2,8 +2,8 @@ from perlin import Perlin
 from ursina import *
 from random import random
 from swirl_engine import SwirlEngine
-from mining_system import *
-from building_system import *
+from mining_systemPREP import *
+from building_systemPREP import *
 
 class MeshTerrain:
     def __init__(this):
@@ -13,7 +13,7 @@ class MeshTerrain:
         this.numVertices = len(this.block.vertices)
 
         this.subsets = []
-        this.numSubsets = 64
+        this.numSubsets = 1024
         
         # Must be even number! See genTerrain()
         this.subWidth = 6 
@@ -28,6 +28,11 @@ class MeshTerrain:
 
         this.perlin = Perlin()
 
+        # *** For use in loading saved terrain map.
+        this.setup_subsets()
+
+    # ***
+    def setup_subsets(this):
         for i in range(0,this.numSubsets):
             e = Entity( model=Mesh(),
                         texture=this.textureAtlas)
@@ -49,7 +54,6 @@ class MeshTerrain:
                 if key=='left mouse' and value==1:
                     this.do_mining()
 
-    
     def input(this,key):
         if key=='left mouse up' and bte.visible==True:
             this.do_mining()
@@ -79,11 +83,12 @@ class MeshTerrain:
                             floor(np.z)))==None:
                 this.genBlock(np.x,np.y,np.z,subset,gap=False,blockType='soil')
 
-
     def genBlock(this,x,y,z,subset=-1,gap=True,blockType='grass'):
         if subset==-1: subset=this.currentSubset
         # Extend or add to the vertices of our model.
-        model = this.subsets[subset].model
+        try:
+            model = this.subsets[subset].model
+        except: print(subset)
 
         model.vertices.extend([ Vec3(x,y,z) + v for v in 
                                 this.block.vertices])
@@ -97,7 +102,7 @@ class MeshTerrain:
                 this.td[key]='g'
 
         # Record subset index and first vertex of this block.
-        vob = (subset, len(model.vertices)-37)
+        vob = [subset, len(model.vertices)-37]
         this.vd[(floor(x),
                 floor(y),
                 floor(z))] = vob
