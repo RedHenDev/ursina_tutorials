@@ -6,6 +6,7 @@ from flake import SnowFall
 # *** to circumvent TypeError: 'module' object is not callable
 # *** i.e. when mob_system module imported.
 import random as ra
+import bumpPrep
 
 app = Ursina()
 
@@ -16,6 +17,8 @@ subject = FirstPersonController()
 subject.gravity = 0.0
 subject.cursor.visible=False
 window.fullscreen=False
+window.show_ursina_splash=True
+camera.clip_plane_far=400
 
 terrain = MeshTerrain()
 # snowfall = SnowFall(subject)
@@ -78,7 +81,7 @@ def save_world():
     # Open main module directory for correct file.
     path = os.path.dirname(os.path.abspath(sys.argv[0]))
     os.chdir(path)
-    with open('test_map.mm', 'wb') as f:
+    with open('test_map2.mm', 'wb') as f:
         
         new_data=[subject.position,terrain.td]
 
@@ -138,72 +141,9 @@ def update():
     # ***
     mob_move(guy,subject.position,terrain.td)
 
-    blockFound=False
-    step = 2
-    height = 1.86
     # ***
-    x = round(subject.x)
-    z = round(subject.z)
-    y = round(subject.y)
-    # ***
-    # Simple wall collision detection.
-    # Front and Back.
-    # inF is location of block ahead, behind, side, etc.
-    def checkBump(inF):
-        for i in range(1,step+1):
-            if terrain.td.get(  (round(inF.x),
-                                round(inF.y+i),
-                                round(inF.z)) )=='t':
-                return True
-        return False
-    # In front...
-    # Also check diagonal left and right...
-    howClose=0.55
-    rPos=Vec3(x,y,z)
-    subFor=subject.forward
-    subFor.y=0
-    bDir=rPos+subFor*howClose
-    if (checkBump(bDir) or
-        checkBump(bDir+subject.left*howClose*0.5) or
-        checkBump(bDir+subject.right*howClose*0.5)):
-        held_keys['w'] = 0
-    # Behind...
-    bDir=rPos-subFor*howClose
-    if (checkBump(bDir) or
-        checkBump(bDir+subject.left*howClose*0.5) or
-        checkBump(bDir+subject.right*howClose*0.5)):
-        held_keys['s'] = 0
-    # Left...
-    subFor=subject.left
-    subFor.y=0
-    bDir=rPos+subFor*howClose
-    if (checkBump(bDir) or
-        checkBump(bDir+subject.forward*howClose*0.5) or
-        checkBump(bDir+subject.back*howClose*0.5)):
-        held_keys['a'] = 0
-    # Right...
-    bDir=rPos-subFor*howClose
-    if (checkBump(bDir) or
-        checkBump(bDir+subject.forward*howClose*0.5) or
-        checkBump(bDir+subject.back*howClose*0.5)):
-        held_keys['d'] = 0
-        
-    for i in range(-step,step):
-        if terrain.td.get((x,y+i,z))=='t':
-            if terrain.td.get((x,y+i+1,z))=='t':
-                target = y+i+height+1
-                blockFound=True
-                break
-            target = y+i+height
-            blockFound=True
-            break
-    if blockFound==True:
-        # Step up or down :>
-        subject.y = lerp(subject.y, target, 6 * time.dt)
-    else:
-        # Gravity fall :<
-        subject.y -= 9.8 * time.dt
-
+    bumpPrep.bumpWall(subject,terrain)
+    
 # ***
 # Mobs deserve their own module :)
 from mob_systemPREP import *
