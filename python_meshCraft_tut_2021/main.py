@@ -63,7 +63,7 @@ def update():
         elif grass_audio.playing==False:
             grass_audio.pitch=random()+0.7
             grass_audio.play()
-
+    
     blockFound=False
     step = 2
     height = 1.86

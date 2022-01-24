@@ -86,9 +86,7 @@ class MeshTerrain:
     def genBlock(this,x,y,z,subset=-1,gap=True,blockType='grass'):
         if subset==-1: subset=this.currentSubset
         # Extend or add to the vertices of our model.
-        try:
-            model = this.subsets[subset].model
-        except: print(subset)
+        model = this.subsets[subset].model
 
         model.vertices.extend([ Vec3(x,y,z) + v for v in 
                                 this.block.vertices])
@@ -102,7 +100,7 @@ class MeshTerrain:
                 this.td[key]='g'
 
         # Record subset index and first vertex of this block.
-        vob = [subset, len(model.vertices)-37]
+        vob = (subset, len(model.vertices)-37)
         this.vd[(floor(x),
                 floor(y),
                 floor(z))] = vob

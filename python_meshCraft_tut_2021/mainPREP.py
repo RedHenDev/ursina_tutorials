@@ -3,6 +3,7 @@ from ursina.prefabs.first_person_controller import FirstPersonController
 from mesh_terrainPREP import MeshTerrain
 from flake import SnowFall
 # *** to circumvent TypeError: 'module' object is not callable
+# *** i.e. when mob_system module imported.
 import random as ra
 
 app = Ursina()
@@ -13,13 +14,13 @@ indra.color = window.color
 subject = FirstPersonController()
 subject.gravity = 0.0
 subject.cursor.visible=False
-window.fullscreen=True
+window.fullscreen=False
 
 terrain = MeshTerrain()
-snowfall = SnowFall(subject)
-generatingTerrain=False
+# snowfall = SnowFall(subject)
+generatingTerrain=True
 
-for i in range(1):
+for i in range(128):
     terrain.genTerrain()
 
 grass_audio = Audio('step.ogg',autoplay=False,loop=False)
@@ -39,9 +40,9 @@ def load_world():
     with open('test_map.mm', 'rb') as f:
         nd = pickle.load(f)
 
+        # Empty out current terrain.
         for s in terrain.subsets:
             destroy(s)
-        subject.position=copy(nd[0])
         terrain.td={}
         terrain.vd={}
         terrain.subsets=[]
@@ -52,59 +53,23 @@ def load_world():
         # if we find 't' then generate a block.
         # Note this means we'll lose colour info etc.
         i = 0
-        whatSub=0
-        chunkSize=terrain.subWidth*terrain.subWidth
         for key in terrain.td:
-            i+=1
             if terrain.td.get(key)=='t':
                 x = key[0]
                 y = key[1]
                 z = key[2]
-                # print(str(key)+'-->'+terrain.td.get(key))
-                # if whatSub>63:
-                #     whatSub=1
                 if i>=len(terrain.subsets)-1:
-                    print(len(terrain.subsets))
                     i=0
                 terrain.genBlock(x,y,z,subset=i,gap=False,blockType='grass')
-                    # print(whatSub)
+                i+=1
+
         # Reset swirl engine.
         terrain.swirlEngine.reset(  subject.position.x,
                                     subject.position.z)
         for s in terrain.subsets:
             s.model.generate()
-
-        # # Populate our familiar terrain variables
-        # # with data from the saved file.
-        # subject.position = copy(nd[0])
-        # terrain.td = copy(nd[1])
-        # terrain.vd = copy(nd[2])
-        # tm = copy(nd[3])
-
-        # """
-        # # Alter vertex dictionary to single model...
-        # # OK this doesn't work -- must be a mistake in here.
-        # # tot=0
-        # # for key in terrain.vd:
-        # #     if terrain.vd[key] is not None:
-        # #         terrain.vd[key][0]=0
-        # #         terrain.vd[key][1]=tot+terrain.vd.get(key)[1]
-        # #         tot += terrain.vd.get(key)[1]
-        # #         print('assigned'+str(terrain.vd.get(key)))
-        # """
-
-        # # Build single mesh from saved data.
-        # world = Entity(model=Mesh(
-        #                     vertices=tm[0],
-        #                     triangles=tm[1],
-        #                     colors=tm[2],
-        #                     uvs=tm[3]))
-        # world.texture='texture_atlas_3.png'
-        # world.texture_scale*=64/world.texture.width
-        
-        # terrain.subsets[0].model=copy(world.model)
-        # terrain.swirlEngine.reset(0,0)
-        # terrain.currentSubset=0
+        # And reposition subject according to saved map.
+        subject.position=copy(nd[0])
 
 def save_world():
     import pickle, sys, os
@@ -114,34 +79,6 @@ def save_world():
     os.chdir(path)
     with open('test_map.mm', 'wb') as f:
         
-        # e=Entity()
-        # e.model=Mesh()
-        # for s in terrain.subsets:
-        #     for v in s.model.vertices:
-        #         e.model.vertices.append(v)
-        #     for t in s.model.triangles:
-        #         e.model.triangles.append(t)
-        #     for c in s.model.colors:
-        #         e.model.colors.append(c)
-        #     for u in s.model.uvs:
-        #         e.model.uvs.append(u)
-        # # e.combine(auto_destroy=False)
-
-        # terrain_model = [   e.model.vertices,
-        #                     e.model.triangles,
-        #                     e.model.colors,
-        #                     e.model.uvs]
-        # destroy(e)
-
-        # new_data = [subject.position,
-        #             terrain.td,
-        #             terrain.vd,
-        #             terrain_model]
-        
-        # OK, let's just try saving the terrain dictionary.
-        # When loading, therefore, terrain must be
-        # regenerated in order especially to repopulate
-        # the vertex dictionary.
         new_data=[subject.position,terrain.td]
 
         pickle.dump(new_data, f)
@@ -203,9 +140,34 @@ def update():
     blockFound=False
     step = 2
     height = 1.86
-    x = floor(subject.x+0.5)
-    z = floor(subject.z+0.5)
-    y = floor(subject.y+0.5)
+    # x = floor(subject.x+0.5)
+    # z = floor(subject.z+0.5)
+    # y = floor(subject.y+0.5)
+    x = round(subject.x)
+    z = round(subject.z)
+    y = round(subject.y)
+    # ***
+    # Simple wall collision detection.
+    # Front and Back.
+    inF=Vec3(x,y,z)+subject.forward*0.55
+    for i in range(1,step+1):
+        if terrain.td.get(  (round(inF.x),
+                            round(inF.y+i),
+                            round(inF.z)) )=='t':
+            subject.speed=0
+            subject.position-=subject.forward*0.1
+            break
+        else: subject.speed=6
+    inF=Vec3(x,y,z)-subject.forward*0.55
+    for i in range(1,step+1):
+        if terrain.td.get(  (round(inF.x),
+                            round(inF.y+i),
+                            round(inF.z)) )=='t':
+            subject.speed=0
+            subject.position+=subject.forward*0.1
+            break
+        else: subject.speed=6
+        
     for i in range(-step,step):
         if terrain.td.get((x,y+i,z))=='t':
             if terrain.td.get((x,y+i+1,z))=='t':
@@ -223,9 +185,7 @@ def update():
         subject.y -= 9.8 * time.dt
 
 # ***
-# load_world()
 # Mobs deserve their own module :)
-# ***
-from mob_system import *
+from mob_systemPREP import *
 
 app.run()
