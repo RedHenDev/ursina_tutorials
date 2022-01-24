@@ -1,3 +1,4 @@
+from operator import truediv
 from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
 from mesh_terrainPREP import MeshTerrain
@@ -140,33 +141,52 @@ def update():
     blockFound=False
     step = 2
     height = 1.86
-    # x = floor(subject.x+0.5)
-    # z = floor(subject.z+0.5)
-    # y = floor(subject.y+0.5)
+    # ***
     x = round(subject.x)
     z = round(subject.z)
     y = round(subject.y)
     # ***
     # Simple wall collision detection.
     # Front and Back.
-    inF=Vec3(x,y,z)+subject.forward*0.55
-    for i in range(1,step+1):
-        if terrain.td.get(  (round(inF.x),
-                            round(inF.y+i),
-                            round(inF.z)) )=='t':
-            subject.speed=0
-            subject.position-=subject.forward*0.1
-            break
-        else: subject.speed=6
-    inF=Vec3(x,y,z)-subject.forward*0.55
-    for i in range(1,step+1):
-        if terrain.td.get(  (round(inF.x),
-                            round(inF.y+i),
-                            round(inF.z)) )=='t':
-            subject.speed=0
-            subject.position+=subject.forward*0.1
-            break
-        else: subject.speed=6
+    # inF is location of block ahead, behind, side, etc.
+    def checkBump(inF):
+        for i in range(1,step+1):
+            if terrain.td.get(  (round(inF.x),
+                                round(inF.y+i),
+                                round(inF.z)) )=='t':
+                return True
+        return False
+    # In front...
+    # Also check diagonal left and right...
+    howClose=0.55
+    rPos=Vec3(x,y,z)
+    subFor=subject.forward
+    subFor.y=0
+    bDir=rPos+subFor*howClose
+    if (checkBump(bDir) or
+        checkBump(bDir+subject.left*howClose*0.5) or
+        checkBump(bDir+subject.right*howClose*0.5)):
+        held_keys['w'] = 0
+    # Behind...
+    bDir=rPos-subFor*howClose
+    if (checkBump(bDir) or
+        checkBump(bDir+subject.left*howClose*0.5) or
+        checkBump(bDir+subject.right*howClose*0.5)):
+        held_keys['s'] = 0
+    # Left...
+    subFor=subject.left
+    subFor.y=0
+    bDir=rPos+subFor*howClose
+    if (checkBump(bDir) or
+        checkBump(bDir+subject.forward*howClose*0.5) or
+        checkBump(bDir+subject.back*howClose*0.5)):
+        held_keys['a'] = 0
+    # Right...
+    bDir=rPos-subFor*howClose
+    if (checkBump(bDir) or
+        checkBump(bDir+subject.forward*howClose*0.5) or
+        checkBump(bDir+subject.back*howClose*0.5)):
+        held_keys['d'] = 0
         
     for i in range(-step,step):
         if terrain.td.get((x,y+i,z))=='t':
