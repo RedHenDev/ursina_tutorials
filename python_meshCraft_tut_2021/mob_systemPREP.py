@@ -20,6 +20,11 @@ def mob_move(mob,sub_pos,_td):
     dir = mob.position-sub_pos
     if dir.length() > 5:
         mob.position+=-mob.forward*time.dt*mob.speed
+        mob.resume()
+        mob.is_playing=True
+    else:
+        mob.pause()
+        mob.is_playing=False
     
     blockFound=False
     step = 4

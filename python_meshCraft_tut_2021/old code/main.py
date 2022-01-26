@@ -2,7 +2,7 @@ from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
 from mesh_terrain import MeshTerrain
 from flake import SnowFall
-import random as ra
+from random import random
 
 app = Ursina()
 
@@ -16,7 +16,7 @@ window.fullscreen=False
 
 terrain = MeshTerrain()
 # snowfall = SnowFall(subject)
-generatingTerrain=False
+generatingTerrain=True
 
 for i in range(12):
     terrain.genTerrain()
@@ -40,8 +40,8 @@ def update():
     # Highlight terrain block for mining/building...
     terrain.update(subject.position,camera)
 
-    # Handle mob ai.
-    mob_movement(grey, subject.position, terrain.td)
+    # Look after our mob behaviours.
+    move_mob(grey,subject.position,terrain.td)
 
     count+=1
     if count == 4:
@@ -61,10 +61,10 @@ def update():
         # Sound :)
         if subject.y > 4:
             if snow_audio.playing==False:
-                snow_audio.pitch=ra.random()+0.25
+                snow_audio.pitch=random()+0.25
                 snow_audio.play()
         elif grass_audio.playing==False:
-            grass_audio.pitch=ra.random()+0.7
+            grass_audio.pitch=random()+0.7
             grass_audio.play()
     
     blockFound=False
