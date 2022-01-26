@@ -19,6 +19,7 @@ subject.cursor.visible=False
 window.fullscreen=False
 window.show_ursina_splash=True
 camera.clip_plane_far=400
+indra.scale*=0.04
 
 terrain = MeshTerrain()
 # snowfall = SnowFall(subject)
