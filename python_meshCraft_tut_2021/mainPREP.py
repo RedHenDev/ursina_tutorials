@@ -10,16 +10,21 @@ import bumpPrep
 
 app = Ursina()
 
-window.color = color.rgb(0,200,255)
-indra = Sky()
-indra.color = window.color
+# window.color = color.rgb(0,200,255)
+
+# indra = Sky()
+# indra.color = window.color
 subject = FirstPersonController()
 subject.gravity = 0.0
 subject.cursor.visible=False
 window.fullscreen=False
 window.show_ursina_splash=True
-camera.clip_plane_far=400
-indra.scale*=0.04
+# camera.clip_plane_far=400
+# indra.scale*=0.04
+
+bg=Entity(model='quad',texture='panda_tex',z=camera.clip_plane_far)
+bg.scale=camera.clip_plane_far
+bg.parent=camera
 
 terrain = MeshTerrain()
 # snowfall = SnowFall(subject)

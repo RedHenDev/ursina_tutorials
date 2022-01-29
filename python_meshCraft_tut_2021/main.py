@@ -3,6 +3,7 @@ from ursina.prefabs.first_person_controller import FirstPersonController
 from mesh_terrain import MeshTerrain
 from flake import SnowFall
 import random as ra
+from bump_system import *
 
 app = Ursina()
 
@@ -18,7 +19,7 @@ terrain = MeshTerrain()
 # snowfall = SnowFall(subject)
 generatingTerrain=False
 
-for i in range(12):
+for i in range(64):
     terrain.genTerrain()
 
 grass_audio = Audio('step.ogg',autoplay=False,loop=False)
@@ -67,27 +68,8 @@ def update():
             grass_audio.pitch=ra.random()+0.7
             grass_audio.play()
     
-    blockFound=False
-    step = 2
-    height = 1.86
-    x = floor(subject.x+0.5)
-    z = floor(subject.z+0.5)
-    y = floor(subject.y+0.5)
-    for i in range(-step,step):
-        if terrain.td.get((x,y+i,z))=='t':
-            if terrain.td.get((x,y+i+1,z))=='t':
-                target = y+i+height+1
-                blockFound=True
-                break
-            target = y+i+height
-            blockFound=True
-            break
-    if blockFound==True:
-        # Step up or down :>
-        subject.y = lerp(subject.y, target, 6 * time.dt)
-    else:
-        # Gravity fall :<
-        subject.y -= 9.8 * time.dt
+    # Walk on solid terrain, and check wall collisions.
+    bumpWall(subject,terrain)
 
 from mob_system import *
 

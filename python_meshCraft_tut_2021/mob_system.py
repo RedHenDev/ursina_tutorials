@@ -6,18 +6,20 @@ grey = FrameAnimation3d('panda_walk_',fps=1)
 # ***
 grey.texture='panda_texture'
 grey.position = Vec3(0,-2.9,10)
-grey.turnSpeed = 0.002
+grey.turnSpeed = 1
 grey.speed = 1
 
 def mob_movement(mob, subPos, _td):
     # First, turn towards target...
-    # Turn speed not affected? BUG
-    mob.lookAt(subPos, mob.turnSpeed * time.dt)
+    # BUG wiggle walk when aligned with subject?
+    tempOR = mob.rotation_y
+    mob.lookAt(subPos)
     mob.rotation = Vec3(0,mob.rotation.y+180,0)
+    mob.rotation_y = lerp(tempOR,mob.rotation_y,mob.turnSpeed*time.dt)
 
     # Now move mob towards target...
     # How close can they approach?
-    intimacyDist = 10
+    intimacyDist = 3
     # How far away from target?
     dist = subPos-mob.position
     # Magnitude of distance from target examined...
@@ -33,6 +35,12 @@ def mob_movement(mob, subPos, _td):
     terrain_walk(mob, _td)
 
 def terrain_walk(mob, _td):
+    # Check mob hasn't fallen off the planet ;)
+
+    if mob.y < -100:
+        mob.y = 100
+        print("I've fallen off!")
+
     blockFound=False
     step = 4
     height = 1

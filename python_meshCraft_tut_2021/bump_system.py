@@ -1,3 +1,6 @@
+"""Subject terrain collisions -- i.e. not ghosting
+through walls etc."""
+
 from ursina import Vec3, held_keys, time
 
 def bumpWall(subject,terrain):
