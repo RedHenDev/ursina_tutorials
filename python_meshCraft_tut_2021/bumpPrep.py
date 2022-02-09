@@ -63,6 +63,9 @@ def bumpWall(subject,terrain):
     if blockFound==True:
         # Step up or down :>
         subject.y = lerp(subject.y, target, 6 * time.dt)
+        if subject.ump:
+            subject.ump=False
+            subject.y+=4
     else:
         # Gravity fall :<
         subject.y -= 9.8 * time.dt

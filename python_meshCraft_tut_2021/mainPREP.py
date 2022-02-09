@@ -16,6 +16,8 @@ indra.color = window.color
 subject = FirstPersonController()
 subject.gravity = 0.0
 subject.cursor.visible=False
+# ***
+subject.ump=False
 window.fullscreen=False
 window.show_ursina_splash=True
 # ***
@@ -40,6 +42,10 @@ def input(key):
     terrain.input(key)
     if key=='g':
         generatingTerrain = not generatingTerrain
+    
+    # ***
+    if key=='space':
+        subject.ump=True
 
     # ***
     if key=='b':
