@@ -10,21 +10,23 @@ import bumpPrep
 
 app = Ursina()
 
-# window.color = color.rgb(0,200,255)
+window.color = color.rgb(0,200,255)
 
-# indra = Sky()
-# indra.color = window.color
+indra = Sky()
+indra.color = window.color
 subject = FirstPersonController()
 subject.gravity = 0.0
 subject.cursor.visible=False
 window.fullscreen=False
 window.show_ursina_splash=True
-# camera.clip_plane_far=400
-# indra.scale*=0.04
+# ***
+camera.clip_plane_far=400
+indra.scale*=0.04
 
-bg=Entity(model='quad',texture='panda_tex',z=camera.clip_plane_far)
-bg.scale=camera.clip_plane_far
-bg.parent=camera
+# Placing 'ui' background.
+# bg=Entity(model='quad',texture='panda_tex',z=camera.clip_plane_far)
+# bg.scale=camera.clip_plane_far
+# bg.parent=camera
 
 terrain = MeshTerrain()
 # snowfall = SnowFall(subject)
@@ -47,7 +49,7 @@ def load_world():
     # Open main module directory for correct file.
     path = os.path.dirname(os.path.abspath(sys.argv[0]))
     os.chdir(path)
-    with open('test_map.mm', 'rb') as f:
+    with open('test_map2.mm', 'rb') as f:
         nd = pickle.load(f)
 
         # Empty out current terrain.
@@ -99,14 +101,7 @@ def input(key):
     terrain.input(key)
     if key=='g':
         generatingTerrain = not generatingTerrain
-    # ***
-    if key=='p':
-        if guy.is_playing:
-            guy.pause()
-            guy.is_playing=False
-        else: 
-            guy.resume()
-            guy.is_playing=True
+
     # ***
     if key=='b':
         save_world()
