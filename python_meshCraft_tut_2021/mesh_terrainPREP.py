@@ -4,6 +4,7 @@ from random import random
 from swirl_engine import SwirlEngine
 from mining_systemPREP import *
 from building_systemPREP import *
+from PREP_cfg import SIX_DIRS
 
 class MeshTerrain:
     def __init__(this):
@@ -70,17 +71,14 @@ class MeshTerrain:
         if epi==None: return
         # Refactor this -- place in mining_system 
         # except for cal to genBlock?
-        wp =    [   Vec3(0,1,0),
-                    Vec3(0,-1,0),
-                    Vec3(-1,0,0),
-                    Vec3(1,0,0),
-                    Vec3(0,0,-1),
-                    Vec3(0,0,1)]
+        
         for i in range(0,6):
-            np = epi + wp[i]
-            if this.td.get( (floor(np.x),
-                            floor(np.y),
-                            floor(np.z)))==None:
+            # ***
+            np = epi + SIX_DIRS[i]
+            x=floor(np.x)
+            y=floor(np.y)
+            z=floor(np.z)
+            if this.td.get( (x,y,z) )==None:
                 this.genBlock(np.x,np.y,np.z,subset,gap=False,blockType='soil')
 
     def genBlock(this,x,y,z,subset=-1,gap=True,blockType='grass'):
