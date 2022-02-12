@@ -4,6 +4,7 @@ from mesh_terrain import MeshTerrain
 from flake import SnowFall
 import random as ra
 from bump_system import *
+from save_load_system import saveMap, loadMap
 
 app = Ursina()
 
@@ -12,11 +13,19 @@ indra = Sky()
 indra.color = window.color
 subject = FirstPersonController()
 subject.gravity = 0.0
-# subject.cursor.visible=False
+subject.cursor.visible=True
+subject.cursor.color=color.white
+subject.frog=False # For jumping...
+subject.runSpeed=12
+subject.walkSpeed=4
+camera.dash=10 # Rate at which fov changes when running.
 window.fullscreen=False
 
 terrain = MeshTerrain()
 # snowfall = SnowFall(subject)
+# How do you at atmospheric fog?
+scene.fog_density=0.04
+scene.fog_color=indra.color
 generatingTerrain=False
 
 for i in range(64):
@@ -33,6 +42,11 @@ def input(key):
     terrain.input(key)
     if key=='g':
         generatingTerrain = not generatingTerrain
+    # Jumping...
+    if key=='space': subject.frog=True
+    # Saving and loading...
+    if key=='m': saveMap(subject.position,terrain.td)
+    if key=='l': loadMap(subject,terrain)
 
 count = 0
 def update():
@@ -70,6 +84,16 @@ def update():
     
     # Walk on solid terrain, and check wall collisions.
     bumpWall(subject,terrain)
+    # Running and dash effect.
+    if held_keys['shift'] and held_keys['w']:
+        subject.speed=subject.runSpeed
+        if camera.fov<100:
+            camera.fov+=camera.dash*time.dt
+    else:
+        subject.speed=subject.walkSpeed
+        if camera.fov>90:
+            camera.fov-=camera.dash*4*time.dt
+            if camera.fov<90:camera.fov=90
 
 from mob_system import *
 

@@ -28,4 +28,4 @@ def gapShell(_td,_bsite):
         y=floor(p.y)
         z=floor(p.z)
         if _td.get((x,y,z))==None:
-            _td[(floor(p.x),floor(p.y),floor(p.z))]='g'
+            _td[(x,y,z)]='g'

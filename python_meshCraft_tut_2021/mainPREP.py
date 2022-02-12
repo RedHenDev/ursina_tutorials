@@ -15,17 +15,19 @@ indra = Sky()
 indra.color = window.color
 subject = FirstPersonController()
 subject.gravity = 0.0
-subject.cursor.visible=False
+subject.cursor.visible=True
+subject.cursor.color=color.white
 # ***
 subject.ump=False
 window.fullscreen=False
-window.show_ursina_splash=True
+# window.show_ursina_splash=True
 # ***
-camera.clip_plane_far=400
-indra.scale*=0.04
+camera.clip_plane_far=100
+indra.scale*=0.01
+camDash=10
 
 terrain = MeshTerrain()
-snowfall = SnowFall(subject)
+# snowfall = SnowFall(subject)
 generatingTerrain=True
 
 for i in range(256):
@@ -56,6 +58,17 @@ def input(key):
 count = 0
 def update():
     global count, pX, pZ
+
+    # *** Camera dash effect. FOV default is 90.
+    if held_keys['shift'] and held_keys['w']:
+        subject.speed=12
+        if camera.fov<100:
+            camera.fov+=camDash*time.dt
+    else: 
+        subject.speed=6
+        if camera.fov>90:
+            camera.fov-=camDash*4*time.dt
+            if camera.fov<90:camera.fov=90
 
     # Highlight terrain block for mining/building...
     terrain.update(subject.position,camera)

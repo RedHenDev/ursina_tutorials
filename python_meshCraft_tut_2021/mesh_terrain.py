@@ -28,6 +28,10 @@ class MeshTerrain:
 
         this.perlin = Perlin()
 
+        # Instantiate our subset Entities.
+        this.setup_subsets()
+
+    def setup_subsets(this):
         for i in range(0,this.numSubsets):
             e = Entity( model=Mesh(),
                         texture=this.textureAtlas)
@@ -45,11 +49,12 @@ class MeshTerrain:
         highlight(pos,cam,this.td)
         # Blister-mining!
         if bte.visible==True:
-            for key, value in held_keys.items():
-                if key=='left mouse' and value==1:
-                    this.do_mining()
+            if held_keys['shift'] and held_keys['left mouse']:
+                this.do_mining()
+            # for key, value in held_keys.items():
+            #     if key=='left mouse' and value==1:
+            #         this.do_mining()
 
-    
     def input(this,key):
         if key=='left mouse up' and bte.visible==True:
             this.do_mining()

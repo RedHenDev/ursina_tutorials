@@ -6,8 +6,8 @@ from ursina import Vec3, held_keys, time
 def bumpWall(subject,terrain):
     blockFound=False
     step = 2
+    jumpHeight = 3
     height = 1.86
-    # ***
     x = round(subject.x)
     z = round(subject.z)
     y = round(subject.y)
@@ -66,6 +66,10 @@ def bumpWall(subject,terrain):
     if blockFound==True:
         # Step up or down :>
         subject.y = lerp(subject.y, target, 6 * time.dt)
+        # We are grounded -- so can jump...
+        if subject.frog is True:
+            subject.frog=False
+            subject.y+=jumpHeight
     else:
         # Gravity fall :<
         subject.y -= 9.8 * time.dt

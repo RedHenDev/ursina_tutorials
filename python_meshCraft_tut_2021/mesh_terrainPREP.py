@@ -50,10 +50,10 @@ class MeshTerrain:
     def update(this,pos,cam):
         highlight(pos,cam,this.td)
         # Blister-mining!
+        # ***
         if bte.visible==True:
-            for key, value in held_keys.items():
-                if key=='left mouse' and value==1:
-                    this.do_mining()
+            if held_keys['shift'] and held_keys['left mouse']:
+                this.do_mining()
 
     def input(this,key):
         if key=='left mouse up' and bte.visible==True:
@@ -79,7 +79,7 @@ class MeshTerrain:
             y=floor(np.y)
             z=floor(np.z)
             if this.td.get( (x,y,z) )==None:
-                this.genBlock(np.x,np.y,np.z,subset,gap=False,blockType='soil')
+                this.genBlock(x,y,z,subset,gap=False,blockType='soil')
 
     def genBlock(this,x,y,z,subset=-1,gap=True,blockType='grass'):
         if subset==-1: subset=this.currentSubset
