@@ -46,15 +46,18 @@ class MeshTerrain:
 
     # ***
     def findBuildSite(this,pos,cam):
-        i = highlight(pos,cam,this.td,True)
+        # i = highlight(pos,cam,this.td,True)
         
-        traj=cam.forward
-
-        j=0.5
-        bp.position = (pos+Vec3(0,1.86,0)+cam.forward*0.51*i) + (traj.normalized()*-j)   
+        dist=bte.position-(pos+Vec3(0,1.86,0))
+        j=0.75
+        bp.position = ((pos+Vec3(0,1.86,0)+
+                        cam.forward*(dist.length())) 
+                        - (cam.forward)*j)   
         bp.x=round(bp.x)
         bp.y=floor(bp.y)
         bp.z=round(bp.z)
+        if bp.position==bte.position:
+            bp.position+=Vec3(0,1,0)
 
         
 

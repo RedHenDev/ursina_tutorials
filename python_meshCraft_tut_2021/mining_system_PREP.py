@@ -1,9 +1,9 @@
 from ursina import Entity, color, floor, Vec3
 # ***
-bte = Entity(model='block.obj',color=color.rgba(1,1,0,0.4))
-bte.scale=1.001
-bp = Entity(model='block.obj',color=color.rgba(0,0,1,0.4))
-bp.scale=1.001
+bte = Entity(model='block.obj',color=color.rgba(1,1,0,0.2))
+bte.scale=1.04
+bp = Entity(model='block.obj',color=color.rgba(0,0,1,0.2))
+bp.scale=1.04
 # ***
 def highlight(pos,cam,td,fbs=False):
     for i in range(1,32):
