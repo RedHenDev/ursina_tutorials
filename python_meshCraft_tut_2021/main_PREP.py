@@ -18,16 +18,22 @@ subject.cursor.color=color.white
 subject.frog=False # For jumping...
 subject.runSpeed=12
 subject.walkSpeed=4
+# ***
+subject.y=100
 camera.dash=10 # Rate at which fov changes when running.
 window.fullscreen=False
+
 
 terrain = MeshTerrain()
 # ***
 terrain.generatingTerrain=True
 # snowfall = SnowFall(subject)
 # *** 
-scene.fog_density=(0,50)
+# scene.fog_density=(0,50)
+scene.fog_density=(3,50)
 scene.fog_color=indra.color
+camera.clip_plane_far=100
+indra.scale*=1/camera.clip_plane_far
 
 for i in range(32):
     terrain.genTerrain()

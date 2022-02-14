@@ -13,7 +13,7 @@ class MeshTerrain:
         this.numVertices = len(this.block.vertices)
 
         this.subsets = []
-        this.numSubsets = 128
+        this.numSubsets = 512
         
         # Must be even number! See genTerrain()
         this.subWidth = 6 

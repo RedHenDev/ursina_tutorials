@@ -16,8 +16,7 @@ def checkBuild(_bsite,_td,_bp):
     z = int(_bsite.z)
     # Make sure no block here already...
     if _td.get((x,y,z))!='g' and _td.get((x,y,z))!=None:
-        print("Can't build here, sorry :(") 
-        print(_bp)
+        print("Can't build here, sorry :(")
         return None
     # If we're here, we can build. Yessssss.
     return Vec3(x,y,z)
