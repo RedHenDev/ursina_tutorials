@@ -3,7 +3,7 @@ from ursina.prefabs.first_person_controller import FirstPersonController
 from mesh_terrain_PREP import MeshTerrain
 from flake import SnowFall
 import random as ra
-from bump_system import *
+from bump_system_PREP import *
 from save_load_system import saveMap, loadMap
 
 app = Ursina()
@@ -20,9 +20,9 @@ subject.runSpeed=12
 subject.walkSpeed=4
 # ***
 subject.y=100
+subject.height=1.53
 camera.dash=10 # Rate at which fov changes when running.
 window.fullscreen=False
-
 
 terrain = MeshTerrain()
 # ***
@@ -31,9 +31,15 @@ terrain.generatingTerrain=True
 # *** 
 # scene.fog_density=(0,50)
 scene.fog_density=(3,50)
-scene.fog_color=indra.color
+# scene.fog_color=indra.color
+scene.fog_color=color.white
 camera.clip_plane_far=100
 indra.scale*=1/camera.clip_plane_far
+
+# ***
+beaker=Text('')
+beaker.scale=2
+beaker.origin=(-0.5,.5)
 
 for i in range(32):
     terrain.genTerrain()
@@ -57,21 +63,23 @@ def input(key):
 count = 0
 def update():
     global count, pX, pZ
-
-    # Highlight terrain block for mining/building...
-    terrain.update(subject.position,camera)
-
+    # ***
+    # beaker.text=str(int(subject.x))
+    # beaker.background=True
+    print_on_screen(str(int(subject.x)),scale=4,duration=0.1)
     # Handle mob ai.
     mob_movement(grey, subject.position, terrain.td)
-
+    # ***
     count+=1
-    if count == 4:
+    if count == 2:
         
         count=0
         # Generate terrain at current swirl position.
         if terrain.generatingTerrain:
-            for i in range(4):
+            for i in range(1):
                 terrain.genTerrain()
+        # Highlight terrain block for mining/building...
+        terrain.update(subject.position,camera)
         
 
     # Change subset position based on subject position.

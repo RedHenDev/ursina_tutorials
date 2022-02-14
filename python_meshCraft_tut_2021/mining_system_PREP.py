@@ -7,8 +7,8 @@ bte.origin_y+=0.05
 bp = Entity(model='block.obj',color=color.rgba(0,0,1,0.4))
 bp.scale=0.5
 bp.origin_y-=0.5
-# ***
-def highlight(pos,cam,td,fbs=False):
+
+def highlight(pos,cam,td):
     for i in range(1,32):
         # Adjust for player's height!
         wp=pos+Vec3(0,1.86,0)+cam.forward*(i*0.5)

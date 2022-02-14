@@ -1,6 +1,6 @@
 from ursina import Entity, color, floor, Vec3
-
-bte = Entity(model='cube',color=color.rgba(1,1,0,0.4))
+# Build Tool Entity (aka 'bte').
+bte = Entity(model='block.obj',color=color.rgba(1,1,0,0.4))
 bte.scale=1.001
 
 def highlight(pos,cam,td):
@@ -13,7 +13,7 @@ def highlight(pos,cam,td):
         y = floor(wp.y)
         z = round(wp.z)
         bte.x = x
-        bte.y = y+0.5
+        bte.y = y
         bte.z = z
         if td.get((x,y,z))=='t':
             bte.visible = True
@@ -24,7 +24,7 @@ def highlight(pos,cam,td):
 def mine(td,vd,subsets):
     if not bte.visible: return
 
-    wv=vd.get((floor(bte.x),floor(bte.y-0.5),floor(bte.z)))
+    wv=vd.get((floor(bte.x),floor(bte.y),floor(bte.z)))
     
     # Have we got a block highlighted? If not, return.
     if wv==None: return
@@ -35,7 +35,7 @@ def mine(td,vd,subsets):
     subsets[wv[0]].model.generate()
 
     # g for gap in terrain. And wipe vd entry.
-    td[ (floor(bte.x),floor(bte.y-0.5),floor(bte.z))]='g'
-    vd[ (floor(bte.x),floor(bte.y-0.5),floor(bte.z))] = None
+    td[ (floor(bte.x),floor(bte.y),floor(bte.z))]='g'
+    vd[ (floor(bte.x),floor(bte.y),floor(bte.z))] = None
     
-    return (bte.position + Vec3(0,-0.5,0), wv[0])
+    return (bte.position, wv[0])

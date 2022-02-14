@@ -15,13 +15,14 @@ subject = FirstPersonController()
 subject.gravity = 0.0
 subject.cursor.visible=True
 subject.cursor.color=color.white
+subject.height=1.86
 subject.frog=False # For jumping...
 subject.runSpeed=12
 subject.walkSpeed=4
 camera.dash=10 # Rate at which fov changes when running.
 window.fullscreen=False
 
-terrain = MeshTerrain()
+terrain = MeshTerrain(subject,camera)
 # snowfall = SnowFall(subject)
 # How do you at atmospheric fog?
 scene.fog_density=0.04

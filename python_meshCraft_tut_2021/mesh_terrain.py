@@ -6,8 +6,11 @@ from mining_system import *
 from building_system import *
 
 class MeshTerrain:
-    def __init__(this):
+    def __init__(this,_sub,_cam):
         
+        this.subject = _sub
+        this.camera = _cam
+
         this.block = load_model('block.obj')
         this.textureAtlas = 'texture_atlas_3.png'
         this.numVertices = len(this.block.vertices)
@@ -45,6 +48,8 @@ class MeshTerrain:
             this.subsets[epi[1]].model.generate()
 
     # Highlight looked-at block :)
+    # !*!*!*!*!*!*!
+    # We don't need to pass in pos and cam anymore?!
     def update(this,pos,cam):
         highlight(pos,cam,this.td)
         # Blister-mining!
@@ -60,7 +65,9 @@ class MeshTerrain:
             this.do_mining()
         # Building :)
         if key=='right mouse up' and bte.visible==True:
-            bsite = checkBuild(bte.position,this.td)
+            bsite = checkBuild( bte.position,this.td,
+                                this.camera.forward,
+                                this.subject.position+Vec3(0,this.subject.height,0))
             if bsite!=None:
                 this.genBlock(floor(bsite.x),floor(bsite.y),floor(bsite.z),subset=0,blockType='grass')
                 gapShell(this.td,bsite)

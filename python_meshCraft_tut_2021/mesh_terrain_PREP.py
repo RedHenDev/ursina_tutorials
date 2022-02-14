@@ -16,7 +16,7 @@ class MeshTerrain:
         this.numSubsets = 512
         
         # Must be even number! See genTerrain()
-        this.subWidth = 6 
+        this.subWidth = 8 
         this.swirlEngine = SwirlEngine(this.subWidth)
         this.currentSubset = 0
 
@@ -58,16 +58,12 @@ class MeshTerrain:
         bp.z=round(bp.z)
         if bp.position==bte.position:
             bp.position+=Vec3(0,1,0)
-        # Adjust for model offset.
-        # bp.y+=0.25
-
-        
 
     # Highlight looked-at block :)
     def update(this,pos,cam):
         highlight(pos,cam,this.td)
         # ***
-        if bte.visible:
+        if bp.visible:
             this.findBuildSite(pos,cam)
         # Blister-mining!
         if bte.visible==True:
@@ -81,11 +77,12 @@ class MeshTerrain:
         if key=='left mouse up' and bte.visible==True:
             this.do_mining()
         # Building :)
-        if key=='right mouse up' and bte.visible==True:
+        # ***
+        if key=='right mouse up' and bp.visible==True:
             # ***
-            bsite = checkBuild(bte.position,this.td,bp.position)
+            bsite = checkBuild(this.td,bp.position)
             if bsite!=None:
-                this.genBlock(floor(bsite.x),floor(bsite.y),floor(bsite.z),subset=0,blockType='grass')
+                this.genBlock(bsite.x,bsite.y,bsite.z,subset=0,blockType='grass')
                 gapShell(this.td,bsite)
                 this.subsets[0].model.generate()
     

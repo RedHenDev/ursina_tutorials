@@ -3,8 +3,8 @@ Our building system :) 2022
 Happy New Year!
 """
 from ursina import Vec3, floor
-
-def checkBuild(_bsite,_td,_bp):
+# ***
+def checkBuild(_td,_bp):
     # Adjust build site, since build-tool-entity (bte) offset.
     # _bsite += Vec3(0,-0.5,0)
     # Store in convenient variables and floor.
