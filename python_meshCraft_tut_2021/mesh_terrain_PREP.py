@@ -6,8 +6,11 @@ from mining_system_PREP import *
 from building_system_PREP import *
 
 class MeshTerrain:
-    def __init__(this):
+    def __init__(this,_sub,_cam):
         
+        this.subject = _sub
+        this.camera = _cam
+
         this.block = load_model('block.obj')
         this.textureAtlas = 'texture_atlas_3.png'
         this.numVertices = len(this.block.vertices)
@@ -45,26 +48,29 @@ class MeshTerrain:
             this.subsets[epi[1]].model.generate()
 
     # ***
-    def findBuildSite(this,pos,cam):
-        # i = highlight(pos,cam,this.td,True)
+    # def findBuildSite(this,pos,cam):
+    #     # i = highlight(pos,cam,this.td,True)
         
-        dist=bte.position-(pos+Vec3(0,1.86,0))
-        j=0.75
-        bp.position = ((pos+Vec3(0,1.86,0)+
-                        cam.forward*(dist.length())) 
-                        - (cam.forward)*j)   
-        bp.x=round(bp.x)
-        bp.y=floor(bp.y)
-        bp.z=round(bp.z)
-        if bp.position==bte.position:
-            bp.position+=Vec3(0,1,0)
+    #     dist=bte.position-(pos+Vec3(0,1.86,0))
+    #     j=0.75
+    #     bp.position = ((pos+Vec3(0,1.86,0)+
+    #                     cam.forward*(dist.length())) 
+    #                     - (cam.forward)*j)   
+    #     bp.x=round(bp.x)
+    #     bp.y=floor(bp.y)
+    #     bp.z=round(bp.z)
+    #     if bp.position==bte.position:
+    #         bp.position+=Vec3(0,1,0)
 
     # Highlight looked-at block :)
-    def update(this,pos,cam):
-        highlight(pos,cam,this.td)
+    # Don't need the pos or cam?
+    # !*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!
+    def update(this):
+        highlight(  this.subject.position,
+                    this.camera,this.td)
         # ***
-        if bp.visible:
-            this.findBuildSite(pos,cam)
+        # if bp.visible:
+        #     this.findBuildSite(pos,cam)
         # Blister-mining!
         if bte.visible==True:
             if held_keys['shift'] and held_keys['left mouse']:
@@ -78,9 +84,12 @@ class MeshTerrain:
             this.do_mining()
         # Building :)
         # ***
-        if key=='right mouse up' and bp.visible==True:
+        # if key=='right mouse up' and bp.visible==True:
+        if key=='right mouse up' and bte.visible==True:
             # ***
-            bsite = checkBuild(this.td,bp.position)
+            bsite = checkBuild( bte.position,this.td,
+                                this.camera.forward,
+                                this.subject.position+Vec3(0,this.subject.height,0))
             if bsite!=None:
                 this.genBlock(bsite.x,bsite.y,bsite.z,subset=0,blockType='grass')
                 gapShell(this.td,bsite)

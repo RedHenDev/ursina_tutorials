@@ -1,7 +1,7 @@
 """Subject terrain collisions -- i.e. not ghosting
 through walls etc."""
 
-from ursina import Vec3, held_keys, time, floor
+from ursina import Vec3, held_keys, time, floor, lerp
 
 def bumpWall(subject,terrain):
     blockFound=False
@@ -16,7 +16,8 @@ def bumpWall(subject,terrain):
     # Front and Back.
     # inF is location of block ahead, behind, side, etc.
     def checkBump(inF):
-        for i in range(1,step+1):
+        # ***
+        for i in range(1,round(subject.height)):
             if terrain.td.get(  (round(inF.x),
                                 floor(inF.y+i),
                                 round(inF.z)) )=='t':
@@ -55,10 +56,16 @@ def bumpWall(subject,terrain):
         held_keys['d'] = 0
         
     # Walking on the terrain itself.
-    for i in range(-step,step):
+    # ***
+    for i in range(-2,step+1):
         if terrain.td.get((x,y+i,z))=='t':
             if terrain.td.get((x,y+i+1,z))=='t':
                 target = y+i+height+1
+                blockFound=True
+                break
+            # ***
+            if terrain.td.get((x,y+i+2,z))=='t':
+                target = y+i+height+2
                 blockFound=True
                 break
             target = y+i+height

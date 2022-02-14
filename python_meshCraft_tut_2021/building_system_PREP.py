@@ -4,16 +4,29 @@ Happy New Year!
 """
 from ursina import Vec3, floor
 # ***
-def checkBuild(_td,_bp):
+def checkBuild(_bsite,_td,_camF,_pos):
+# def checkBuild(_td,_bp):
     # Adjust build site, since build-tool-entity (bte) offset.
     # _bsite += Vec3(0,-0.5,0)
     # Store in convenient variables and floor.
     # Also -- increment y by 1 - since building above!
     # ***
-    _bsite = _bp
-    x = int(_bsite.x)
-    y = int(_bsite.y)
-    z = int(_bsite.z)
+    # _bsite = _bp
+    # x = int(_bsite.x)
+    # y = int(_bsite.y)
+    # z = int(_bsite.z)
+
+    dist = _bsite - _pos
+    mouseInWorld = _pos + _camF * dist.length()
+    mouseInWorld -= _camF * 0.75
+    x = round(mouseInWorld.x)
+    y = floor(mouseInWorld.y)
+    z = round(mouseInWorld.z)
+    # Oh, but what if we're trying to build inside bte?
+    # Build 1 above current block!
+    if _bsite == Vec3(x,y,z):
+        y+=1
+
     # Make sure no block here already...
     if _td.get((x,y,z))!='g' and _td.get((x,y,z))!=None:
         print("Can't build here, sorry :(")

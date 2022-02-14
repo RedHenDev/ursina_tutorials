@@ -19,12 +19,12 @@ subject.frog=False # For jumping...
 subject.runSpeed=12
 subject.walkSpeed=4
 # ***
-subject.y=100
-subject.height=1.53
+subject.y=22
+subject.height=1.86
 camera.dash=10 # Rate at which fov changes when running.
 window.fullscreen=False
-
-terrain = MeshTerrain()
+# ***
+terrain = MeshTerrain(subject,camera)
 # ***
 terrain.generatingTerrain=True
 # snowfall = SnowFall(subject)
@@ -79,7 +79,7 @@ def update():
             for i in range(1):
                 terrain.genTerrain()
         # Highlight terrain block for mining/building...
-        terrain.update(subject.position,camera)
+        terrain.update()
         
 
     # Change subset position based on subject position.
