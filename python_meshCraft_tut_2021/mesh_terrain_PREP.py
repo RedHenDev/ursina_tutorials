@@ -1,4 +1,4 @@
-from perlin import Perlin
+from perlin_PREP import Perlin
 from ursina import *
 from random import random
 from swirl_engine import SwirlEngine
@@ -13,7 +13,7 @@ class MeshTerrain:
         this.numVertices = len(this.block.vertices)
 
         this.subsets = []
-        this.numSubsets = 1024
+        this.numSubsets = 128
         
         # Must be even number! See genTerrain()
         this.subWidth = 6 
@@ -58,6 +58,8 @@ class MeshTerrain:
         bp.z=round(bp.z)
         if bp.position==bte.position:
             bp.position+=Vec3(0,1,0)
+        # Adjust for model offset.
+        # bp.y+=0.25
 
         
 
