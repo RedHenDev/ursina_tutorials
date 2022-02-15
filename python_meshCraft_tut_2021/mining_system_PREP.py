@@ -47,5 +47,5 @@ def mine(td,vd,subsets):
     # ***
     td[ (int(bte.x),int(bte.y),int(bte.z))]='g'
     vd[ (int(bte.x),int(bte.y),int(bte.z))] = None
-    # ***
+    
     return (bte.position, wv[0])
