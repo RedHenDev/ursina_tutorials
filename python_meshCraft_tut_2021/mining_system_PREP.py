@@ -1,12 +1,14 @@
-from ursina import Entity, color, floor, Vec3
+# from ursina import Entity, color, floor, Vec3
 # ***
+from ursina import *
 bte = Entity(model='block.obj',color=color.rgba(1,1,0,0.4))
 bte.scale=1.1
 # Adjust for model offset.
 bte.origin_y+=0.05
-bp = Entity(model='block.obj',color=color.rgba(0,0,1,0.4))
-bp.scale=0.5
-bp.origin_y-=0.5
+bp = Entity(model='block.obj',texture='ursina_wink_0001')
+bp.texture_scale=0.25
+# bp.origin_y-=5.1
+# bp.scale=0.11
 
 def highlight(pos,cam,td):
     for i in range(1,32):
@@ -47,5 +49,5 @@ def mine(td,vd,subsets):
     # ***
     td[ (int(bte.x),int(bte.y),int(bte.z))]='g'
     vd[ (int(bte.x),int(bte.y),int(bte.z))] = None
-    
+
     return (bte.position, wv[0])

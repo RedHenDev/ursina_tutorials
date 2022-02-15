@@ -1,4 +1,7 @@
 from ursina import *
+# ***
+# Place other imports after this to permit texture loading.
+app = Ursina()
 from ursina.prefabs.first_person_controller import FirstPersonController
 from mesh_terrain_PREP import MeshTerrain
 from flake import SnowFall
@@ -6,7 +9,9 @@ import random as ra
 from bump_system_PREP import *
 from save_load_system_PREP import saveMap, loadMap
 
-app = Ursina()
+# ***
+from mob_system import *
+window.vsync=False
 
 window.color = color.rgb(0,200,255)
 indra = Sky()
@@ -33,8 +38,8 @@ terrain.generatingTerrain=True
 scene.fog_density=(3,50)
 # scene.fog_color=indra.color
 scene.fog_color=color.white
-camera.clip_plane_far=100
-indra.scale*=1/camera.clip_plane_far
+camera.clip_plane_far=1000
+# indra.scale*=1/camera.clip_plane_far
 
 # ***
 beaker=Text('')
@@ -66,7 +71,9 @@ def update():
     # ***
     # beaker.text=str(int(subject.x))
     # beaker.background=True
-    print_on_screen(str(int(subject.x)),scale=4,duration=0.1)
+    print_on_screen('x'+str(int(subject.x))+' z'+str(int(subject.z)),
+                    scale=4,
+                    duration=0.1)
     # Handle mob ai.
     mob_movement(grey, subject.position, terrain.td)
     # ***
@@ -83,7 +90,8 @@ def update():
         
 
     # Change subset position based on subject position.
-    if abs(subject.x-pX)>1 or abs(subject.z-pZ)>1:
+    # ***
+    if abs(subject.x-pX)>100 or abs(subject.z-pZ)>100:
         pX=subject.x
         pZ=subject.z 
         terrain.swirlEngine.reset(pX,pZ)
@@ -109,6 +117,6 @@ def update():
             camera.fov-=camera.dash*4*time.dt
             if camera.fov<90:camera.fov=90
 
-from mob_system import *
+
 
 app.run()

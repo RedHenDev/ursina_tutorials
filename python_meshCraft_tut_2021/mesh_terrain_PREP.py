@@ -1,9 +1,10 @@
 from perlin_PREP import Perlin
 from ursina import *
-from random import random
 from swirl_engine import SwirlEngine
 from mining_system_PREP import *
 from building_system_PREP import *
+# ***
+import random as ra
 
 class MeshTerrain:
     def __init__(this,_sub,_cam):
@@ -47,32 +48,19 @@ class MeshTerrain:
             this.genWalls(epi[0],epi[1])
             this.subsets[epi[1]].model.generate()
 
-    # ***
-    # def findBuildSite(this,pos,cam):
-    #     # i = highlight(pos,cam,this.td,True)
-        
-    #     dist=bte.position-(pos+Vec3(0,1.86,0))
-    #     j=0.75
-    #     bp.position = ((pos+Vec3(0,1.86,0)+
-    #                     cam.forward*(dist.length())) 
-    #                     - (cam.forward)*j)   
-    #     bp.x=round(bp.x)
-    #     bp.y=floor(bp.y)
-    #     bp.z=round(bp.z)
-    #     if bp.position==bte.position:
-    #         bp.position+=Vec3(0,1,0)
-
     # Highlight looked-at block :)
     # Don't need the pos or cam?
     # !*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!
     def update(this):
         highlight(  this.subject.position,
                     this.camera,this.td)
-        # ***
-        # if bp.visible:
-        #     this.findBuildSite(pos,cam)
         # Blister-mining!
         if bte.visible==True:
+            # Build site indicator...
+            # temp=checkBuild( bte.position,this.td,
+            #                     this.camera.forward,
+            #                     this.subject.position+Vec3(0,this.subject.height,0),
+            #                     bp)
             if held_keys['shift'] and held_keys['left mouse']:
                 this.do_mining()
             # for key, value in held_keys.items():
@@ -89,7 +77,8 @@ class MeshTerrain:
             # ***
             bsite = checkBuild( bte.position,this.td,
                                 this.camera.forward,
-                                this.subject.position+Vec3(0,this.subject.height,0))
+                                this.subject.position+Vec3(0,this.subject.height,0),
+                                bp)
             if bsite!=None:
                 this.genBlock(bsite.x,bsite.y,bsite.z,subset=0,blockType='grass')
                 gapShell(this.td,bsite)
@@ -137,7 +126,7 @@ class MeshTerrain:
                 floor(z))] = vob
 
         # Decide random tint for colour of block :)
-        c = random()-0.5
+        c = ra.random()-0.5
         model.colors.extend( (Vec4(1-c,1-c,1-c,1),)*
                                 this.numVertices)
 
@@ -154,7 +143,7 @@ class MeshTerrain:
             uu = 9
             uv = 7
         # Randomly place stone blocks.
-        if random() > 0.86:
+        if ra.random() > 0.86:
             uu = 8
             uv = 5
         # If high enough, cap with snow blocks :D
