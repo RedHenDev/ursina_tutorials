@@ -47,16 +47,29 @@ beaker.scale=2
 beaker.origin=(-0.5,.5)
 
 # ***
-# for i in range(32):
-#     terrain.genTerrain()
+for i in range(64):
+    terrain.genTerrain()
 # loadMap(subject,terrain)
 
 # *** UI elements
-inventory=Panel()
-# Entity(model='quad',parent=camera.ui)
+# inventory=Panel()
+inventory=Entity(model='quad',parent=camera.ui)
+inventory.color=color.dark_gray
 inventory.scale=0.1
 inventory.scale_x*=10
 inventory.origin=(0,4.5)
+
+g = Draggable(model='block.obj',parent=camera.ui)
+g.color=color.light_gray
+g.scale=0.04
+g.origin=(5,5.8)
+g.texture='texture_atlas_3.png'
+g.texture_scale*=(64/g.texture.width)
+uu=8
+uv=7
+g.model.uvs = [Vec2(uu,uv) + u for u in g.model.uvs]
+g.model.generate()
+        
 # *** UI elements
 
 grass_audio = Audio('step.ogg',autoplay=False,loop=False)
@@ -93,6 +106,7 @@ def update():
     print_on_screen('x'+str(int(subject.x))+' z'+str(int(subject.z)),
                     scale=4,
                     duration=0.1)
+
     # Handle mob ai.
     mob_movement(grey, subject.position, terrain.td)
     mob_movement(lewlin, subject.position, terrain.td,False)
@@ -110,10 +124,10 @@ def update():
     
     # ***
     # Crazy subset wave...
-    if not mouse.locked:
-        for s in terrain.subsets:
-            s.y = math.sin(terrain.subsets.index(s) + earthquake*0.5)*0.1
-        earthquake+=1
+    # if mouse.locked:
+    #     for s in terrain.subsets:
+    #         s.y = math.sin(terrain.subsets.index(s) + earthquake*0.5)*0.1
+    #     earthquake+=1
 
     # Change subset position based on subject position.
     if abs(subject.x-pX)>1 or abs(subject.z-pZ)>1:

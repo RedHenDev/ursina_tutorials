@@ -20,7 +20,7 @@ class MeshTerrain:
         this.numSubsets = 512
         
         # Must be even number! See genTerrain()
-        this.subWidth = 6 
+        this.subWidth = 10 
         this.swirlEngine = SwirlEngine(this.subWidth)
         this.currentSubset = 0
 
@@ -133,6 +133,9 @@ class MeshTerrain:
         # This is the texture atlas co-ord for grass :)
         uu = 8
         uv = 7
+        # Randomly place stone blocks.
+        if blockType=='grass' and ra.random() > 0.86:
+            blockType='stone'
         if blockType=='soil':
             uu = 10
             uv = 7
@@ -142,12 +145,11 @@ class MeshTerrain:
         elif blockType=='ice':
             uu = 9
             uv = 7
-        # Randomly place stone blocks.
-        if ra.random() > 0.86:
-            uu = 8
-            uv = 5
+        
+            
         # If high enough, cap with snow blocks :D
         if y > 2:
+            blockType='snow'
             uu = 8
             uv = 6
         model.uvs.extend([Vec2(uu,uv) + u for u in this.block.uvs])

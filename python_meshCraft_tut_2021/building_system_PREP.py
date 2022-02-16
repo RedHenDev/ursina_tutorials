@@ -19,7 +19,7 @@ def checkBuild(_bsite,_td,_camF,_pos,_bp):
     dist = _bsite - _pos
     mouseInWorld = _pos + _camF * dist.length()
     # ***
-    mouseInWorld -= _camF * 0.85
+    mouseInWorld -= _camF * 0.75
     x = round(mouseInWorld.x)
     y = floor(mouseInWorld.y)
     z = round(mouseInWorld.z)

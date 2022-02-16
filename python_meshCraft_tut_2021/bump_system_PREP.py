@@ -58,7 +58,6 @@ def bumpWall(subject,terrain):
         held_keys['d'] = 0
         
     # Walking on the terrain itself.
-    # ***
     for i in range(-2,step+1):
         dot=terrain.td.get((x,y+i,z))
         if dot is not None and dot[0] is not 'g':
@@ -78,6 +77,7 @@ def bumpWall(subject,terrain):
             break
     if blockFound==True:
         # Step up or down :>
+        # *** speed of lerp increased to 9...
         subject.y = lerp(subject.y, target, 9 * time.dt)
         # We are grounded -- so can jump...
         if subject.frog is True:
