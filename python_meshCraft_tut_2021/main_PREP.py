@@ -47,30 +47,12 @@ beaker.scale=2
 beaker.origin=(-0.5,.5)
 
 # ***
-for i in range(64):
+for i in range(32):
     terrain.genTerrain()
 # loadMap(subject,terrain)
 
 # *** UI elements
-# inventory=Panel()
-inventory=Entity(model='quad',parent=camera.ui)
-inventory.color=color.dark_gray
-inventory.scale=0.1
-inventory.scale_x*=10
-inventory.origin=(0,4.5)
-
-g = Draggable(model='block.obj',parent=camera.ui)
-g.color=color.light_gray
-g.scale=0.04
-g.origin=(5,5.8)
-g.texture='texture_atlas_3.png'
-g.texture_scale*=(64/g.texture.width)
-uu=8
-uv=7
-g.model.uvs = [Vec2(uu,uv) + u for u in g.model.uvs]
-g.model.generate()
-        
-# *** UI elements
+from inventory_PREP import *
 
 grass_audio = Audio('step.ogg',autoplay=False,loop=False)
 snow_audio = Audio('snowStep.mp3',autoplay=False,loop=False)
@@ -88,13 +70,7 @@ def input(key):
     if key=='m': saveMap(subject.position,terrain.td)
     if key=='l': loadMap(subject,terrain)
     # ***
-    if key=='e' and not subject.enabled:
-        subject.enable()
-        mouse.locked=True
-    elif key=='e' and subject.enabled:
-        subject.disable()
-        mouse.locked=False
-        # mouse.enabled=True
+    inventory_input(key,mouse,subject)
 
 count = 0
 earthquake=0
