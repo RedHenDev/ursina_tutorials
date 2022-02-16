@@ -110,11 +110,10 @@ class MeshTerrain:
 
         model.vertices.extend([ Vec3(x,y,z) + v for v in 
                                 this.block.vertices])
-        # Record terrain in dictionary :)
-        dot = [blockType,subset]
-        this.td[(floor(x),floor(y),floor(z))] = dot
-        # Also, record gap above this position to
-        # correct for spawning walls after mining.
+        
+        # ***
+        # This is where we used to record td.
+
         if gap==True:
             key=((floor(x),floor(y+1),floor(z)))
             dot = this.td.get(key)
@@ -131,7 +130,6 @@ class MeshTerrain:
         c = ra.random()-0.5
         model.colors.extend( (Vec4(1-c,1-c,1-c,1),)*
                                 this.numVertices)
-
         # This is the texture atlas co-ord for grass :)
         uu = 8
         uv = 7
@@ -153,6 +151,12 @@ class MeshTerrain:
             uu = 8
             uv = 6
         model.uvs.extend([Vec2(uu,uv) + u for u in this.block.uvs])
+        
+        # Record terrain in dictionary :)
+        dot = [blockType,subset]
+        this.td[(floor(x),floor(y),floor(z))] = dot
+        # Also, record gap above this position to
+        # correct for spawning walls after mining.
 
     def genTerrain(this):
         # Get current position as we swirl around world.

@@ -110,9 +110,10 @@ def update():
     
     # ***
     # Crazy subset wave...
-    # for s in terrain.subsets:
-    #     s.y = math.sin(terrain.subsets.index(s) + earthquake*0.5)*0.25
-    # earthquake+=1
+    if not mouse.locked:
+        for s in terrain.subsets:
+            s.y = math.sin(terrain.subsets.index(s) + earthquake*0.5)*0.1
+        earthquake+=1
 
     # Change subset position based on subject position.
     if abs(subject.x-pX)>1 or abs(subject.z-pZ)>1:

@@ -78,7 +78,7 @@ def bumpWall(subject,terrain):
             break
     if blockFound==True:
         # Step up or down :>
-        subject.y = lerp(subject.y, target, 6 * time.dt)
+        subject.y = lerp(subject.y, target, 9 * time.dt)
         # We are grounded -- so can jump...
         if subject.frog is True:
             subject.frog=False

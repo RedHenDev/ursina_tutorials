@@ -18,8 +18,13 @@ lewlin.turnSpeed = 1
 lewlin.speed = 3
 lewlin.origin_y-=14
 lewlin.y=20
+# lewlin.model.colorize(smooth=False, world_space=True)
 # ***
 def mob_movement(mob, subPos, _td, animated=True):
+    # ***
+    if not animated:
+        mob.model.colorize(smooth=False, world_space=True)
+
     # First, turn towards target...
     # BUG wiggle walk when aligned with subject?
     tempOR = mob.rotation_y

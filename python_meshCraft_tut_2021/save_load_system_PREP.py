@@ -9,7 +9,7 @@ def saveMap(_subPos, _td):
     path = os.path.dirname(os.path.abspath(sys.argv[0]))
     os.chdir(path)
 
-    with open('terrain_map_1.panda', 'wb') as f:
+    with open('maptest.map', 'wb') as f:
 
         map_data = [_subPos, _td]
 
@@ -24,7 +24,7 @@ def loadMap(_subject,_terrain):
     # Open main module directory for correct file.
     path = os.path.dirname(os.path.abspath(sys.argv[0]))
     os.chdir(path)
-    with open('terrain_map_1.panda', 'rb') as f:
+    with open('maptest.map', 'rb') as f:
         map_data = pickle.load(f)
 
     # Empty out current terrain objects.
@@ -42,13 +42,15 @@ def loadMap(_subject,_terrain):
     # Note this means we'll lose colour info etc.
     i = 0 # Which subset to build block on?
     for key in _terrain.td:
-        if _terrain.td.get(key)=='t':
+        # ***
+        val=_terrain.td.get(key)
+        if val[0] is not 'g':
             x = key[0]
             y = key[1]
             z = key[2]
             if i>=len(_terrain.subsets)-1:
                 i=0
-            _terrain.genBlock(x,y,z,subset=i,gap=False,blockType='grass')
+            _terrain.genBlock(x,y,z,subset=i,gap=False,blockType=val[0])
             i+=1
 
     # And reposition subject according to saved map.

@@ -31,7 +31,8 @@ def checkBuild(_bsite,_td,_camF,_pos,_bp):
     # _bp.position=Vec3(x,y,z)
 
     # Make sure no block here already...
-    if _td.get((x,y,z))[0]!='g' and _td.get((x,y,z))[0]!=None:
+    # ***
+    if _td.get((x,y,z))!= None and _td.get((x,y,z))[0]!='g':
         print("Can't build here, sorry :(")
         return None
     # If we're here, we can build. Yessssss.
