@@ -18,9 +18,11 @@ def bumpWall(subject,terrain):
     def checkBump(inF):
         # ***
         for i in range(1,round(subject.height)):
-            if terrain.td.get(  (round(inF.x),
+            # ***
+            whatval = terrain.td.get(  (round(inF.x),
                                 floor(inF.y+i),
-                                round(inF.z)) )=='t':
+                                round(inF.z)) )
+            if whatval is not None and whatval[0] is not 'g':
                 return True
         return False
     # In front...
@@ -58,13 +60,16 @@ def bumpWall(subject,terrain):
     # Walking on the terrain itself.
     # ***
     for i in range(-2,step+1):
-        if terrain.td.get((x,y+i,z))=='t':
-            if terrain.td.get((x,y+i+1,z))=='t':
+        dot=terrain.td.get((x,y+i,z))
+        if dot is not None and dot[0] is not 'g':
+            dot=terrain.td.get((x,y+i+1,z))
+            if dot is not None and dot[0] is not 'g':
                 target = y+i+height+1
                 blockFound=True
                 break
             # ***
-            if terrain.td.get((x,y+i+2,z))=='t':
+            dot=terrain.td.get((x,y+i+2,z))
+            if dot is not None and dot[0] is not 'g':
                 target = y+i+height+2
                 blockFound=True
                 break

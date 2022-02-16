@@ -10,7 +10,7 @@ from bump_system_PREP import *
 from save_load_system_PREP import saveMap, loadMap
 
 # ***
-from mob_system import *
+from mob_system_PREP import *
 window.vsync=False
 
 window.color = color.rgb(0,200,255)
@@ -35,10 +35,10 @@ terrain.generatingTerrain=True
 # snowfall = SnowFall(subject)
 # *** 
 # scene.fog_density=(0,50)
-scene.fog_density=(3,50)
-# scene.fog_color=indra.color
-scene.fog_color=color.white
-camera.clip_plane_far=1000
+scene.fog_density=(3,100)
+scene.fog_color=indra.color
+# scene.fog_color=color.white
+# camera.clip_plane_far=2000
 # indra.scale*=1/camera.clip_plane_far
 
 # ***
@@ -46,8 +46,18 @@ beaker=Text('')
 beaker.scale=2
 beaker.origin=(-0.5,.5)
 
-for i in range(32):
-    terrain.genTerrain()
+# ***
+# for i in range(32):
+#     terrain.genTerrain()
+# loadMap(subject,terrain)
+
+# *** UI elements
+inventory=Panel()
+# Entity(model='quad',parent=camera.ui)
+inventory.scale=0.1
+inventory.scale_x*=10
+inventory.origin=(0,4.5)
+# *** UI elements
 
 grass_audio = Audio('step.ogg',autoplay=False,loop=False)
 snow_audio = Audio('snowStep.mp3',autoplay=False,loop=False)
@@ -64,10 +74,19 @@ def input(key):
     # Saving and loading...
     if key=='m': saveMap(subject.position,terrain.td)
     if key=='l': loadMap(subject,terrain)
+    # ***
+    if key=='e' and not subject.enabled:
+        subject.enable()
+        mouse.locked=True
+    elif key=='e' and subject.enabled:
+        subject.disable()
+        mouse.locked=False
+        # mouse.enabled=True
 
 count = 0
+earthquake=0
 def update():
-    global count, pX, pZ
+    global count, pX, pZ, earthquake
     # ***
     # beaker.text=str(int(subject.x))
     # beaker.background=True
@@ -76,6 +95,7 @@ def update():
                     duration=0.1)
     # Handle mob ai.
     mob_movement(grey, subject.position, terrain.td)
+    mob_movement(lewlin, subject.position, terrain.td,False)
     # ***
     count+=1
     if count == 2:
@@ -87,11 +107,15 @@ def update():
                 terrain.genTerrain()
         # Highlight terrain block for mining/building...
         terrain.update()
-        
+    
+    # ***
+    # Crazy subset wave...
+    # for s in terrain.subsets:
+    #     s.y = math.sin(terrain.subsets.index(s) + earthquake*0.5)*0.25
+    # earthquake+=1
 
     # Change subset position based on subject position.
-    # ***
-    if abs(subject.x-pX)>100 or abs(subject.z-pZ)>100:
+    if abs(subject.x-pX)>1 or abs(subject.z-pZ)>1:
         pX=subject.x
         pZ=subject.z 
         terrain.swirlEngine.reset(pX,pZ)

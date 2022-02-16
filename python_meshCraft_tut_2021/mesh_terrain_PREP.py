@@ -20,7 +20,7 @@ class MeshTerrain:
         this.numSubsets = 512
         
         # Must be even number! See genTerrain()
-        this.subWidth = 8 
+        this.subWidth = 6 
         this.swirlEngine = SwirlEngine(this.subWidth)
         this.currentSubset = 0
 
@@ -111,13 +111,15 @@ class MeshTerrain:
         model.vertices.extend([ Vec3(x,y,z) + v for v in 
                                 this.block.vertices])
         # Record terrain in dictionary :)
-        this.td[(floor(x),floor(y),floor(z))] = 't'
+        dot = [blockType,subset]
+        this.td[(floor(x),floor(y),floor(z))] = dot
         # Also, record gap above this position to
         # correct for spawning walls after mining.
         if gap==True:
             key=((floor(x),floor(y+1),floor(z)))
-            if this.td.get(key)==None:
-                this.td[key]='g'
+            dot = this.td.get(key)
+            if dot is None:
+                this.td[key]=['g',subset]
 
         # Record subset index and first vertex of this block.
         vob = (subset, len(model.vertices)-37)

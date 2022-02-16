@@ -31,7 +31,7 @@ def checkBuild(_bsite,_td,_camF,_pos,_bp):
     # _bp.position=Vec3(x,y,z)
 
     # Make sure no block here already...
-    if _td.get((x,y,z))!='g' and _td.get((x,y,z))!=None:
+    if _td.get((x,y,z))[0]!='g' and _td.get((x,y,z))[0]!=None:
         print("Can't build here, sorry :(")
         return None
     # If we're here, we can build. Yessssss.
@@ -46,5 +46,5 @@ def gapShell(_td,_bsite):
             Vec3(0,0,1)]
     for i in range(6):
         p = _bsite + wp[i]
-        if _td.get((floor(p.x),floor(p.y),floor(p.z)))==None:
-            _td[(floor(p.x),floor(p.y),floor(p.z))]='g'
+        if _td.get((floor(p.x),floor(p.y),floor(p.z))) is None:
+            _td[(floor(p.x),floor(p.y),floor(p.z))]=['g',0]

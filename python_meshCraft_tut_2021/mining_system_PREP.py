@@ -22,7 +22,8 @@ def highlight(pos,cam,td):
         bte.x = x
         bte.y = y # ***
         bte.z = z
-        if td.get((x,y,z))=='t':
+        if td.get((x,y,z))!=None and \
+            td.get((x,y,z))[0]!='g':
             bte.visible = True
             # ***
             bp.visible = True
@@ -47,7 +48,7 @@ def mine(td,vd,subsets):
 
     # g for gap in terrain. And wipe vd entry.
     # ***
-    td[ (int(bte.x),int(bte.y),int(bte.z))]='g'
+    td[ (int(bte.x),int(bte.y),int(bte.z))]=['g',None]
     vd[ (int(bte.x),int(bte.y),int(bte.z))] = None
 
     return (bte.position, wv[0])
