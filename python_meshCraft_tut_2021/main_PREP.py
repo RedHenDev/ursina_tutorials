@@ -53,6 +53,7 @@ for i in range(32):
 
 # *** UI elements
 from inventory_PREP import *
+subject.blockTnum=0
 
 grass_audio = Audio('step.ogg',autoplay=False,loop=False)
 snow_audio = Audio('snowStep.mp3',autoplay=False,loop=False)

@@ -5,6 +5,7 @@ from mining_system_PREP import *
 from building_system_PREP import *
 # ***
 import random as ra
+from inventory_PREP import mins
 
 class MeshTerrain:
     def __init__(this,_sub,_cam):
@@ -80,7 +81,7 @@ class MeshTerrain:
                                 this.subject.position+Vec3(0,this.subject.height,0),
                                 bp)
             if bsite!=None:
-                this.genBlock(bsite.x,bsite.y,bsite.z,subset=0,blockType='grass')
+                this.genBlock(bsite.x,bsite.y,bsite.z,subset=0,blockType=mins[this.subject.blockTnum])
                 gapShell(this.td,bsite)
                 this.subsets[0].model.generate()
     
@@ -145,6 +146,9 @@ class MeshTerrain:
         elif blockType=='ice':
             uu = 9
             uv = 7
+        elif blockType=='snow':
+            uu = 8
+            uv = 6
         
             
         # If high enough, cap with snow blocks :D

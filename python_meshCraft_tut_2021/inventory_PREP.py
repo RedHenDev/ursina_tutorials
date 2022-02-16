@@ -7,54 +7,12 @@ inventory.scale=0.1
 inventory.scale_x*=9
 inventory.origin=(0,4.5)
 
-# g = Draggable(model='block.obj',parent=camera.ui)
-# g = Entity(model='block.obj',parent=camera.ui)
+hLighter=Entity(model='quad',parent=camera.ui)
+hLighter.color=color.black
+hLighter.scale=0.088
+hLighter.origin=(4.5,5.1)
 
-# g.color=color.light_gray
-# g.scale=0.08
-# g.origin=(5.6,6.1)
-# g.texture='texture_atlas_3.png'
-# g.texture_scale*=(64/g.texture.width)
-# uu=8
-# uv=7
-# g.model.uvs = [Vec2(uu,uv) + u for u in g.model.uvs]
-# g.model.generate()
-
-class iceCube(Entity):
-    def __init__(this,blockType='grass'):
-        super().__init__()
-        this.model='block.obj'
-        this.parent=camera.ui
-
-        this.color=color.light_gray
-        this.scale=0.08
-        this.origin=(5.6,6.1)
-        this.texture='texture_atlas_3.png'
-        this.texture_scale*=(64/this.texture.width)
-        # Grass.
-        uu = 8
-        uv = 7
-        if blockType=='soil':
-            uu = 10
-            uv = 7
-        elif blockType=='stone':
-            uu = 8
-            uv = 5
-        elif blockType=='ice':
-            uu = 9
-            uv = 7
-        elif blockType=='snow':
-            uu = 8
-            uv = 6
-        
-        this.uu=uu
-        this.uv=uv 
-            
-        this.setup_texture(uu,uv)
-
-    def setup_texture(this,_uu=8,_uv=7):
-        this.model.uvs = [Vec2(_uu,_uv) + u for u in this.model.uvs]
-        this.model.generate()
+# g = Draggable(model='block.obj')
 
 minerals =  {   'grass' : (8,7),
                 'soil' : (10,7),
@@ -62,12 +20,34 @@ minerals =  {   'grass' : (8,7),
                 'ice' : (9,7),
                 'snow' : (8,6),
             }
-gs = []
 # Create iterable list from dictionary keys (not values).
 mins = list(minerals.keys())
-for i in range(1,11):
+
+class iceCube(Entity):
+    def __init__(this,blockType='grass'):
+        super().__init__()
+        this.model='block.obj'
+        this.parent=camera.ui
+        this.blockType=blockType
+
+        this.color=color.white
+        this.scale=0.08
+        this.origin=(5.6,6.1)
+        this.texture='texture_atlas_3.png'
+        this.texture_scale*=(64/this.texture.width) 
+            
+        this.setup_texture()
+
+    def setup_texture(this):
+        uu=minerals[this.blockType][0]
+        uv=minerals[this.blockType][1]
+        this.model.uvs = [Vec2(uu,uv) + u for u in this.model.uvs]
+        this.model.generate()
+
+gs = []
+for i in range(10):
     e = iceCube(mins[i%len(mins)])
-    e.origin_x = 6.05 + (1.1 * -i)
+    e.origin_x = 4.95 + (1.1 * -i)
 
 def inventory_input(key,mouse,subject):
     if key=='e' and not subject.enabled:
@@ -76,3 +56,9 @@ def inventory_input(key,mouse,subject):
     elif key=='e' and subject.enabled:
         subject.disable()
         mouse.locked=False
+    
+    if key=='r': 
+        hLighter.origin_x-=1
+        if hLighter.origin_x<-4.5:
+            hLighter.origin_x=4.5
+        subject.blockTnum=(subject.blockTnum+1)%len(mins)
