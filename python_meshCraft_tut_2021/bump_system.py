@@ -54,10 +54,16 @@ def bumpWall(subject,terrain):
         held_keys['d'] = 0
         
     # Walking on the terrain itself.
-    for i in range(-step,step):
+    for i in range(-2,step):
         if terrain.td.get((x,y+i,z))=='t':
             if terrain.td.get((x,y+i+1,z))=='t':
+                # Also check any blocks above, still within stepping range.
                 target = y+i+height+1
+                blockFound=True
+                break
+            # Stomach height?
+            if terrain.td.get((x,y+i+2,z))=='t':
+                target = y+i+height+2
                 blockFound=True
                 break
             target = y+i+height

@@ -37,13 +37,8 @@ def checkBuild(_bsite,_td,_camF,_pos):
     return Vec3(x,y,z)
 
 def gapShell(_td,_bsite):
-    wp =[   Vec3(0,1,0),
-            Vec3(0,-1,0),
-            Vec3(-1,0,0),
-            Vec3(1,0,0),
-            Vec3(0,0,-1),
-            Vec3(0,0,1)]
+    from config import six_cube_dirs
     for i in range(6):
-        p = _bsite + wp[i]
+        p = _bsite + six_cube_dirs[i]
         if _td.get((floor(p.x),floor(p.y),floor(p.z)))==None:
             _td[(floor(p.x),floor(p.y),floor(p.z))]='g'

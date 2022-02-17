@@ -1,7 +1,8 @@
 from ursina import Entity, color, floor, Vec3
 # Build Tool Entity (aka 'bte').
 bte = Entity(model='block.obj',color=color.rgba(1,1,0,0.4))
-bte.scale=1.001
+bte.scale=1.1
+bte.origin_y+=0.05
 
 def highlight(pos,cam,td):
     for i in range(1,32):
