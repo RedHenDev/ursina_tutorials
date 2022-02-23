@@ -4,7 +4,11 @@ so that all part of a single file.
 """
 import math
 import random
-from collections import Iterable
+# from collections import Iterable
+# ***
+from _collections_abc import Iterable
+# Above is perlin fix for some people (instead of 'collections')
+# Thanks to '#1 Coder' see comment on mesh craft vid 13.
 from typing import Optional, Union
 
 #from rand_vec import RandVec
