@@ -26,7 +26,7 @@ camera.dash=10 # Rate at which fov changes when running.
 window.fullscreen=False
 
 terrain = MeshTerrain(subject,camera)
-# snowfall = SnowFall(subject)
+#snowfall = SnowFall(subject)
 # How do you at atmospheric fog?
 scene.fog_density=(0,75)
 # scene.fog_color=indra.color
