@@ -11,7 +11,7 @@ from bump_system import *
 from save_load_system import saveMap, loadMap
 from inventory_system import *
 
-window.color = color.rgb(0,200,255)
+window.color = color.rgb(0,0,225)
 indra = Sky()
 indra.color = window.color
 subject = FirstPersonController()
