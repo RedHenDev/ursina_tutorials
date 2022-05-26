@@ -4,6 +4,7 @@ from random import random
 from swirl_engine import SwirlEngine
 from mining_system import *
 from building_system import *
+from config import six_cube_dirs
 
 class MeshTerrain:
     def __init__(this,_sub,_cam):
@@ -75,7 +76,7 @@ class MeshTerrain:
     
     # I.e. after mining, to create illusion of depth.
     def genWalls(this,epi,subset):
-        from config import six_cube_dirs
+        
         if epi==None: return
         # Refactor this -- place in mining_system 
         # except for cal to genBlock?

@@ -34,7 +34,7 @@ scene.fog_color=color.white
 generatingTerrain=True
 
 # Generate our terrain 'chunks'.
-for i in range(64):
+for i in range(4):
     terrain.genTerrain()
 # For loading in a large terrain at start.
 # loadMap(subject,terrain)

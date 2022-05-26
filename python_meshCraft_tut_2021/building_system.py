@@ -3,6 +3,7 @@ Our building system :) 2022
 Happy New Year!
 """
 from ursina import Vec3, floor
+from config import six_cube_dirs
 
 def checkBuild(_bsite,_td,_camF,_pos): 
     # Store in convenient variables and floor.
@@ -37,7 +38,7 @@ def checkBuild(_bsite,_td,_camF,_pos):
     return Vec3(x,y,z)
 
 def gapShell(_td,_bsite):
-    from config import six_cube_dirs
+    
     for i in range(6):
         p = _bsite + six_cube_dirs[i]
         if _td.get((floor(p.x),floor(p.y),floor(p.z)))==None:
