@@ -11,6 +11,13 @@ from bump_system import *
 from save_load_system import saveMap, loadMap
 from inventory_system import *
 
+"""
+Adventues
+1) 'Snap' behaviour for items. DONE :D
+2) Number keys select building block type.
+3) Make an inventory panel.
+"""
+
 window.color = color.rgb(0,0,225)
 indra = Sky()
 indra.color = window.color
@@ -22,6 +29,7 @@ subject.height=1.86
 subject.frog=False # For jumping...
 subject.runSpeed=12
 subject.walkSpeed=4
+subject.blockType='grass'
 camera.dash=10 # Rate at which fov changes when running.
 window.fullscreen=False
 
@@ -79,7 +87,7 @@ def update():
             # for i in range(1):
                 # terrain.genTerrain()
                 
-        
+    
 
     # Change subset position based on subject position.
     if abs(subject.x-pX)>1 or abs(subject.z-pZ)>1:

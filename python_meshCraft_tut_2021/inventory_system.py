@@ -1,8 +1,10 @@
 
 from urllib.request import build_opener
+from xml.dom.minidom import TypeInfo
 from ursina import *
 import random as ra
 from config import mins,minerals
+import numpy as np
 
 
 # Inventory hotbar.
@@ -31,8 +33,8 @@ class Hotspot(Entity):
         this.onHotbar=False
         this.visible=False
         this.occupied=False
-        # Pick a random block type.
-        this.blockType=mins[ra.randint(0,len(mins)-1)]
+        # What item are we hosting?
+        this.item=None
 
 class Item(Draggable):
     def __init__(this):
@@ -49,6 +51,7 @@ class Item(Draggable):
 
         this.onHotbar=False
         this.visible=False
+        this.currentSpot=None
 
         this.set_texture()
         this.set_colour()
@@ -71,7 +74,45 @@ class Item(Draggable):
             this.color=minerals[this.blockType][2]
     
     def fixPos(this):
-        pass
+        # Look through all the hotspots.
+        # Find the unoccupied hotspot that is closest.
+        # If found, copy that hotspot's position.
+        # Set previous hotspot host to unoccupied.
+        # Download item's blocktype info etc. into
+        # host hotspot -- so that subject can use item.
+        # !?! Can't find an available hotspot?
+        # Return to current host position.
+
+        closest=-1
+        closestHotty=None
+        for h in hotspots:
+            if h.occupied: continue
+            # Found a unoccupied hotspot :)
+            # How close is it?
+            dist=h.position-this.position
+            # Find the magnitude - i.e. distance.
+            dist=np.linalg.norm(dist)
+            if dist < closest or closest == -1:
+                # We have a new closest!
+                closestHotty=h
+                # Always remember to set current record!
+                closest=dist
+        # Finished iterating over hotspots.
+        if closestHotty is not None:
+            # We've found an available closest :)
+            this.position=closestHotty.position
+            # Update new host's information about item.
+            closestHotty.occupied=True
+            closestHotty.item=this
+            # Update previous host-spot's status.
+            if this.currentSpot:
+                this.currentSpot.occupied=False
+                this.currentSpot.item=None
+            # Finally, update current host spot.
+            this.currentSpot=closestHotty
+        elif this.currentSpot:
+            # No hotspot available? Just move back.
+            this.position=this.currentSpot.position
 
     def drop(this):
         this.fixPos()
@@ -102,6 +143,22 @@ for i in range(9):
     items.append(bud)
 
 def inv_input(key,subject,mouse):
+    try:
+        wnum = int(key)
+        if wnum > 0 and wnum < 10:
+            # Make sure no hotspots are highlighted.
+            for h in hotspots:
+                h.color=color.white
+            # Adjust wnum to list indexing (1=0).
+            wnum-=1
+            hotspots[wnum].color=color.yellow
+            # Is this hotspot occupied with an item?
+            if hotspots[wnum].occupied:
+                # Set subject's new blocktype from this item.
+                subject.blockType=hotspots[wnum].item.blockType
+                
+    except:
+        pass
     # Pause and unpause, ready for inventory.
     if key=='e' and subject.enabled:
         subject.disable()
