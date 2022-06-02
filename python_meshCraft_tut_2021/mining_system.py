@@ -16,7 +16,8 @@ def highlight(pos,cam,td):
         bte.x = x
         bte.y = y
         bte.z = z
-        if td.get((x,y,z))=='t':
+        whatT=td.get((x,y,z))
+        if whatT!=None and whatT!='g':
             bte.visible = True
             break
         else:

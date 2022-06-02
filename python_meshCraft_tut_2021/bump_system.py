@@ -16,9 +16,10 @@ def bumpWall(subject,terrain):
     # inF is location of block ahead, behind, side, etc.
     def checkBump(inF):
         for i in range(1,step+1):
-            if terrain.td.get(  (round(inF.x),
-                                round(inF.y+i),
-                                round(inF.z)) )=='t':
+            whatT=terrain.td.get(  (round(inF.x),
+                                    round(inF.y+i),
+                                    round(inF.z)) )
+            if whatT!=None and whatT!='g':
                 return True
         return False
     # In front...
@@ -55,14 +56,17 @@ def bumpWall(subject,terrain):
         
     # Walking on the terrain itself.
     for i in range(-2,step):
-        if terrain.td.get((x,y+i,z))=='t':
-            if terrain.td.get((x,y+i+1,z))=='t':
+        whatT1=terrain.td.get((x,y+i,z))
+        if whatT1!=None and whatT1!='g':
+            whatT2=terrain.td.get((x,y+i+1,z))
+            if whatT2!=None and whatT2!='g':
                 # Also check any blocks above, still within stepping range.
                 target = y+i+height+1
                 blockFound=True
                 break
             # Stomach height?
-            if terrain.td.get((x,y+i+2,z))=='t':
+            whatT3=terrain.td.get((x,y+i+2,z))
+            if whatT3!=None and whatT3!='g':
                 target = y+i+height+2
                 blockFound=True
                 break

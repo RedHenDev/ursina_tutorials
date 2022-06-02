@@ -134,12 +134,13 @@ for i in range(Hotspot.rowFit):
             )
     hotspots.append(bud)
 
-for i in range(9):
+for i in range(8):
     bud=Item()
     bud.onHotbar=True
     bud.visible=True
     bud.x=ra.random()-0.5
     bud.y=ra.random()-0.5
+    bud.fixPos()
     items.append(bud)
 
 def inv_input(key,subject,mouse):

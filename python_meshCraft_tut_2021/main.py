@@ -12,10 +12,23 @@ from save_load_system import saveMap, loadMap
 from inventory_system import *
 
 """
-Adventues
+Adventures
 1) 'Snap' behaviour for items. DONE :D
-2) Number keys select building block type.
+2) Number keys select building block type. DONE :)
 3) Make an inventory panel.
+
+Notes for vid 16
+i) Correcting colour - DONE (except for stain bug - see vi)
+ii) Saving blockType correctly - DONE
+ii+) from 't' to not None and not 'g' (in bump_system, building, etc.) - DONE
+ii+) record blockType in td only at end of genBlock() - DONE
+iii) Map-name const at start of save_load_system - DONE
+iv) fixPos() at instantiation of hotspots - DONE!
+
+Tut 17 notes
+i) inventory panel creation; toggle behaviour, static method
+ii) Investigate colour staining bug
+ii) ? - Earthquakes :o
 """
 
 window.color = color.rgb(0,0,225)
