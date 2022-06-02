@@ -1,6 +1,4 @@
 
-from urllib.request import build_opener
-from xml.dom.minidom import TypeInfo
 from ursina import *
 import random as ra
 from config import mins,minerals
