@@ -108,8 +108,6 @@ class MeshTerrain:
         # Does the dictionary entry for this blockType
         # hold colour information? If so, use it :)
         if len(minerals[blockType])>2:
-            model.colors.extend(    (minerals[blockType][2],)*
-                                    this.numVertices)
             # Decide random tint for colour of block :)
             c = random()-0.5
             # Grab the Vec4 colour data :)

@@ -4,6 +4,8 @@ import random as ra
 from config import mins,minerals
 import numpy as np
 
+hotspots=[]
+items=[]
 
 # Inventory hotbar.
 hotbar = Entity(model='quad',parent=camera.ui)
@@ -13,6 +15,21 @@ hotbar.scale_x=0.68
 hotbar.y=-0.45 + (hotbar.scale_y*0.5)
 # Appearance.
 hotbar.color=color.dark_gray
+hotbar.render_queue=0
+
+# Inventory main panel.
+iPan = Entity(model='quad',parent=camera.ui)
+# Set the size and position.
+iPan.rows=3
+iPan.scale_y=hotbar.scale_y * iPan.rows
+iPan.scale_x=hotbar.scale_x
+iPan.basePosY=hotbar.y+(hotbar.scale_y*0.5)+(iPan.scale_y*0.5)
+iPan.gap=hotbar.scale_y
+iPan.y=iPan.basePosY+iPan.gap
+# Appearance.
+iPan.color=color.light_gray
+iPan.render_queue=0
+iPan.visible=False
 
 class Hotspot(Entity):
     # Fix size of hospot to height of hotbar.
@@ -27,12 +44,36 @@ class Hotspot(Entity):
         this.scale_x=this.scale_y
         this.color=color.white
         this.texture='white_box'
+        this.render_queue=1
 
         this.onHotbar=False
         this.visible=False
         this.occupied=False
         # What item are we hosting?
         this.item=None
+    
+    @staticmethod
+    def toggle():
+        if iPan.visible:
+            iPan.visible=False
+        else:
+            iPan.visible=True
+        # Toggle non-hotbar hotspots and their items.   
+        for h in hotspots:
+            # Gameplay mode? I.e. not visible?
+            if not h.visible and not h.onHotbar:
+                # Inventory mode.
+                h.visible=True
+                if h.item:
+                    h.item.visible=True
+                    # Enable item?
+            elif not h.onHotbar:
+                # Gameplay mode.
+                h.visible=False
+                if h.item:
+                    h.item.visible=False
+                    # Disable item?
+
 
 class Item(Draggable):
     def __init__(this):
@@ -43,6 +84,7 @@ class Item(Draggable):
         this.color=color.white
         this.texture='texture_atlas_3.png'
         this.texture_scale*=64/this.texture.width
+        this.render_queue=2
 
         # Pick a random block type.
         this.blockType=mins[ra.randint(0,len(mins)-1)]
@@ -115,9 +157,6 @@ class Item(Draggable):
     def drop(this):
         this.fixPos()
 
-hotspots=[]
-items=[]
-
 # Hotspots for the hotbar.
 for i in range(Hotspot.rowFit):
     bud=Hotspot()
@@ -126,12 +165,33 @@ for i in range(Hotspot.rowFit):
     bud.y=hotbar.y
     padding=(hotbar.scale_x-bud.scale_x*Hotspot.rowFit)*0.5
     bud.x=  (   hotbar.x-hotbar.scale_x*0.5 +
-                bud.scale_x*0.5 +
+                Hotspot.scalar*0.5 + 
                 padding +
                 i*bud.scale_x
             )
     hotspots.append(bud)
 
+# Hotspots for the main inventory panel.
+for i in range(Hotspot.rowFit):
+    for j in range(iPan.rows):
+        bud=Hotspot()
+        bud.onHotbar=False
+        bud.visible=False
+        # Position.
+        padding_x=(iPan.scale_x-Hotspot.scalar*Hotspot.rowFit)*0.5
+        padding_y=(iPan.scale_y-Hotspot.scalar*iPan.rows)*0.5
+        bud.y=  (   iPan.y+iPan.scale_y*0.5 -
+                    Hotspot.scalar*0.5 -
+                    padding_y -
+                    Hotspot.scalar * j
+                )
+        bud.x=  (   iPan.x-iPan.scale_x*0.5 +
+                    Hotspot.scalar*0.5 +
+                    padding_x +
+                    i*Hotspot.scalar
+                )
+        hotspots.append(bud)
+# Main inventory panel items. 
 for i in range(8):
     bud=Item()
     bud.onHotbar=True
@@ -150,7 +210,7 @@ def inv_input(key,subject,mouse):
                 h.color=color.white
             # Adjust wnum to list indexing (1=0).
             wnum-=1
-            hotspots[wnum].color=color.yellow
+            hotspots[wnum].color=color.black
             # Is this hotspot occupied with an item?
             if hotspots[wnum].occupied:
                 # Set subject's new blocktype from this item.
@@ -160,8 +220,12 @@ def inv_input(key,subject,mouse):
         pass
     # Pause and unpause, ready for inventory.
     if key=='e' and subject.enabled:
+        # Inventory mode.
+        Hotspot.toggle()
         subject.disable()
         mouse.locked=False
     elif key=='e' and not subject.enabled:
+        # Gameplay mode.
+        Hotspot.toggle()
         subject.enable()
         mouse.locked=True

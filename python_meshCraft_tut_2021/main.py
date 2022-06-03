@@ -26,9 +26,14 @@ iii) Map-name const at start of save_load_system - DONE
 iv) fixPos() at instantiation of hotspots - DONE!
 
 Tut 17 notes
-i) inventory panel creation; toggle behaviour, static method
-ii) Investigate colour staining bug
-ii) ? - Earthquakes :o
+i) inventory panel creation; toggle behaviour, static method - DONE
+ii) Investigate colour staining bug - DONE
+ii+) Solve colour staining - DONE :D
+ii) ? - Earthquakes :o - DONE :D
+
+Tut 18 notes
+i) mined block particles - pick-up for inventory
+ii) trees? Rocks?!
 """
 
 window.color = color.rgb(0,0,225)
@@ -80,9 +85,11 @@ def input(key):
     # Inventory access.
     inv_input(key,subject,mouse)
 
-count = 0
+count=0
+earthcounter=0
+earthquake_ON=False
 def update():
-    global count, pX, pZ
+    global count, pX, pZ, earthcounter
 
     # Highlight terrain block for mining/building...
     terrain.update(subject.position,camera)
@@ -116,6 +123,17 @@ def update():
             grass_audio.pitch=ra.random()+0.7
             grass_audio.play()
     
+    # *******
+    #  Earthquake experiment!
+    if earthquake_ON:
+        earth_amp=0.1
+        earth_freq=0.5
+        earthcounter+=earth_freq
+        for h in terrain.subsets:
+            h.y = (math.sin(terrain.subsets.index(h) + 
+                            earthcounter)*earth_amp)#*time.dt
+    # *******
+
     # Walk on solid terrain, and check wall collisions.
     bumpWall(subject,terrain)
     # Running and dash effect.
