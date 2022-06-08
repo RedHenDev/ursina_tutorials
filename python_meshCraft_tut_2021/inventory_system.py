@@ -78,7 +78,8 @@ class Hotspot(Entity):
 class Item(Draggable):
     def __init__(this):
         super().__init__()
-        this.model='quad'
+        # *** for ursina update fix
+        this.model=load_model('quad',use_deepcopy=True)
         this.scale_x=Hotspot.scalar*0.9
         this.scale_y=this.scale_x
         this.color=color.white
@@ -100,8 +101,10 @@ class Item(Draggable):
         # Use dictionary to access uv co-ords.
         uu=minerals[this.blockType][0]
         uv=minerals[this.blockType][1]
-        basemod=load_model('block.obj')
-        cb=copy(basemod.uvs)
+        # *** - for ursina update fix
+        basemod=load_model('block.obj',use_deepcopy=True)
+        e=Empty(model=basemod)
+        cb=copy(e.model.uvs)
         del cb[:-33]
         this.model.uvs = [Vec2(uu,uv) + u for u in cb]
         this.model.generate()

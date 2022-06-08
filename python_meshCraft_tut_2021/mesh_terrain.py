@@ -11,8 +11,8 @@ class MeshTerrain:
         
         this.subject = _sub
         this.camera = _cam
-
-        this.block = load_model('block.obj')
+        # *** - for ursina update fix
+        this.block = load_model('block.obj',use_deepcopy=True)
         this.textureAtlas = 'texture_atlas_3.png'
         this.numVertices = len(this.block.vertices)
 
