@@ -34,6 +34,7 @@ ii) ? - Earthquakes :o - DONE :D
 Tut 18 notes
 i) mined block particles - pick-up for inventory
 ii) trees? Rocks?!
+iii) Note on ursina update and fix!
 """
 
 window.color = color.rgb(0,0,225)

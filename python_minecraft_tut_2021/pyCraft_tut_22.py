@@ -124,7 +124,8 @@ subDic = {}
 def createTerrainEntities():
     # Instantiate our 'ghost' subset cubes.
     for i in range(numSubCubes):
-        bud = Entity(model=cubeModel,texture=cubeTex)
+        bud = Entity(model=cubeModel,
+            use_deepcopy=True,texture=cubeTex)
         bud.scale *= 0.99999
         bud.rotation_y = random.randint(1,4)*90
         bud.disable()
@@ -132,14 +133,15 @@ def createTerrainEntities():
 
     # Instantiate our empty subsets.
     for i in range(numSubsets):
-        bud = Entity(model=cubeModel)
+        bud = Entity(model=cubeModel,use_deepcopy=True)
         bud.texture = cubeTex
         bud.disable()
         subsets.append(bud)
 
     # Instantiate our empty megasets.
     for i in range(99):
-        bud = Entity(model=cubeModel)
+        # *** - use deepcopy fix.
+        bud = Entity(model=load_model(cubeModel,use_deepcopy=True))
         bud.texture = cubeTex
         bud.disable()
         megasets.append(bud)

@@ -4,7 +4,7 @@ Good luck!
 """
 
 from random import randrange, randint, random
-from ursina import Entity, color, texture, Vec3
+from ursina import Entity, color, texture, Vec3, load_model
 from numpy import floor
 
 class Mining_system:
@@ -21,7 +21,7 @@ class Mining_system:
         # including gaps.
         this.tDic = {}
         this.buildTex = 'build_texture.png' 
-        this.cubeModel = 'moonCube.obj'
+        this.cubeModel = load_model('moonCube.obj',use_deepcopy=True)
         this.builds = Entity(model=this.cubeModel,
                             texture=this.buildTex)
 
