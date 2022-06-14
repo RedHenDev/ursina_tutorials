@@ -38,7 +38,7 @@ class Hotspot(Entity):
     rowFit=9
     def __init__(this):
         super().__init__()
-        this.model='quad'
+        this.model=load_model('quad',use_deepcopy=True)
         this.parent=camera.ui
         this.scale_y=Hotspot.scalar
         this.scale_x=this.scale_y
@@ -203,6 +203,13 @@ for i in range(8):
     bud.y=ra.random()-0.5
     bud.fixPos()
     items.append(bud)
+
+# Make sure non-hotbar items are toggled off (invisible).
+# Call this twice so that main inventory panel is
+# invisible at the start, but that items inherit their
+# non-hotbar status.
+Hotspot.toggle()
+Hotspot.toggle()
 
 def inv_input(key,subject,mouse):
     try:

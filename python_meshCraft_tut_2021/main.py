@@ -32,14 +32,21 @@ ii+) Solve colour staining - DONE :D
 ii) ? - Earthquakes :o - DONE :D
 
 Tut 18 notes
-i) mined block particles - pick-up for inventory
-ii) trees? Rocks?!
-iii) Note on ursina update and fix!
+i) mined block particles - pick-up for inventory - DONE
+ii) trees? Rocks?! (VID 20?)
+iii) Note on ursina update and fix! 4.1.1 - DONE
+
+Tut 19 adventure plans!
+i) colour bug for e.g. ruby collectible
+ii) picking up behaviour 
+iii) sounds for picking up item
+iv) text for stacking info on inventory
+iv+) stacking behaviour on inventory
 """
 
-window.color = color.rgb(0,0,225)
-indra = Sky()
-indra.color = window.color
+window.color = color.rgb(0,200,225)
+# indra = Sky()
+# indra.color = window.color
 subject = FirstPersonController()
 subject.gravity = 0.0
 subject.cursor.visible=True

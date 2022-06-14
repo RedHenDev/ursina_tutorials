@@ -43,7 +43,10 @@ class MeshTerrain:
             this.subsets.append(e)
 
     def do_mining(this):
-        epi = mine(this.td,this.vd,this.subsets)
+        # Pass in block and textureAtlas for dropping
+        # collectible. See mining_system mine().
+        epi = mine( this.td,this.vd,this.subsets,
+                    this.textureAtlas)
         if epi != None:
             this.genWalls(epi[0],epi[1])
             this.subsets[epi[1]].model.generate()
@@ -138,7 +141,7 @@ class MeshTerrain:
                 this.td[key]='g'
 
         # Record subset index and first vertex of this block.
-        vob = (subset, len(model.vertices)-37)
+        vob = (subset, len(model.vertices)-this.numVertices-1)
         this.vd[(floor(x),
                 floor(y),
                 floor(z))] = vob
