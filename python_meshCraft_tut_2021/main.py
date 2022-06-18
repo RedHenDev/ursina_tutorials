@@ -42,6 +42,8 @@ ii) picking up behaviour
 iii) sounds for picking up item
 iv) text for stacking info on inventory
 iv+) stacking behaviour on inventory
+v) disable collectibles if far from subject
+vi) destroy collectibles if lifespan exspires
 """
 
 window.color = color.rgb(0,200,225)
