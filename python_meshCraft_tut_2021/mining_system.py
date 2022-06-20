@@ -5,16 +5,17 @@ bte = Entity(model='block.obj',color=color.rgba(1,1,0,0.4))
 bte.scale=1.1
 bte.origin_y+=0.05
 
-def highlight(pos,cam,td):
+def highlight(pos,sub_H,cam,td):
     # We should certainly look after this behaviour
     # in a dedicated collectible class :)
-    collectible_bounce()
-    
+    # collectible_bounce()
+
     for i in range(1,32):
         # Adjust for player's height!
-        wp=pos+Vec3(0,1.86,0)+cam.forward*(i*0.5)
+        wp=pos+Vec3(0,sub_H,0)+cam.forward*(i*0.5)
         # This trajectory is close to perfect!
         # If we can hit perfection...one day...?
+        # Still not quite perfect :o
         x = round(wp.x)
         y = floor(wp.y)
         z = round(wp.z)
@@ -28,7 +29,7 @@ def highlight(pos,cam,td):
         else:
             bte.visible = False
 
-def mine(td,vd,subsets,_texture):
+def mine(td,vd,subsets,_texture,_sub):
     if not bte.visible: return
 
     wv=vd.get((floor(bte.x),floor(bte.y),floor(bte.z)))
@@ -42,7 +43,8 @@ def mine(td,vd,subsets,_texture):
 
     # Drop collectible :D
     blockType=td.get((floor(bte.x),floor(bte.y),floor(bte.z)))
-    drop_collectible(blockType,bte.position,_texture)
+    # drop_collectible(blockType,bte.position,_texture)
+    Collectible(blockType,bte.position,_texture,_sub)
 
     subsets[wv[0]].model.generate()
 

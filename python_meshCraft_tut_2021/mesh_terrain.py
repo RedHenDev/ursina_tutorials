@@ -46,16 +46,16 @@ class MeshTerrain:
         # Pass in block and textureAtlas for dropping
         # collectible. See mining_system mine().
         epi = mine( this.td,this.vd,this.subsets,
-                    this.textureAtlas)
+                    this.textureAtlas,this.subject)
         if epi != None:
             this.genWalls(epi[0],epi[1])
             this.subsets[epi[1]].model.generate()
 
     # Highlight looked-at block :)
-    # !*!*!*!*!*!*!
-    # We don't need to pass in pos and cam anymore?!
-    def update(this,pos,cam):
-        highlight(pos,cam,this.td)
+    def update(this):
+        highlight(  this.subject.position,
+                    this.subject.height,
+                    this.camera,this.td)
         # Blister-mining!
         if bte.visible==True and mouse.locked==True:
             if held_keys['shift'] and held_keys['left mouse']:
@@ -68,6 +68,8 @@ class MeshTerrain:
         if key=='left mouse up' and bte.visible==True and mouse.locked==True:
             this.do_mining()
         # Building :)
+        # First, return and don't build if empty handed.
+        if this.subject.blockType is None: return
         if key=='right mouse up' and bte.visible==True and mouse.locked==True:
             bsite = checkBuild( bte.position,this.td,
                                 this.camera.forward,

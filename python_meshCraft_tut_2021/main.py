@@ -37,13 +37,16 @@ ii) trees? Rocks?! (VID 20?)
 iii) Note on ursina update and fix! 4.1.1 - DONE
 
 Tut 19 adventure plans!
-i) colour bug for e.g. ruby collectible
-ii) picking up behaviour 
+0) eye-level correction - DONE
+0.1) more efficient highlight call - DONE
+0.2) empty-subject hands, then no build - DONE
+i) colour bug for e.g. ruby collectible - DONE - UNDONE?!
+ii) picking up behaviour  - DONE
 iii) sounds for picking up item
 iv) text for stacking info on inventory
 iv+) stacking behaviour on inventory
 v) disable collectibles if far from subject
-vi) destroy collectibles if lifespan exspires
+vi) destroy collectibles if lifespan expires
 """
 
 window.color = color.rgb(0,200,225)
@@ -53,11 +56,12 @@ subject = FirstPersonController()
 subject.gravity = 0.0
 subject.cursor.visible=True
 subject.cursor.color=color.white
-subject.height=1.86
+subject.height=1.62 # Minecraft eye-level?
+subject.camera_pivot.y=subject.height
 subject.frog=False # For jumping...
 subject.runSpeed=12
 subject.walkSpeed=4
-subject.blockType='grass'
+subject.blockType=None # Current building mineral.
 camera.dash=10 # Rate at which fov changes when running.
 window.fullscreen=False
 
@@ -102,7 +106,7 @@ def update():
     global count, pX, pZ, earthcounter
 
     # Highlight terrain block for mining/building...
-    terrain.update(subject.position,camera)
+    terrain.update()
 
     # Handle mob ai.
     mob_movement(grey, subject.position, terrain.td)

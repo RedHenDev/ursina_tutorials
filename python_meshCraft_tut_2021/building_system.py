@@ -5,6 +5,7 @@ Happy New Year!
 from ursina import Vec3, floor
 from config import six_cube_dirs
 
+# Called from MeshTerrain btw :)
 def checkBuild(_bsite,_td,_camF,_pos): 
     # Store in convenient variables and floor.
     # Also -- increment y by 1 - since building above!
