@@ -45,11 +45,11 @@ class Collectible(Entity):
 
         # Does the dictionary entry for this blockType
         # hold colour information? If so, use it :)
-        if len(minerals[_blockType])>2:
+        if len(minerals[this.blockType])>2:
             # Decide random tint for colour of block :)
             c = random()-0.5
             # Grab the Vec4 colour data :)
-            ce=minerals[_blockType][2]
+            ce=minerals[this.blockType][2]
             # Adjust each colour channel separately to
             # ensure that hard-coded RGB combination is maintained.
             this.model.colors.extend(    (Vec4(ce[0]-c,ce[1]-c,ce[2]-c,ce[3]),)*
