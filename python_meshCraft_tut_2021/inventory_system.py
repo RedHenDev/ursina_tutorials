@@ -7,12 +7,25 @@ import numpy as np
 hotspots=[]
 items=[]
 
+# ***
+window.fullscreen=True
+if window.fullscreen==False:
+    camera.ui.scale_x*=0.05*1/window.aspect_ratio
+    camera.ui.scale_y*=0.05
+
 # Inventory hotbar.
 hotbar = Entity(model='quad',parent=camera.ui)
 # Set the size and position.
-hotbar.scale_y=0.08
-hotbar.scale_x=0.68
-hotbar.y=-0.45 + (hotbar.scale_y*0.5)
+# hotbar.scale_y=0.08
+# hotbar.scale_x=0.68
+hot_cols=9
+hot_wid=1/16 # Width of hotspot is 1 tenth of window height.
+hb_wid=hot_wid*hot_cols # Hotbar width no. of cols times this.
+hotbar.scale=Vec3(hb_wid,hot_wid,0)
+# ui_cols=hotbar.scale[0]/9
+hotbar.y=(-0.45 + (hotbar.scale_y*0.5))
+
+# hotbar.y=-0.45 + (hotbar.scale_y*0.5)
 # Appearance.
 hotbar.color=color.dark_gray
 hotbar.render_queue=0

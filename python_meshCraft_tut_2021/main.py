@@ -12,6 +12,8 @@ from save_load_system import saveMap, loadMap
 from inventory_system import *
 
 """
+NB - RED workspace is private PREP.
+NB - BLUE is TUTORIAL code!
 Adventures
 1) 'Snap' behaviour for items. DONE :D
 2) Number keys select building block type. DONE :)
@@ -63,7 +65,8 @@ subject.runSpeed=12
 subject.walkSpeed=4
 subject.blockType=None # Current building mineral.
 camera.dash=10 # Rate at which fov changes when running.
-window.fullscreen=False
+# ***
+# window.fullscreen=False
 
 terrain = MeshTerrain(subject,camera)
 #snowfall = SnowFall(subject)
