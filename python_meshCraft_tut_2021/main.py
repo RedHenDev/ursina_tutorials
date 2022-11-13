@@ -65,7 +65,7 @@ subject.runSpeed=12
 subject.walkSpeed=4
 subject.blockType=None # Current building mineral.
 camera.dash=10 # Rate at which fov changes when running.
-# ***
+# *** - see inventory_system.py
 # window.fullscreen=False
 
 terrain = MeshTerrain(subject,camera)
