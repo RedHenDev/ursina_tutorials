@@ -9,6 +9,7 @@ from ursina import Entity, Vec2, Vec4, load_model, Audio
 from config import minerals
 from math import sin, floor
 from random import random
+from inventory_system import Item
 
 pop_audio = Audio('pop.mp3',autoplay=False,loop=False)
 pickup_audio = Audio('pickup.mp3',autoplay=False,loop=False)
@@ -52,12 +53,12 @@ class Collectible(Entity):
             ce=minerals[this.blockType][2]
             # Adjust each colour channel separately to
             # ensure that hard-coded RGB combination is maintained.
-            this.model.colors.extend(    (Vec4(ce[0]-c,ce[1]-c,ce[2]-c,ce[3]),)*
+            this.model.colors = (   (Vec4(ce[0]-c,ce[1]-c,ce[2]-c,ce[3]),)*
                                     this.numVertices)
         else:
             # Decide random tint for colour of block :)
             c = random()-0.5
-            this.model.colors.extend(    (Vec4(1-c,1-c,1-c,1),)*
+            this.model.colors = (   (Vec4(1-c,1-c,1-c,1),)*
                                     this.numVertices)
 
         # UV information for texture wrap.
@@ -84,6 +85,12 @@ class Collectible(Entity):
             # Send signal to delete me!
             # this.timeToRest=True
             pickup_audio.play()
+            
+            # Signal to Item class to 
+            # create a new Item on inventory.
+            Item.new_item(this.blockType)
+            
+            
             this.disable()
 
 

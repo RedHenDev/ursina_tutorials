@@ -49,6 +49,19 @@ iv) text for stacking info on inventory
 iv+) stacking behaviour on inventory
 v) disable collectibles if far from subject
 vi) destroy collectibles if lifespan expires
+
+Tut 20
+i) ui aspect ratio bug DONE
+ii) collectible colour bug DONE
+iii) inventory items stay put when clicked DONE
+iv) saw a panda -- DONE
+v) created simple stack system DONE 
+
+Tut 21
+i) BUG item text remaining when it shouldn't
+ii) deplete stack number when building
+iii) TREES :)
+
 """
 
 window.color = color.rgb(0,200,225)

@@ -9,7 +9,7 @@ items=[]
 
 # ***
 import sys
-window.fullscreen=True
+window.fullscreen=False
 if window.fullscreen==False and sys.platform.lower()=='darwin':
     camera.ui.scale_x*=0.05*1/window.aspect_ratio
     camera.ui.scale_y*=0.05
@@ -29,7 +29,8 @@ hotbar.y=(-0.45 + (hotbar.scale_y*0.5))
 # hotbar.y=-0.45 + (hotbar.scale_y*0.5)
 # Appearance.
 hotbar.color=color.dark_gray
-hotbar.render_queue=0
+# hotbar.render_queue=0
+hotbar.z=0
 
 # Inventory main panel.
 iPan = Entity(model='quad',parent=camera.ui)
@@ -42,7 +43,8 @@ iPan.gap=hotbar.scale_y
 iPan.y=iPan.basePosY+iPan.gap
 # Appearance.
 iPan.color=color.light_gray
-iPan.render_queue=0
+# iPan.render_queue=0
+iPan.z=0
 iPan.visible=False
 
 class Hotspot(Entity):
@@ -58,13 +60,19 @@ class Hotspot(Entity):
         this.scale_x=this.scale_y
         this.color=color.white
         this.texture='white_box'
-        this.render_queue=1
+        # this.render_queue=1
+        this.z=-1
 
         this.onHotbar=False
         this.visible=False
         this.occupied=False
         # What item are we hosting?
         this.item=None
+        # New stack system :)
+        # Start with no items as default.
+        this.stack=0
+        # Text for number of blocks in stack.
+        this.t = Text("",scale=1.2)
     
     @staticmethod
     def toggle():
@@ -90,7 +98,7 @@ class Hotspot(Entity):
 
 
 class Item(Draggable):
-    def __init__(this):
+    def __init__(this,_blockType):
         super().__init__()
         # *** for ursina update fix
         this.model=load_model('quad',use_deepcopy=True)
@@ -99,10 +107,14 @@ class Item(Draggable):
         this.color=color.white
         this.texture='texture_atlas_3.png'
         this.texture_scale*=64/this.texture.width
-        this.render_queue=2
+        # this.render_queue=2
+        this.z=-2
 
         # Pick a random block type.
-        this.blockType=mins[ra.randint(0,len(mins)-1)]
+        if _blockType==None:
+            this.blockType=mins[ra.randint(0,len(mins)-1)]
+        else:
+            this.blockType=_blockType
 
         this.onHotbar=False
         this.visible=False
@@ -143,7 +155,7 @@ class Item(Draggable):
         closest=-1
         closestHotty=None
         for h in hotspots:
-            if h.occupied: continue
+            if h.occupied and h.item!=this: continue
             # Found a unoccupied hotspot :)
             # How close is it?
             dist=h.position-this.position
@@ -161,10 +173,14 @@ class Item(Draggable):
             # Update new host's information about item.
             closestHotty.occupied=True
             closestHotty.item=this
+            closestHotty.stack=this.currentSpot.stack
             # Update previous host-spot's status.
             if this.currentSpot:
                 this.currentSpot.occupied=False
                 this.currentSpot.item=None
+                if this.currentSpot!=closestHotty:
+                    this.currentSpot.stack=0
+                    this.currentSpot.t.text = "     "
             # Finally, update current host spot.
             this.currentSpot=closestHotty
         elif this.currentSpot:
@@ -173,6 +189,55 @@ class Item(Draggable):
 
     def drop(this):
         this.fixPos()
+        # Display how many blocks in this hotspot's stack.
+        stackNum = this.currentSpot.stack
+        myText="<white><bold>"+str(stackNum)
+        this.currentSpot.t = Text(myText)
+        this.currentSpot.t.origin=(0,0)
+        this.currentSpot.t.z=-3
+        this.currentSpot.t.x=this.currentSpot.x
+        this.currentSpot.t.y=this.currentSpot.y
+
+    @staticmethod
+    def stack_check(_blockType):
+        for h in hotspots:
+            if h.onHotbar==False: continue
+            if h.occupied==False: continue
+            # OK -- found an occupied hotbar hotspot.
+            if h.item.blockType==_blockType:
+                h.stack+=1
+                return True
+        # No matching stacks.
+        return False
+
+    @staticmethod
+    def new_item(_blockType):
+        # First, check whether there is already
+        # a stack of this blockType on the hotbar.
+        # If yes, increment hotspot's stack.
+        # If no, and space available on hotbar,
+        # create a new stack of 1 of that item -
+        # which means, creating a new Item.
+        aStack = Item.stack_check(_blockType)
+        if aStack==False:
+            # Space available on hotbar?
+            for h in hotspots:
+                if not h.onHotbar or h.occupied: continue
+                else:
+                    h.stack=1
+                    b=Item(_blockType)
+                    b.currentSpot=h
+                    items.append(b)
+                    # Refactor this later!
+                    # Dedicated function please :)
+                    h.item=b
+                    h.occupied=True
+                    b.onHotbar=True
+                    b.visible=True
+                    b.x = h.x
+                    b.y = h.y
+                    break
+                    
 
 # Hotspots for the hotbar.
 for i in range(Hotspot.rowFit):
@@ -209,21 +274,21 @@ for i in range(Hotspot.rowFit):
                 )
         hotspots.append(bud)
 # Main inventory panel items. 
-for i in range(8):
-    bud=Item()
-    bud.onHotbar=True
-    bud.visible=True
-    bud.x=ra.random()-0.5
-    bud.y=ra.random()-0.5
-    bud.fixPos()
-    items.append(bud)
+# for i in range(8):
+#     bud=Item()
+#     bud.onHotbar=True
+#     bud.visible=True
+#     bud.x=ra.random()-0.5
+#     bud.y=ra.random()-0.5
+#     bud.fixPos()
+#     items.append(bud)
 
 # Make sure non-hotbar items are toggled off (invisible).
 # Call this twice so that main inventory panel is
 # invisible at the start, but that items inherit their
 # non-hotbar status.
 Hotspot.toggle()
-Hotspot.toggle()
+Hotspot.toggle()    
 
 def inv_input(key,subject,mouse):
     try:
