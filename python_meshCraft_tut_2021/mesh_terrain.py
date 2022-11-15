@@ -5,6 +5,7 @@ from swirl_engine import SwirlEngine
 from mining_system import *
 from building_system import *
 from config import six_cube_dirs, minerals, mins
+from tree_system import *
 
 class MeshTerrain:
     def __init__(this,_sub,_cam):
@@ -17,10 +18,10 @@ class MeshTerrain:
         this.numVertices = len(this.block.vertices)
 
         this.subsets = []
-        this.numSubsets = 512
+        this.numSubsets = 1024
         
         # Must be even number! See genTerrain()
-        this.subWidth = 10 
+        this.subWidth = 6 
         this.swirlEngine = SwirlEngine(this.subWidth)
         this.currentSubset = 0
 
@@ -34,6 +35,21 @@ class MeshTerrain:
 
         # Instantiate our subset Entities.
         this.setup_subsets()
+
+    def plantTree(this,_x,_y,_z):
+        ent=TreeSystem.genTree(_x,_z)
+        if ent==0: return
+        # TrunkyWunky.
+        for i in range(int(ent*10)):
+            this.genBlock(_x,_y+i,_z,
+                blockType='concrete',layingTerrain=False)
+        # Crown.
+        for t in range(-2,3):
+            for tt in range(4):
+                for ttt in range(-2,3):
+                    this.genBlock(_x+t,_y+(ent*10)+tt,_z+ttt,
+                    blockType='ice')
+
 
     def setup_subsets(this):
         for i in range(0,this.numSubsets):
@@ -163,6 +179,8 @@ class MeshTerrain:
                                 floor(y),
                                 floor(z+j)))==None:
                     this.genBlock(x+k,y,z+j,blockType='grass',layingTerrain=True)
+                    # Plant a tree?
+                    this.plantTree(x+k,y+1,z+j)
 
         this.subsets[this.currentSubset].model.generate()
         # Current subset hack ;)

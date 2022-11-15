@@ -44,11 +44,10 @@ Tut 19 adventure plans!
 0.2) empty-subject hands, then no build - DONE
 i) colour bug for e.g. ruby collectible - DONE - UNDONE?!
 ii) picking up behaviour  - DONE
-iii) sounds for picking up item
-iv) text for stacking info on inventory
-iv+) stacking behaviour on inventory
-v) disable collectibles if far from subject
-vi) destroy collectibles if lifespan expires
+iii) sounds for picking up item - DONE
+iv) text for stacking info on inventory DONE
+iv+) stacking behaviour on inventory DONE
+v) destroy collectibles if lifespan expires - DONE
 
 Tut 20
 i) ui aspect ratio bug DONE
@@ -58,9 +57,13 @@ iv) saw a panda -- DONE
 v) created simple stack system DONE 
 
 Tut 21
-i) BUG item text remaining when it shouldn't
-ii) deplete stack number when building
-iii) TREES :)
+i) BUG item text remaining when it shouldn't - DONE
+i.i) BUG items of different kinds overlapping... DONE
+i.ii) Item stack text update upon collection. - DONE
+iii) TREES :) - DONE
+
+Tut 22
+i) deplete stack number when building :)
 
 """
 
@@ -128,9 +131,9 @@ def update():
     mob_movement(grey, subject.position, terrain.td)
 
     count+=1
-    if count == 2:
+    if count >= 1:
         
-        count=0
+        count=1
         # Generate terrain at current swirl position.
         if generatingTerrain:
             terrain.genTerrain()

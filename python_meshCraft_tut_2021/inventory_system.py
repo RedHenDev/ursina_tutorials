@@ -72,7 +72,7 @@ class Hotspot(Entity):
         # Start with no items as default.
         this.stack=0
         # Text for number of blocks in stack.
-        this.t = Text("",scale=1.2)
+        this.t = Text("",scale=1.5)
     
     @staticmethod
     def toggle():
@@ -86,12 +86,14 @@ class Hotspot(Entity):
             if not h.visible and not h.onHotbar:
                 # Inventory mode.
                 h.visible=True
+                h.t.visible=True
                 if h.item:
                     h.item.visible=True
                     # Enable item?
             elif not h.onHotbar:
                 # Gameplay mode.
                 h.visible=False
+                h.t.visible=False
                 if h.item:
                     h.item.visible=False
                     # Disable item?
@@ -175,28 +177,31 @@ class Item(Draggable):
             closestHotty.item=this
             closestHotty.stack=this.currentSpot.stack
             # Update previous host-spot's status.
-            if this.currentSpot:
+            
+            if this.currentSpot!=closestHotty:
+                this.currentSpot.stack=0
+                this.currentSpot.t.text = "     "
                 this.currentSpot.occupied=False
                 this.currentSpot.item=None
-                if this.currentSpot!=closestHotty:
-                    this.currentSpot.stack=0
-                    this.currentSpot.t.text = "     "
-            # Finally, update current host spot.
-            this.currentSpot=closestHotty
+                # Finally, update current host spot.
+                this.currentSpot=closestHotty
         elif this.currentSpot:
             # No hotspot available? Just move back.
             this.position=this.currentSpot.position
 
-    def drop(this):
-        this.fixPos()
+    def update_stack_text(this):
         # Display how many blocks in this hotspot's stack.
         stackNum = this.currentSpot.stack
         myText="<white><bold>"+str(stackNum)
-        this.currentSpot.t = Text(myText)
+        this.currentSpot.t.text = myText
         this.currentSpot.t.origin=(0,0)
         this.currentSpot.t.z=-3
         this.currentSpot.t.x=this.currentSpot.x
         this.currentSpot.t.y=this.currentSpot.y
+
+    def drop(this):
+        this.fixPos()
+        this.update_stack_text()
 
     @staticmethod
     def stack_check(_blockType):
@@ -206,6 +211,8 @@ class Item(Draggable):
             # OK -- found an occupied hotbar hotspot.
             if h.item.blockType==_blockType:
                 h.stack+=1
+                # Also update the text on stack.
+                h.item.update_stack_text()
                 return True
         # No matching stacks.
         return False
@@ -236,6 +243,7 @@ class Item(Draggable):
                     b.visible=True
                     b.x = h.x
                     b.y = h.y
+                    b.update_stack_text()
                     break
                     
 

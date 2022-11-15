@@ -5,7 +5,7 @@ dropping collectable materials.
 
 # Collectible dictionary. Similar to td{}.
 # It will store terrain position of a collectible :)
-from ursina import Entity, Vec2, Vec4, load_model, Audio
+from ursina import Entity, Vec2, Vec4, load_model, Audio, destroy
 from config import minerals
 from math import sin, floor
 from random import random
@@ -69,6 +69,9 @@ class Collectible(Entity):
         # Make sound!
         pop_audio.play()
         this.model.generate()
+
+        # Set collectible to destroy after some time.
+        destroy(this, 7)
 
     def update(this):
         this.checkPickUp()
