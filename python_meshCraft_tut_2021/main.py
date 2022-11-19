@@ -64,6 +64,11 @@ iii) TREES :) - DONE
 
 Tut 22
 i) deplete stack number when building :)
+ii) Trees minable
+ii.i) Tree texture(s)
+iii) FOV to 70 or 63
+iv) location co-ords as Text on screen (future: minimap?)
+v) audio as member property of collectible class
 
 """
 
