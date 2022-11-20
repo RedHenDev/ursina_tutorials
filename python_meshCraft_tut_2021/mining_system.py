@@ -32,12 +32,19 @@ def highlight(pos,sub_H,cam,td):
 def mine(td,vd,subsets,_texture,_sub):
     if not bte.visible: return
 
+    # Reference vertices dictionary
+    # and see if there is a highlighted block here.
     wv=vd.get((floor(bte.x),floor(bte.y),floor(bte.z)))
     
     # Have we got a block highlighted? If not, return.
     if wv==None: return
     
     # If we are here, we are successfully mining!
+    # So, present solution is to simply send the 
+    # highlighted block's vertices high into the air
+    # and thus 'vanishing' them. Also, record 'gap' on
+    # terrain dictionary (td) and update vd.
+    # _numVertices used instead of magic number 37.
     for i in range(wv[1]+1,wv[1]+37):
         subsets[wv[0]].model.vertices[i][1]+=999
 
