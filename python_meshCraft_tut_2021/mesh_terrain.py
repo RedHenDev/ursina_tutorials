@@ -1,11 +1,12 @@
 from perlin import Perlin
 from ursina import *
-from random import random
+from random import random as rara
 from swirl_engine import SwirlEngine
 from mining_system import *
 from building_system import *
 from config import six_cube_dirs, minerals, mins
 from tree_system import *
+from inventory_system import *
 
 class MeshTerrain:
     def __init__(this,_sub,_cam):
@@ -94,6 +95,29 @@ class MeshTerrain:
                 this.genBlock(floor(bsite.x),floor(bsite.y),floor(bsite.z),subset=0,blockType=this.subject.blockType)
                 gapShell(this.td,bsite)
                 this.subsets[0].model.generate()
+                # *** Deplete a block from the stack ;)
+                for h in hotspots:
+                    # Is this hotspot highlighted?
+                    if h.color==color.black:
+                        # Decrease stack number by 1.
+                        h.stack -= 1
+                        if h.stack > 0:
+                            h.item.update_stack_text()
+                            break
+                        # If we use up all blocks,
+                        # empty out this hotspot.
+                        elif h.stack <= 0:
+                            if h.stack < 0:
+                                h.stack=0
+                            h.occupied=False
+                            destroy(h.item)
+                            h.t.text=""
+                            # No blocks to build with!
+                            this.subject.blockType=None
+
+
+
+
     
     # I.e. after mining, to create illusion of depth.
     def genWalls(this,epi,subset):
@@ -120,7 +144,7 @@ class MeshTerrain:
 
         if layingTerrain:
             # Randomly place stone blocks.
-            if random() > 0.86:
+            if rara() > 0.86:
                 blockType='stone'
             # If high enough, cap with snow blocks :D
             if y > 2:
@@ -130,7 +154,7 @@ class MeshTerrain:
         # hold colour information? If so, use it :)
         if len(minerals[blockType])>2:
             # Decide random tint for colour of block :)
-            c = random()-0.5
+            c = rara()-0.5
             # Grab the Vec4 colour data :)
             ce=minerals[blockType][2]
             # Adjust each colour channel separately to
@@ -139,7 +163,7 @@ class MeshTerrain:
                                     this.numVertices)
         else:
             # Decide random tint for colour of block :)
-            c = random()-0.5
+            c = rara()-0.5
             model.colors.extend(    (Vec4(1-c,1-c,1-c,1),)*
                                     this.numVertices)
 

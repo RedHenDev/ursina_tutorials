@@ -63,13 +63,17 @@ i.ii) Item stack text update upon collection. - DONE
 iii) TREES :) - DONE
 
 Tut 22
-i) deplete stack number when building :)
+i) deplete stack number when building :) - DONE
+
+Tut 23 * TREE SPECIAL *
 ii) Trees minable
 ii.i) Tree texture(s)
+ii.ii) Tree perlin distribution
 iii) FOV to 70 or 63
 iv) location co-ords as Text on screen (future: minimap?)
 v) audio as member property of collectible class
-
+vi) Refactor the current-blockType (building) mechanism.
+vii) Write an 'empty' function to empty a hotspot.
 """
 
 window.color = color.rgb(0,200,225)

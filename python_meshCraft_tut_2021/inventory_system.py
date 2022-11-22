@@ -7,7 +7,6 @@ import numpy as np
 hotspots=[]
 items=[]
 
-# ***
 import sys
 window.fullscreen=False
 if window.fullscreen==False and sys.platform.lower()=='darwin':
@@ -231,6 +230,8 @@ class Item(Draggable):
             for h in hotspots:
                 if not h.onHotbar or h.occupied: continue
                 else:
+                    # Creating a new stack :)
+                    # On hotbar.
                     h.stack=1
                     b=Item(_blockType)
                     b.currentSpot=h
@@ -244,6 +245,8 @@ class Item(Draggable):
                     b.x = h.x
                     b.y = h.y
                     b.update_stack_text()
+                    # Is this hotspot highlighted? If so,
+                    # Subject can build with new stack :)
                     break
                     
 
