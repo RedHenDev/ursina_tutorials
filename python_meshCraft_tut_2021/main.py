@@ -66,14 +66,19 @@ Tut 22
 i) deplete stack number when building :) - DONE
 
 Tut 23 * TREE SPECIAL *
-ii) Trees minable
-ii.i) Tree texture(s)
-ii.ii) Tree perlin distribution
-iii) FOV to 70 or 63
+0.i) refactor rara (random module clash) - DONE
+ii) Trees minable - DONE
+ii.i) Tree texture(s) - DONE -> grass transparency :) 'BUG'
+ii.ii) Tree perlin distribution - DONE
+iii) FOV to 63 - DONE (corrected for dash effect)
 iv) location co-ords as Text on screen (future: minimap?)
 v) audio as member property of collectible class
 vi) Refactor the current-blockType (building) mechanism.
 vii) Write an 'empty' function to empty a hotspot.
+viii) Giant rocky outcrops?!
+ix) Text background (e.g. for location text)
+x) Ui hotspot spacing (refactor)
+xi) Bump system - sticking to trees, and climbing them...
 """
 
 window.color = color.rgb(0,200,225)
@@ -90,6 +95,7 @@ subject.runSpeed=12
 subject.walkSpeed=4
 subject.blockType=None # Current building mineral.
 camera.dash=10 # Rate at which fov changes when running.
+camera.fov=origFOV=63
 # *** - see inventory_system.py
 # window.fullscreen=False
 
@@ -131,7 +137,7 @@ count=0
 earthcounter=0
 earthquake_ON=False
 def update():
-    global count, pX, pZ, earthcounter
+    global count, pX, pZ, earthcounter, origFOV
 
     # Highlight terrain block for mining/building...
     terrain.update()
@@ -185,9 +191,9 @@ def update():
             camera.fov+=camera.dash*time.dt
     else:
         subject.speed=subject.walkSpeed
-        if camera.fov>90:
+        if camera.fov>origFOV:
             camera.fov-=camera.dash*4*time.dt
-            if camera.fov<90:camera.fov=90
+            if camera.fov<origFOV:camera.fov=origFOV
 
 from mob_system import *
 

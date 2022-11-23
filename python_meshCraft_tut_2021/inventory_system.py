@@ -245,8 +245,6 @@ class Item(Draggable):
                     b.x = h.x
                     b.y = h.y
                     b.update_stack_text()
-                    # Is this hotspot highlighted? If so,
-                    # Subject can build with new stack :)
                     break
                     
 
@@ -256,11 +254,10 @@ for i in range(Hotspot.rowFit):
     bud.onHotbar=True
     bud.visible=True
     bud.y=hotbar.y
-    padding=(hotbar.scale_x-bud.scale_x*Hotspot.rowFit)*0.5
+    # padding=(hotbar.scale_x-bud.scale_x*Hotspot.rowFit)*0.5
     bud.x=  (   hotbar.x-hotbar.scale_x*0.5 +
-                Hotspot.scalar*0.5 + 
-                padding +
-                i*bud.scale_x
+                Hotspot.scalar*0.5 * 1.2 + 
+                i*bud.scale_x * 1.1
             )
     hotspots.append(bud)
 
@@ -271,17 +268,15 @@ for i in range(Hotspot.rowFit):
         bud.onHotbar=False
         bud.visible=False
         # Position.
-        padding_x=(iPan.scale_x-Hotspot.scalar*Hotspot.rowFit)*0.5
-        padding_y=(iPan.scale_y-Hotspot.scalar*iPan.rows)*0.5
+        # padding_x=(iPan.scale_x-Hotspot.scalar*Hotspot.rowFit)*0.5
+        # padding_y=(iPan.scale_y-Hotspot.scalar*iPan.rows)*0.5
         bud.y=  (   iPan.y+iPan.scale_y*0.5 -
-                    Hotspot.scalar*0.5 -
-                    padding_y -
-                    Hotspot.scalar * j
+                    Hotspot.scalar*0.5 * 1.2 -
+                    Hotspot.scalar * j * 1.1
                 )
         bud.x=  (   iPan.x-iPan.scale_x*0.5 +
-                    Hotspot.scalar*0.5 +
-                    padding_x +
-                    i*Hotspot.scalar
+                    Hotspot.scalar*0.5 * 1.2 +
+                    i*Hotspot.scalar * 1.1
                 )
         hotspots.append(bud)
 # Main inventory panel items. 
@@ -301,7 +296,14 @@ for i in range(Hotspot.rowFit):
 Hotspot.toggle()
 Hotspot.toggle()    
 
+# Where am I?
+wai=Text(   '<black><bold>Nowhere',
+            scale=2.4,position=(-.8,.5))
+
+
 def inv_input(key,subject,mouse):
+    # Since we may have moved, update location text.
+    wai.text=f'<black><bold>east:{floor(subject.x)}, north:{floor(subject.z)}'
     try:
         wnum = int(key)
         if wnum > 0 and wnum < 10:

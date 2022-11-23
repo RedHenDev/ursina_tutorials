@@ -59,4 +59,4 @@ def mine(td,vd,subsets,_texture,_sub):
     td[ (floor(bte.x),floor(bte.y),floor(bte.z))]='g'
     vd[ (floor(bte.x),floor(bte.y),floor(bte.z))] = None
     
-    return (bte.position, wv[0])
+    return (bte.position, wv[0], blockType)
