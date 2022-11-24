@@ -71,14 +71,22 @@ ii) Trees minable - DONE
 ii.i) Tree texture(s) - DONE -> grass transparency :) 'BUG'
 ii.ii) Tree perlin distribution - DONE
 iii) FOV to 63 - DONE (corrected for dash effect)
-iv) location co-ords as Text on screen (future: minimap?)
-v) audio as member property of collectible class
-vi) Refactor the current-blockType (building) mechanism.
-vii) Write an 'empty' function to empty a hotspot.
-viii) Giant rocky outcrops?!
-ix) Text background (e.g. for location text)
-x) Ui hotspot spacing (refactor)
-xi) Bump system - sticking to trees, and climbing them...
+iv) location co-ords as Text on screen DONE 
+
+Tut 24
+i) audio - pickups as member property
+ii) Rocks -> replace random stone placements
+
+**To Do List**
+) audio as member property of collectible class
+) Refactor the current-blockType (building) mechanism.
+) Write an 'empty' function to empty a hotspot.
+) Giant rocky outcrops?!
+) Text background (e.g. for location text)
+) Ui hotspot spacing (refactor)
+) Bump system - sticking to trees, and climbing them...
+) minimap?
+) BUG glitching through terrain bc trees
 """
 
 window.color = color.rgb(0,200,225)
