@@ -76,6 +76,8 @@ iv) location co-ords as Text on screen DONE
 Tut 24
 i) audio - pickups as member property
 ii) Rocks -> replace random stone placements
+iii) tree placement wiggle
+iv) prevent tree crown clash
 
 **To Do List**
 ) audio as member property of collectible class
