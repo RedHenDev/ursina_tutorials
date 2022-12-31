@@ -35,14 +35,27 @@ class MeshTerrain:
 
         this.perlin = Perlin()
 
+        # Our new planting terrain feature variables...
+        this.tree_noise=PerlinNoise(
+                octaves=32,
+                seed=2022)
+        this.tree_freq=64
+        this.tree_amp=128
+
         # Instantiate our subset Entities.
         this.setup_subsets()
 
-    def plantTree(this,_x,_y,_z):
+    def plant_tree(this,_x,_y,_z):
         ent=TreeSystem.genTree(_x,_z)
         if ent==0: return
+
+        # *** - disrupt grid.
+        wiggle=floor(sin(_z*_x)*3)
+        _z += wiggle
+        _x += wiggle
+
         # TrunkyWunky.
-        treeH=int(3*ent)
+        treeH=int(7*ent)
         for i in range(treeH):
             this.genBlock(_x,_y+i,_z,
                 blockType='wood',layingTerrain=False)
@@ -53,6 +66,11 @@ class MeshTerrain:
                     this.genBlock(_x+t,_y+treeH+tt-1,_z+ttt,
                     blockType='foliage')
 
+    def plant_stone(this, _x, _z):
+        probs=this.tree_noise(([_x/this.tree_freq,_z/this.tree_freq]))*this.tree_amp
+        if probs > 32:
+            return True
+        return False
 
     def setup_subsets(this):
         for i in range(0,this.numSubsets):
@@ -145,14 +163,6 @@ class MeshTerrain:
         model.vertices.extend([ Vec3(x,y,z) + v for v in 
                                 this.block.vertices])
 
-        if layingTerrain:
-            # Randomly place stone blocks.
-            if ra.random() > 0.86:
-                blockType='stone'
-            # If high enough, cap with snow blocks :D
-            if y > 2:
-                blockType='snow'
-
         # Does the dictionary entry for this blockType
         # hold colour information? If so, use it :)
         if len(minerals[blockType])>2:
@@ -205,9 +215,18 @@ class MeshTerrain:
                 if this.td.get( (floor(x+k),
                                 floor(y),
                                 floor(z+j)))==None:
-                    this.genBlock(x+k,y,z+j,blockType='grass',layingTerrain=True)
-                    # Plant a tree?
-                    this.plantTree(x+k,y+1,z+j)
+                    # Decide whether placing stone etc. or grass :)
+                    # Assume we're laying grass.
+                    bType='grass'
+                    if this.plant_stone(x+k,z+j)==True:
+                        bType='stone'
+                    if y > -2:
+                        bType='snow'
+                    if y ==0:
+                        bType='ice'
+                    this.genBlock(x+k,y,z+j,blockType=bType,layingTerrain=True)
+                    # Plant a tree?ß
+                    this.plant_tree(x+k,y+1,z+j)
 
         this.subsets[this.currentSubset].model.generate()
         # Current subset hack ;)
