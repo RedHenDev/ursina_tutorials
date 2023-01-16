@@ -67,7 +67,20 @@ class Collectible(Entity):
         this.model.uvs=([Vec2(uu,uv) + u for u in this.model.uvs])
         # Done!
         # Make sound!
-        pop_audio.play()
+        # pop_audio.play()
+        # Prepare our own sophisticated sound object.
+        this.pu_sound=Audio('pop.mp3',autoplay=False,loop=False)
+        this.pu_sound.volume=1
+        this.pu_sound.pitch=1+random()
+        # Make a mining sound happen now -- since
+        # if we have initialised a pick-up, we must have
+        # achieved some mining :)
+        e=Audio('pickup.mp3',autoplay=False,loop=False)
+        e.volume=1
+        e.pitch=1+random()
+        e.play()
+        # destroy(e) # Is this needed?
+
         this.model.generate()
 
         # Set collectible to destroy after some time.
@@ -87,7 +100,8 @@ class Collectible(Entity):
             # Collectible.cd.pop(this.o_position)
             # Send signal to delete me!
             # this.timeToRest=True
-            pickup_audio.play()
+            # pickup_audio.play()
+            this.pu_sound.play()
             
             # Signal to Item class to 
             # create a new Item on inventory.

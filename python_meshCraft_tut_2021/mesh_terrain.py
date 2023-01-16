@@ -46,24 +46,23 @@ class MeshTerrain:
         this.setup_subsets()
 
     def plant_tree(this,_x,_y,_z):
-        ent=TreeSystem.genTree(_x,_z)
-        if ent==0: return
-
         # *** - disrupt grid.
         wiggle=floor(sin(_z*_x)*3)
         _z += wiggle
         _x += wiggle
 
+        ent=TreeSystem.genTree(_x,_z)
+        if ent==0: return
         # TrunkyWunky.
         treeH=int(7*ent)
         for i in range(treeH):
-            this.genBlock(_x,_y+i,_z,
+            this.genBlock(_x,_y+i+1,_z,
                 blockType='wood',layingTerrain=False)
         # Crown.
         for t in range(-2,3):
             for tt in range(4):
                 for ttt in range(-2,3):
-                    this.genBlock(_x+t,_y+treeH+tt-1,_z+ttt,
+                    this.genBlock(_x+t,_y+treeH+tt,_z+ttt,
                     blockType='foliage')
 
     def plant_stone(this, _x, _z):
@@ -220,13 +219,11 @@ class MeshTerrain:
                     bType='grass'
                     if this.plant_stone(x+k,z+j)==True:
                         bType='stone'
-                    if y > -2:
+                    if y > 2:
                         bType='snow'
-                    if y ==0:
-                        bType='ice'
                     this.genBlock(x+k,y,z+j,blockType=bType,layingTerrain=True)
                     # Plant a tree?ß
-                    this.plant_tree(x+k,y+1,z+j)
+                    this.plant_tree(x+k,y,z+j)
 
         this.subsets[this.currentSubset].model.generate()
         # Current subset hack ;)

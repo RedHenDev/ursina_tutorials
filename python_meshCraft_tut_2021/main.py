@@ -74,7 +74,8 @@ iii) FOV to 63 - DONE (corrected for dash effect)
 iv) location co-ords as Text on screen DONE 
 
 Tut 24
-i) audio - pickups as member property
+i) audio - pickups as member property - DONE
+i.i)  - mining sound absent...? - SOLVED DONE
 ii) Rocks -> replace random stone placements - DONE
 iii) tree placement wiggle - DOING...
 iv) prevent tree crown clash
@@ -111,7 +112,7 @@ camera.fov=origFOV=63
 # window.fullscreen=False
 
 terrain = MeshTerrain(subject,camera)
-snowfall = SnowFall(subject)
+# snowfall = SnowFall(subject)
 # How do you at atmospheric fog?
 scene.fog_density=(0,75)
 # scene.fog_color=indra.color
@@ -126,6 +127,7 @@ for i in range(4):
 
 grass_audio = Audio('step.ogg',autoplay=False,loop=False)
 snow_audio = Audio('snowStep.mp3',autoplay=False,loop=False)
+grass_audio.volume=0.1
 
 pX = subject.x
 pZ = subject.z
