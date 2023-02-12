@@ -9,6 +9,11 @@ grey.position = Vec3(0,-2.9,10)
 grey.turnSpeed = 1
 grey.speed = 1
 
+# Can we find Vincent?!
+vincent = Entity(model='vincent.obj',scale=10)
+vincent.z = -16
+vincent.y = 10
+
 def mob_movement(mob, subPos, _td):
     # First, turn towards target...
     # BUG wiggle walk when aligned with subject?

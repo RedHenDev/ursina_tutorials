@@ -77,9 +77,12 @@ Tut 24
 i) audio - pickups as member property - DONE
 i.i)  - mining sound absent...? - SOLVED DONE
 ii) Rocks -> replace random stone placements - DONE
-iii) tree placement wiggle - DOING...
+iii) tree placement wiggle - DONE
 iv) prevent tree crown clash
 v) Tree perlin noise...
+
+Tut 25
+
 
 **To Do List**
 ) audio as member property of collectible class

@@ -51,6 +51,9 @@ class MeshTerrain:
         _z += wiggle
         _x += wiggle
 
+        # Adjust tree x and z pos due to wiggle.
+        _y = floor(this.perlin.getHeight(_x,_z))
+
         ent=TreeSystem.genTree(_x,_z)
         if ent==0: return
         # TrunkyWunky.
