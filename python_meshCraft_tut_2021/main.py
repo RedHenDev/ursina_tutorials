@@ -82,7 +82,10 @@ iv) prevent tree crown clash
 v) Tree perlin noise...
 
 Tut 25
+?
 
+Tut 26
+i) Less trees :)
 
 **To Do List**
 ) audio as member property of collectible class
