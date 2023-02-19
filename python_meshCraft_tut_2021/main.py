@@ -85,10 +85,16 @@ Tut 25
 ?
 
 Tut 26
+i) correct tree placement with wiggle - DONE
+ii) add Vincent from blockbench - DOING
+
+Tut 27
 i) Less trees :)
+i.i) Ruby placement (new stone placement system)
+ii) ursina update 5.2 -- ui resize and load_model
+iii) Vincent ai + texture (blockbench)
 
 **To Do List**
-) audio as member property of collectible class
 ) Refactor the current-blockType (building) mechanism.
 ) Write an 'empty' function to empty a hotspot.
 ) Giant rocky outcrops?!
