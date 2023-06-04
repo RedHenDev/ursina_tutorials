@@ -14,6 +14,12 @@ vincent = Entity(model='vincent.obj',scale=10)
 vincent.z = -16
 vincent.y = 10
 
+demonikat = Entity(model='demonikat.obj',
+                   scale=2)
+demonikat.texture='tex_demonikat.png'
+demonikat.z = 16
+demonikat.y =10
+
 def mob_movement(mob, subPos, _td):
     # First, turn towards target...
     # BUG wiggle walk when aligned with subject?
