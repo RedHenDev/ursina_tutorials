@@ -46,6 +46,13 @@ class MeshTerrain:
         this.setup_subsets()
 
     def plant_tree(this,_x,_y,_z):
+
+        # NB need to move these two lines
+        # here to correctly apply wiggle.
+        # have not shown on a tut vid yet!
+        ent=TreeSystem.genTree(_x,_z)
+        if ent==0: return
+
         # *** - disrupt grid.
         wiggle=floor(sin(_z*_x)*3)
         _z += wiggle
@@ -54,8 +61,7 @@ class MeshTerrain:
         # Adjust tree x and z pos due to wiggle.
         _y = floor(this.perlin.getHeight(_x,_z))
 
-        ent=TreeSystem.genTree(_x,_z)
-        if ent==0: return
+        
         # TrunkyWunky.
         treeH=int(7*ent)
         for i in range(treeH):
