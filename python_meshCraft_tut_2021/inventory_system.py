@@ -134,7 +134,9 @@ class Item(Draggable):
         basemod=load_model('block.obj',use_deepcopy=True)
         e=Empty(model=basemod)
         cb=copy(e.model.uvs)
-        del cb[:-33]
+        #del cb[:-33]
+        cb = cb[-6:] #get last 6 uvs
+        cb = cb[3:] + cb[:3] #reverse order
         this.model.uvs = [Vec2(uu,uv) + u for u in cb]
         this.model.generate()
         this.rotation_z=180
